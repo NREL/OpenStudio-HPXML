@@ -1081,7 +1081,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       batt_soc_kwh = batt_soc.map { |soc| soc - min_soc }.map { |soc| soc * batt_kwh }
 
       crit_load = get_report_meter_data_timeseries([Outputs::MeterCustomElectricityCritical.upcase], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-      crit_load = crit_load.zip(batt_loss).map { |x, y| x + y }
 
       resilience_timeseries = []
       n_timesteps = crit_load.size
