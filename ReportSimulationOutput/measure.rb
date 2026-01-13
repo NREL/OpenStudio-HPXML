@@ -435,7 +435,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         if args[:timeseries_frequency] != EPlus::TimeseriesFrequencyTimestep
           resilience_frequency = EPlus::TimeseriesFrequencyHourly
         end
-        Model.add_output_meter(model, meter_name: Outputs::MeterCustomElectricityCritical, reporting_frequency: resilience_frequency)
+        if @hpxml_bldgs.size == 1
+          Model.add_output_meter(model, meter_name: Outputs::MeterCustomElectricityCritical, reporting_frequency: resilience_frequency)
+        else
+          @hpxml_bldgs.each do |hpxml_bldg|
+            unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
+            Model.add_output_meter(model, meter_name: "unit#{unit_num}_#{Outputs::MeterCustomElectricityCritical.gsub(':', '_')}", reporting_frequency: resilience_frequency)
+          end
+        end
         @resilience.values.each do |resilience|
           resilience.variables.each do |_sys_id, varkey, var|
             Model.add_output_variable(model, key_value: varkey, variable_name: var, reporting_frequency: resilience_frequency)
