@@ -36,6 +36,8 @@ __New Features__
   - See the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#whole-sfa-mf-buildings) for more information.
 - Updated default utility bill rates per EIA energy cost data for 2023.
 - Adds "Electric Panel Load: Max Current Rating (A)" output to results_panel.csv.
+- Adds error-checking for when the sum of supply/return duct leakage to outside values is too high.
+- Adds error-checking for when `HeatPump/HeatingCapacity17F` is provided but `HeatPump/HeatingCapacity` is not.
 
 __Bugfixes__
 - Fixes incorrect cooling design conditions when using TMYx weather files (OpenStudio bug).
@@ -49,7 +51,8 @@ __Bugfixes__
 - Fixes possible errors when small water flow rates for variable-speed experimental ground-source heat pump model.
 - Fixes possible ground-source heat pump sizing error if the heating or cooling design temperature differences are zero.
 - Fixes EMS discharge power program and assignment of default discharging schedule for detailed electric vehicles.
-- Adds error-checking for when `HeatPump/HeatingCapacity17F` is provided but `HeatPump/HeatingCapacity` is not.
+- Avoids thin interior/exterior roof construction layers to help prevent attic temperature out of bounds errors.
+- Fixes several issues related to using unit multipliers with batteries and vehicles.
 
 ## OpenStudio-HPXML v1.10.0
 
