@@ -178,6 +178,7 @@ module Battery
 
     if (not charging_schedule.nil?) && (not discharging_schedule.nil?)
       elcd.setStorageOperationScheme('TrackChargeDischargeSchedules')
+      elcd.resetStorageControlTrackMeterName # In case scheduled battery w/PV
       elcd.setStorageChargePowerFractionSchedule(charging_schedule)
       elcd.setStorageDischargePowerFractionSchedule(discharging_schedule)
 
