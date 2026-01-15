@@ -435,7 +435,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         if args[:timeseries_frequency] != EPlus::TimeseriesFrequencyTimestep
           resilience_frequency = EPlus::TimeseriesFrequencyHourly
         end
-        Model.add_output_meter(model, meter_name: Outputs::MeterCustomElectricityCritical, reporting_frequency: resilience_frequency)
+        if @hpxml_bldgs.size == 1
+          Model.add_output_meter(model, meter_name: Outputs::MeterCustomElectricityCritical, reporting_frequency: resilience_frequency)
+        else
+          @hpxml_bldgs.each do |hpxml_bldg|
+            unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
+            Model.add_output_meter(model, meter_name: "unit#{unit_num}_#{Outputs::MeterCustomElectricityCritical.gsub(':', '_')}", reporting_frequency: resilience_frequency)
+          end
+        end
         @resilience.values.each do |resilience|
           resilience.variables.each do |_sys_id, varkey, var|
             Model.add_output_variable(model, key_value: varkey, variable_name: var, reporting_frequency: resilience_frequency)
@@ -1081,27 +1088,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless (args[:include_annual_resilience] || args[:include_timeseries_resilience])
       next if resilience.variables.empty?
 
-      batteries = []
-      @hpxml_bldgs.each do |hpxml_bldg|
-        hpxml_bldg.batteries.each do |battery|
-          batteries << battery
-        end
-      end
-      next if batteries.empty?
-
-      if batteries.size > 1
-        # When modeling individual dwelling units, OS-HPXML only allows a single battery
-        # When modeling whole SFA/MF buildings, OS-HPXML does not currently allow batteries
-        fail 'Unexpected error.'
-      end
-
-      battery = batteries[0]
-
-      elcd = @model.getElectricLoadCenterDistributions.find { |elcd| elcd.additionalProperties.getFeatureAsString('HPXML_ID').to_s == battery.id }
-      next if elcd.nil?
-
-      elcs = @model.getElectricLoadCenterStorageLiIonNMCBatterys.find { |elcs| elcs.additionalProperties.getFeatureAsString('HPXML_ID').to_s == battery.id }
-
       resilience_frequency = EPlus::TimeseriesFrequencyTimestep
       ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
       if args[:timeseries_frequency] != EPlus::TimeseriesFrequencyTimestep
@@ -1109,32 +1095,59 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         ts_per_hr = 1
       end
 
-      vars = ['Electric Storage Charge Fraction']
-      keys = resilience.variables.select { |v| v[2] == vars[0] }.map { |v| v[1] }
-      batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, resilience_frequency)
+      annual_outputs = []
+      timeseries_outputs = []
+      @hpxml_bldgs.each do |hpxml_bldg|
+        if hpxml_bldg.batteries.size > 1
+          # When modeling individual dwelling units, OS-HPXML only allows a single battery
+          fail 'Unexpected error.'
+        end
+        next if hpxml_bldg.batteries.size == 0
 
-      min_soc = elcd.minimumStorageStateofChargeFraction
-      batt_kw = elcd.designStorageControlDischargePower.get / 1000.0
-      batt_roundtrip_eff = elcs.dctoDCChargingEfficiency
-      batt_kwh = elcs.additionalProperties.getFeatureAsDouble('UsableCapacity_kWh').get
+        battery = hpxml_bldg.batteries[0]
 
-      batt_soc_kwh = batt_soc.map { |soc| soc - min_soc }.map { |soc| soc * batt_kwh }
+        elcd = @model.getElectricLoadCenterDistributions.find { |elcd| elcd.additionalProperties.getFeatureAsString('HPXML_ID').to_s == battery.id }
+        next if elcd.nil?
 
-      crit_load = get_report_meter_data_timeseries([Outputs::MeterCustomElectricityCritical.upcase], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+        elcs = @model.getElectricLoadCenterStorageLiIonNMCBatterys.find { |elcs| elcs.additionalProperties.getFeatureAsString('HPXML_ID').to_s == battery.id }
 
-      resilience_timeseries = []
-      n_timesteps = crit_load.size
-      (0...n_timesteps).each do |init_time_step|
-        resilience_timeseries << get_resilience_timestep_value(init_time_step, batt_kwh, batt_kw, batt_soc_kwh[init_time_step], crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
+        vars = ['Electric Storage Charge Fraction']
+        batt_soc = get_report_variable_data_timeseries([elcs.name.to_s.upcase], vars, 1, 0, resilience_frequency)
+
+        min_soc = elcd.minimumStorageStateofChargeFraction
+        batt_kw = elcd.designStorageControlDischargePower.get / 1000.0
+        batt_roundtrip_eff = elcs.dctoDCChargingEfficiency
+        batt_kwh = elcs.additionalProperties.getFeatureAsDouble('UsableCapacity_kWh').get
+
+        batt_soc_kwh = batt_soc.map { |soc| soc - min_soc }.map { |soc| soc * batt_kwh }
+
+        if @hpxml_bldgs.size == 1
+          crit_load = get_report_meter_data_timeseries([Outputs::MeterCustomElectricityCritical.upcase], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+        else
+          unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
+          crit_load = get_report_meter_data_timeseries(["unit#{unit_num}_#{Outputs::MeterCustomElectricityCritical.gsub(':', '_')}".upcase], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+        end
+
+        resilience_timeseries = []
+        n_timesteps = crit_load.size
+        (0...n_timesteps).each do |init_time_step|
+          resilience_timeseries << get_resilience_timestep_value(init_time_step, batt_kwh, batt_kw, batt_soc_kwh[init_time_step], crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
+        end
+
+        annual_outputs << resilience_timeseries.sum(0.0) / resilience_timeseries.size
+
+        next unless args[:include_timeseries_resilience]
+
+        if ![EPlus::TimeseriesFrequencyDaily, EPlus::TimeseriesFrequencyMonthly].include?(args[:timeseries_frequency])
+          timeseries_outputs << resilience_timeseries
+        else
+          timeseries_outputs << rollup_timeseries_output_to_daily_or_monthly(resilience_timeseries, args[:timeseries_frequency], true)
+        end
       end
 
-      resilience.annual_output = resilience_timeseries.sum(0.0) / resilience_timeseries.size
-
-      next unless args[:include_timeseries_resilience]
-
-      resilience.timeseries_output = resilience_timeseries
-      if [EPlus::TimeseriesFrequencyDaily, EPlus::TimeseriesFrequencyMonthly].include? args[:timeseries_frequency]
-        resilience.timeseries_output = rollup_timeseries_output_to_daily_or_monthly(resilience.timeseries_output, args[:timeseries_frequency], true)
+      resilience.annual_output = annual_outputs.max
+      if not timeseries_outputs.empty?
+        resilience.timeseries_output = timeseries_outputs[0].zip(*timeseries_outputs[1..-1]).map { |e| e.max }
       end
     end
 

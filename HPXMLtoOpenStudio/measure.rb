@@ -277,7 +277,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         # SFA/MF building simulations, we'd need to create custom meters with electricity usage *for each unit*
         # and switch to "TrackMeterDemandStoreExcessOnSite".
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
-        fail 'Modeling batteries for whole SFA/MF buildings is not currently supported.'
+        # fail 'Modeling batteries for whole SFA/MF buildings is not currently supported.'
       end
     end
   end
@@ -388,8 +388,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Other
     PV.apply(runner, model, hpxml_bldg)
     Generator.apply(model, hpxml_bldg)
-    Battery.apply(runner, model, spaces, hpxml_bldg, schedules_file)
-    Vehicle.apply(runner, model, spaces, hpxml_bldg, hpxml.header, schedules_file)
+    Battery.apply(runner, model, spaces, hpxml, hpxml_bldg, schedules_file)
+    Vehicle.apply(runner, model, spaces, hpxml, hpxml_bldg, hpxml.header, schedules_file)
 
     # Unit Meters
     Outputs.create_custom_unit_meters(model, hpxml)
