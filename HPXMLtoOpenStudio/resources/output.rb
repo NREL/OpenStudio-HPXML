@@ -1512,6 +1512,8 @@ module Outputs
         if custom_unit_meter.nil?
           key_vars << ['', 'Electricity:Facility']
         else
+          # Since custom meter cannot reference other custom meters, copy
+          # all custom meter key/variable groups to this custom meter.
           key_vars = custom_unit_meter.keyVarGroups
         end
         Model.add_meter_custom(
@@ -1548,8 +1550,6 @@ module Outputs
   # @param hpxml [HPXML] HPXML object
   # @return [nil]
   def self.create_custom_unit_meters(model, hpxml)
-    return if hpxml.buildings.size == 1
-
     to_eplus = { FT::Elec => EPlus::FuelTypeElectricity,
                  FT::Gas => EPlus::FuelTypeNaturalGas,
                  FT::Oil => EPlus::FuelTypeOil,
@@ -1575,15 +1575,14 @@ module Outputs
           next unless to_eplus[ft] == fuel_type
 
           output_vars.each do |output_var|
-            next if output_var.include? 'ExteriorLights:Electricity' # not associated with a zone, so the meter is across all units
-            next if output_var.include? 'InteriorLights:Electricity' # same as above; like interior equipment, we *could* switch to zone level
-            next if output_var.include? 'Electric Storage Charge Energy' # vehicles
+            next if output_var.include? 'ExteriorLights:Electricity' # Not associated with a zone, so the meter is across all units.
+            next if output_var.include? 'InteriorLights:Electricity' # Same as above; like interior equipment, we *could* switch to zone level.
 
             key_vars << [object.name.to_s, output_var]
           end
         end
 
-        # FIXME: can we simplify all this special stuff?
+        # FIXME: Can we simplify/avoid all this special stuff?
         if fuel_type == EPlus::FuelTypeElectricity
           if object.to_ElectricLoadCenterInverterPVWatts.is_initialized
             key_vars << [object.name.to_s, 'Inverter Ancillary AC Electricity Energy']
@@ -1603,7 +1602,10 @@ module Outputs
         end
       end
 
-      # Avoid the "Output Variable or Meter Name="x:y:z" referenced multiple times, only first instance will be used" E+ warning
+      next if key_vars.empty?
+
+      # Avoid the "Output Variable or Meter Name="x:y:z" referenced multiple
+      # times, only first instance will be used" E+ warning.
       key_vars.each_with_index do |key_var1, i|
         key_vars.each_with_index do |key_var2, j|
           next if key_var1 == key_var2
@@ -1615,16 +1617,16 @@ module Outputs
         end
       end
 
-      next if key_vars.empty?
-
       meter_custom = Model.add_meter_custom(
         model,
-        name: "#{fuel_type}:Facility",
+        name: "#{fuel_type}_Facility",
         fuel_type: fuel_type,
         key_var_pairs: key_vars
       )
 
-      if fuel_type == EPlus::FuelTypeElectricity
+      # We only need the electricity Total, Net, PV, Critical meters by unit when
+      # there are multiple units.
+      if (fuel_type == EPlus::FuelTypeElectricity) && (hpxml.buildings.size > 1)
         Outputs.create_custom_meters(model, meter_custom)
       end
     end
