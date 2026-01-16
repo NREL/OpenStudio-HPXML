@@ -131,6 +131,7 @@ Fuel uses by unit are listed below.
   Fuel Use: <BuildingID>: Wood Cord: Total (MBtu)
   Fuel Use: <BuildingID>: Wood Pellets: Total (MBtu)
   Fuel Use: <BuildingID>: Coal: Total (MBtu)          Includes "coal", "anthracite coal", "bituminous coal", and "coke"
+  ==================================================  ===========================
 
 .. _annualenduses:
 
