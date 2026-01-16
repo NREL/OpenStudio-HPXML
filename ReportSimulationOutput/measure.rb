@@ -1123,19 +1123,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     zone_names = zone_names.sort_by { |x| [x[0], x[1]] }
 
     # Returns a user-friendly version of the object name for output.
+    # UNITX prefix will be replaced with <BuildingID>, if <BuildingID> provided.
     #
-    # @param object_name [Array<String or nil, String>] e.g., [nil, "CONDITIONED SPACE"] or ["MyBuilding_2", "UNIT2_BASEMENT___UNCONDITIONED"]
+    # @param object_name [Array<String or nil, String>] List of prefix/suffix pairs, e.g., [nil, "CONDITIONED SPACE"] or ["MyBuilding_2", "UNIT2_BASEMENT___UNCONDITIONED"]
     # @return [String] Output name
     def sanitize_name(object_name)
-      building_id = object_name[0]
-      zone_name = object_name[1]
-      if building_id.nil?
-        return zone_name.gsub('_', ' ').split.map(&:capitalize).join(' ')
-      else
-        sstrs = zone_name.gsub('_', ' ').split
-        sstrs.delete(sstrs[0]) if sstrs[0].include?('UNIT')
-        return "#{building_id} #{sstrs.map(&:capitalize).join(' ')}"
-      end
+      prefix = object_name[0]
+      suffix = object_name[1]
+      sstrs = suffix.gsub('_', ' ').split
+      sstrs.delete(sstrs[0]) if sstrs[0].include?('UNIT')
+      return "#{prefix} #{sstrs.map(&:capitalize).join(' ')}".strip
     end
 
     # Zone temperatures
@@ -1155,10 +1152,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         @model.getScheduleConstants.each do |schedule|
           next unless schedule.additionalProperties.getFeatureAsString('ObjectType').to_s == sch_location
 
-          sch_name = schedule.name.to_s.upcase
-          sstrs = sch_name.gsub('_', ' ').split
-          sstrs.delete(sstrs[0]) if sstrs[0].include?('UNIT')
-          sch_name = [nil, sstrs.join(' ')]
+          sch_name = [nil, schedule.name.to_s.upcase]
           @zone_temps[sch_name] = ZoneTemp.new
           @zone_temps[sch_name].name = "Temperature: #{sanitize_name(sch_name)}"
           @zone_temps[sch_name].timeseries_units = 'F'
