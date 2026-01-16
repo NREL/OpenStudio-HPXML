@@ -115,6 +115,23 @@ Fuel uses are listed below.
   Fuel Use: Coal: Total (MBtu)          Includes "coal", "anthracite coal", "bituminous coal", and "coke"
   ====================================  ===========================
 
+Annual Energy by Fuel Use by Unit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Fuel uses by unit are listed below.
+
+  ==================================================  ===========================
+  Type                                                Notes
+  ==================================================  ===========================
+  Fuel Use: <BuildingID>: Electricity: Total (MBtu)   Total electricity consumption
+  Fuel Use: <BuildingID>: Electricity: Net (MBtu)     Total energy consumption minus power produced by PV
+  Fuel Use: <BuildingID>: Natural Gas: Total (MBtu)
+  Fuel Use: <BuildingID>: Fuel Oil: Total (MBtu)      Includes "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "kerosene", and "diesel"
+  Fuel Use: <BuildingID>: Propane: Total (MBtu)
+  Fuel Use: <BuildingID>: Wood Cord: Total (MBtu)
+  Fuel Use: <BuildingID>: Wood Pellets: Total (MBtu)
+  Fuel Use: <BuildingID>: Coal: Total (MBtu)          Includes "coal", "anthracite coal", "bituminous coal", and "coke"
+
 .. _annualenduses:
 
 Annual Energy By End Use
