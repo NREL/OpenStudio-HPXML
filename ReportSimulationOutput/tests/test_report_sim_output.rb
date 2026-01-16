@@ -734,7 +734,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'skip_validation' => true,
                   'include_annual_total_consumptions' => false,
                   'include_annual_fuel_consumptions' => false,
-                  'include_timeseries_unit_fuel_consumptions' => false,
+                  'include_annual_unit_fuel_consumptions' => false,
                   'include_annual_end_use_consumptions' => false,
                   'include_annual_system_use_consumptions' => false,
                   'include_annual_emissions' => false,
