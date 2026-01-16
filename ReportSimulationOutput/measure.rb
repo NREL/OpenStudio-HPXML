@@ -1156,7 +1156,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           @zone_temps[sch_name] = ZoneTemp.new
           @zone_temps[sch_name].name = "Temperature: #{sanitize_name(sch_name)}"
           @zone_temps[sch_name].timeseries_units = 'F'
-          @zone_temps[sch_name].timeseries_output = get_report_variable_data_timeseries([schedule.name.to_s.upcase], ['Schedule Value'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+          @zone_temps[sch_name].timeseries_output = get_report_variable_data_timeseries([sch_name[1]], ['Schedule Value'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
 
           break
         end
