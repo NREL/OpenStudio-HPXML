@@ -1700,26 +1700,108 @@ module HVACSizing
   end
 
   # Returns the ACCA Manual S sizing allowances for a given type of HVAC equipment.
-  # These sizing allowances are used in the logic that determines how to convert heating/cooling
+  # These sizing allowances are used in the logic that determines how to convert heating/cooling 
   # design loads into corresponding equipment capacities.
-  #
-  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
-  # @return [Array<Double, Double, Double>] Oversize fraction (frac), oversize delta (Btu/hr), undersize fraction (frac)
-  def self.get_hvac_size_limits(hvac_cooling)
-    oversize_limit = 1.15
-    oversize_delta = 15000.0
-    undersize_limit = 0.9
 
-    if not hvac_cooling.nil?
-      if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeTwoStage
-        oversize_limit = 1.2
-      elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-        oversize_limit = 1.3
+  # New ACCA Manual S specifies different size limits for clg only/HPs depending on 
+  # the sizing condition (Standard, Dry, Variable Speed, etc.)
+  # and total cooling load (24,000 BTU/hr cutoff)
+
+  # get_hvac_size_limits_cooling() does not address section/table N2.3.3 Two-Speed Heat Pump Sizing Condition 
+  # or section/table N2.3.4 Variable-Capacity Equipment Sizing Condition
+  # since these size conditions also include heating size factors and minimum compressor heating size factors
+  # To maintain consistency w/ previous implementation in Man. S 2014, only cooling size limits are returned.
+  # Therefore, only sections/tables N2.3.1 and N2.3.2 from Man. S 2023 are addressed in this method.
+
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system 
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [Array<Double, Double, Double, Double>] total clg oversize limit (frac), 
+  # total clg undersize limit (frac), sens. clg undersize limit (frac), lat. clg undersize limit (frac)
+
+  def self.get_hvac_size_limits_cooling(hvac_cooling, hvac_sizings, hpxml_bldg, weather)
+
+    load_shr = hvac_sizings.Cool_Load_Sens / hvac_sizings.Cool_Load_Tot
+    # calculate Climate JSHR to determine standard vs dry sizing condition (new ACCA)
+
+    if hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingACCA2023
+      if not hvac_cooling.nil?
+        if load_shr < 0.95
+        # larger latent load
+        # Section N.2.3.1 ACCA Man. S 2023, Standard Sizing Condition
+          total_clg_undersize_limit = 0.90
+          sens_clg_undersize_limit = 0.90
+          lat_clg_undersize_limit = 1.00
+          if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage && hvac_sizings.Cool_Load_Tot <= 24000 # BTU/hr
+            total_clg_oversize_limit = 1.20
+          elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage && hvac_sizings.Cool_Load_Tot > 24000 # BTU/hr
+            total_clg_oversize_limit = 1.15
+          elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeTwoStage
+            total_clg_oversize_limit = 1.25
+          end
+        elsif load_shr >= 0.95 # Section N.2.3.2 ACCA Man. S 2023, Dry Sizing Condition
+          if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage
+            # Total Cooling Capacity / (Total Cooling Load + 6 kBtuh) <= 1.00
+            # 1.00 = non-load adjusted oversize limit
+            # goal --> determine "load adjusted" oversize limit
+            # Total Cooling Capacity <= 1.00 * (Total Cooling Load + 6 kBtuh)
+            # Total Cooling Capacity <= 1.00 * Total Cooling Load + 1.00 * 6 kBtuh 
+            # Total Cooling Capacity / Total Cooling Load <= 1.00 + (1.00 * 6 kBtuh) / Total Cooling Load
+            # Total Cooling Capacity Factor <= 1.00 + 6 kBtuh / Total Cooling Load
+            # Effective Total Cooling Oversize Limit = 1.00 + 6 kBtuh / Total Cooling Load
+            total_clg_oversize_limit = 1 + 6000 / hvac_sizings.Cool_Load_Tot
+            total_clg_undersize_limit = 0.90
+            sens_clg_undersize_limit = 0.90
+            lat_clg_undersize_limit = 1.00
+          elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeTwoStage
+            total_clg_oversize_limit = 1.15 # minimum compressor speed! TODO: incorporate minimum speed logic elsewhere
+            total_clg_undersize_limit = 0.90 # total clg undersize limit for dry climate, 2-stage compressor is as specified in ACCA 2014
+            # ACCA 2023 Table N2.3.2 does not specify total cooling undersize limit.
+            sens_clg_undersize_limit = 0.90
+            lat_clg_undersize_limit = 1.00
+          end
+        end
+      end
+    elsif hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingACCA
+    # References "Overview of Size Limits for Residential HVAC Equipment" from Man. S 2014
+      if ((weather.data.HDD65F / weather.data.CDD50F) < 2.0) || (load_shr < 0.95)
+        # mild winter or has latent cooling load
+        if not hvac_cooling.nil?
+          total_clg_undersize_limit = 0.90
+          sens_clg_undersize_limit = 0.90
+          lat_clg_undersize_limit = 1.00
+          if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage
+            total_clg_oversize_limit = 1.15
+          elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeTwoStage
+            total_clg_oversize_limit = 1.20
+          elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+            total_clg_oversize_limit = 1.30
+          end
+        end
+      elsif ((weather.data.HDD65F / weather.data.CDD50F) >= 2.0) && (load_shr >= 0.95)
+        # cold winter and no latent cooling load
+        # Man. S 2014 doesn't specify latent/sensible capacity undersize limits in this situation.
+        # could either return 1 (i.e. no adjustment) or nil for sens/latent undersize limit
+        total_clg_undersize_limit = 0.90
+        sens_clg_undersize_limit = nil
+        lat_clg_undersize_limit = nil
+        # Max Total Cooling Capacity = Total Cooling Load + 15 kBtuh
+        # i.e. Total Cooling Capacity <= Total Cooling Load + 15 kBtuh
+        # <= means solve for oversize limit, size factor (capacity/load) <= oversize limit
+        # Total Cooling Capacity / Total Cooling Load <= (Total Cooling Load + 15 kBtuh) / Total Cooling Load
+        # Total Cooling Oversize Limit = (Total Cooling Load + 15 kBtuh) / Total Cooling Load
+        total_clg_oversize_limit = (hvac_sizings.Cool_Load_Tot + 15000) / hvac_sizings.Cool_Load_Tot
       end
     end
-
-    return oversize_limit, oversize_delta, undersize_limit
+    
+    return total_clg_oversize_limit, total_clg_undersize_limit, sens_clg_undersize_limit, lat_clg_undersize_limit 
+  
   end
+
+  def self.get_hvac_size_limits_heating(hvac_cooling, hvac_sizings, hpxml_bldg, weather, runner)
+    if hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingACCA
+      runner.registerError("No heating size limits  ")
 
   # Transfers the design load totals from the HVAC loads object to the HVAC sizings object.
   #
@@ -3607,8 +3689,10 @@ module HVACSizing
   # @return [Double] Heat pump backup load (Btu/hr)
   def self.calculate_heat_pump_backup_load(mj, hvac_heating, heating_load, hp_nominal_heating_capacity, hpxml_bldg)
     if hpxml_bldg.header.heat_pump_backup_sizing_methodology == HPXML::HeatPumpBackupSizingEmergency
-      # Size backup to meet full design load in case heat pump fails
-      return heating_load
+      # Size backup to meet 85% of design load in case heat pump fails 
+      # New ACCA Man S (2024)--> emergency heating load is 85% of heating load 
+      # See Table N1.16.3.2 Electric Resistance Emergency Heat 
+      return 0.85*heating_load
     elsif hpxml_bldg.header.heat_pump_backup_sizing_methodology == HPXML::HeatPumpBackupSizingSupplemental
       if not hvac_heating.backup_heating_switchover_temp.nil?
         min_compressor_temp = hvac_heating.backup_heating_switchover_temp
