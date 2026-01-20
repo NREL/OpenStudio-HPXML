@@ -1595,26 +1595,33 @@ module HVAC
       # by natural ventilation, Kiva initialization, and probably other things.
       warning = nil
       for i in 0..(Calendar.num_days_in_year(year) - 1)
-        if (hvac_season_days[:htg][i] == hvac_season_days[:clg][i]) # both (or neither) heating/cooling seasons
+        if (hvac_season_days[:htg][i] == hvac_season_days[:clg][i]) # Overlapping heating/cooling seasons, or neither heating or cooling season
           htg_wkdy = htg_wd_setpoints[i].zip(clg_wd_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
           htg_wked = htg_we_setpoints[i].zip(clg_we_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
           clg_wkdy = htg_wd_setpoints[i].zip(clg_wd_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
           clg_wked = htg_we_setpoints[i].zip(clg_we_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
-        elsif hvac_season_days[:htg][i] == 1 # heating only seasons; cooling has minimum of heating
+
+          if hvac_season_days[:htg][i] == 1 # Only when overlapping seasons
+            if (htg_wkdy != htg_wd_setpoints[i]) || (htg_wked != htg_we_setpoints[i]) || (clg_wkdy != clg_wd_setpoints[i]) || (clg_wked != clg_we_setpoints[i])
+              warning = 'HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.' if warning.nil?
+            end
+          end
+        elsif hvac_season_days[:htg][i] == 1 # Heating-only seasons
+          # Cooling has minimum of heating. This is necessary to avoid the E+ error, but
+          # has no impact on the model since we are in the heating-only season.
           htg_wkdy = htg_wd_setpoints[i]
           htg_wked = htg_we_setpoints[i]
           clg_wkdy = htg_wd_setpoints[i].zip(clg_wd_setpoints[i]).map { |h, c| c < h ? h : c }
           clg_wked = htg_we_setpoints[i].zip(clg_we_setpoints[i]).map { |h, c| c < h ? h : c }
-        elsif hvac_season_days[:clg][i] == 1 # cooling only seasons; heating has maximum of cooling
+        elsif hvac_season_days[:clg][i] == 1 # Cooling-only seasons
+          # Heating has maximum of cooling. This is necessary to avoid the E+ error, but
+          # has no impact on the model since we are in the cooling-only season.
           htg_wkdy = clg_wd_setpoints[i].zip(htg_wd_setpoints[i]).map { |c, h| c < h ? c : h }
           htg_wked = clg_we_setpoints[i].zip(htg_we_setpoints[i]).map { |c, h| c < h ? c : h }
           clg_wkdy = clg_wd_setpoints[i]
           clg_wked = clg_we_setpoints[i]
         else
           fail 'HeatingSeason and CoolingSeason, when combined, must span the entire year.'
-        end
-        if (htg_wkdy != htg_wd_setpoints[i]) || (htg_wked != htg_we_setpoints[i]) || (clg_wkdy != clg_wd_setpoints[i]) || (clg_wked != clg_we_setpoints[i])
-          warning = 'HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint; this has no model impact during non-overlapping seasons.' if warning.nil?
         end
         htg_wd_setpoints[i] = htg_wkdy
         htg_we_setpoints[i] = htg_wked
