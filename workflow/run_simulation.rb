@@ -11,9 +11,10 @@ require_relative '../HPXMLtoOpenStudio/resources/version'
 
 basedir = File.expand_path(File.dirname(__FILE__))
 
-$timeseries_types = ['ALL', 'total', 'fuels', 'unitfuels', 'enduses', 'systemuses', 'emissions', 'emissionfuels',
+$timeseries_types = ['ALL', 'total', 'fuels', 'enduses', 'systemuses', 'emissions', 'emissionfuels',
                      'emissionenduses', 'hotwater', 'loads', 'componentloads',
-                     'unmethours', 'temperatures', 'conditions', 'airflows', 'weather', 'resilience']
+                     'unmethours', 'temperatures', 'conditions', 'airflows', 'weather', 'resilience',
+                     'dwellingunits']
 
 def run_workflow(basedir, rundir, hpxml, debug, skip_validation, add_comp_loads,
                  output_format, building_id, ep_input_format, stochastic_schedules,
@@ -78,7 +79,6 @@ def run_workflow(basedir, rundir, hpxml, debug, skip_validation, add_comp_loads,
       args['timeseries_frequency'] = timeseries_output_freq
       args['include_timeseries_total_consumptions'] = timeseries_outputs.include? 'total'
       args['include_timeseries_fuel_consumptions'] = timeseries_outputs.include? 'fuels'
-      args['include_timeseries_unit_fuel_consumptions'] = timeseries_outputs.include? 'unitfuels'
       args['include_timeseries_end_use_consumptions'] = timeseries_outputs.include? 'enduses'
       args['include_timeseries_system_use_consumptions'] = timeseries_outputs.include? 'systemuses'
       args['include_timeseries_emissions'] = timeseries_outputs.include? 'emissions'
@@ -93,6 +93,7 @@ def run_workflow(basedir, rundir, hpxml, debug, skip_validation, add_comp_loads,
       args['include_timeseries_airflows'] = timeseries_outputs.include? 'airflows'
       args['include_timeseries_weather'] = timeseries_outputs.include? 'weather'
       args['include_timeseries_resilience'] = timeseries_outputs.include? 'resilience'
+      args['include_timeseries_dwelling_unit_outputs'] = timeseries_outputs.include? 'dwellingunits'
       remaining_outputs = timeseries_outputs - $timeseries_types
       output_variables = remaining_outputs.select { |o| !o.include?(':') }
       output_meters = remaining_outputs.select { |o| o.include?(':') }

@@ -46,17 +46,6 @@ Generates annual energy consumptions for each fuel type.
 
 <br/>
 
-**Generate Annual Output: Dwelling Unit Fuel Consumptions**
-
-Generates annual energy consumptions for each fuel type of each dwelling unit.
-
-- **Name:** ``include_annual_unit_fuel_consumptions``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
 **Generate Annual Output: End Use Consumptions**
 
 Generates annual energy consumptions for each end use.
@@ -200,6 +189,17 @@ Generates annual resilience outputs.
 
 <br/>
 
+**Generate Annual Output: By Dwelling Unit**
+
+Generates annual outputs by dwelling unit.
+
+- **Name:** ``include_annual_dwelling_unit_outputs``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Timeseries Reporting Frequency**
 
 The frequency at which to report timeseries output data. Using 'none' will disable timeseries outputs.
@@ -229,17 +229,6 @@ Generates timeseries energy consumptions for the total building.
 Generates timeseries energy consumptions for each fuel type.
 
 - **Name:** ``include_timeseries_fuel_consumptions``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Generate Timeseries Output: Dwelling Unit Fuel Consumptions**
-
-Generates timeseries energy consumptions for each fuel type of each dwelling unit.
-
-- **Name:** ``include_timeseries_unit_fuel_consumptions``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
@@ -394,6 +383,17 @@ Generates timeseries weather data.
 Generates timeseries resilience outputs.
 
 - **Name:** ``include_timeseries_resilience``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
+**Generate Timeseries Output: By Dwelling Unit**
+
+Generates timeseries outputs by dwelling unit.
+
+- **Name:** ``include_timeseries_dwelling_unit_outputs``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
