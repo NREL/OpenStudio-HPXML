@@ -880,7 +880,7 @@ module Geometry
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
       thermal_zone.setName(location)
       thermal_zone.additionalProperties.setFeature('ObjectType', location)
-      thermal_zone.additionalProperties.setFeature('BuildingID', building_id) if hpxml.buildings.size > 1
+      thermal_zone.additionalProperties.setFeature('BuildingID', building_id) if hpxml.buildings.size > 1 # Used by reporting measure
       thermal_zone.setMultiplier(zone_multiplier)
 
       space = OpenStudio::Model::Space.new(model)
@@ -1780,12 +1780,8 @@ module Geometry
   def self.apply_building_unit(model, hpxml, hpxml_bldg)
     return if hpxml.buildings.size == 1
 
-    unit_num = hpxml.buildings.index(hpxml_bldg) + 1
-    building_id = hpxml_bldg.building_id
-
     unit = OpenStudio::Model::BuildingUnit.new(model)
-    unit.additionalProperties.setFeature('unit_num', unit_num)
-    unit.additionalProperties.setFeature('BuildingID', building_id)
+    unit.additionalProperties.setFeature('BuildingID', hpxml_bldg.building_id) # Used by reporting measure
     model.getSpaces.each do |s|
       s.setBuildingUnit(unit)
     end
