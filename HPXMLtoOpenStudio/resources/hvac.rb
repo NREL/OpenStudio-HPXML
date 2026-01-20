@@ -1593,7 +1593,7 @@ module HVAC
       # Note: It's tempting to adjust the setpoints, e.g., outside of the heating/cooling seasons,
       # to prevent unmet hours being reported. This is a dangerous idea. These setpoints are used
       # by natural ventilation, Kiva initialization, and probably other things.
-      warning = false
+      warning = nil
       for i in 0..(Calendar.num_days_in_year(year) - 1)
         if (hvac_season_days[:htg][i] == hvac_season_days[:clg][i]) # both (or neither) heating/cooling seasons
           htg_wkdy = htg_wd_setpoints[i].zip(clg_wd_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
@@ -1614,7 +1614,7 @@ module HVAC
           fail 'HeatingSeason and CoolingSeason, when combined, must span the entire year.'
         end
         if (htg_wkdy != htg_wd_setpoints[i]) || (htg_wked != htg_we_setpoints[i]) || (clg_wkdy != clg_wd_setpoints[i]) || (clg_wked != clg_we_setpoints[i])
-          warning = true
+          warning = 'HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint; this has no model impact during non-overlapping seasons.' if warning.nil?
         end
         htg_wd_setpoints[i] = htg_wkdy
         htg_we_setpoints[i] = htg_wked
@@ -1622,8 +1622,8 @@ module HVAC
         clg_we_setpoints[i] = clg_wked
       end
 
-      if warning
-        runner.registerWarning('HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.')
+      if not warning.nil?
+        runner.registerWarning(warning)
       end
     end
 
