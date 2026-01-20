@@ -400,6 +400,7 @@ denver-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-HERS-backup-e
 denver-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-HERS-backup-supplemental.xml,23884.0,23884.0,14772.0,796.0,621.0
 denver-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-MaxLoad-backup-emergency.xml,47879.0,47879.0,23884.0,1596.0,1244.0
 denver-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-MaxLoad-backup-supplemental.xml,47879.0,47879.0,0.0,1596.0,1244.0
+denver-hvac-autosize-seasons-and-inverted-setpoints.xml,41543.0,34547.0,0.0,831.0,1036.0
 denver-hvac-autosize-seasons.xml,41543.0,34547.0,0.0,831.0,1036.0
 denver-hvac-autosize-setpoints-daily-schedules.xml,41543.0,34547.0,0.0,831.0,1036.0
 denver-hvac-autosize-setpoints-daily-setbacks.xml,41543.0,34547.0,0.0,831.0,1036.0
@@ -811,6 +812,7 @@ houston-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-HERS-backup-
 houston-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-HERS-backup-supplemental.xml,19254.0,19254.0,0.0,642.0,501.0
 houston-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-MaxLoad-backup-emergency.xml,21838.0,21838.0,14182.0,728.0,568.0
 houston-hvac-autosize-room-ac-with-reverse-cycle-sizing-methodology-MaxLoad-backup-supplemental.xml,21838.0,21838.0,0.0,728.0,568.0
+houston-hvac-autosize-seasons-and-inverted-setpoints.xml,26597.0,41016.0,0.0,532.0,1230.0
 houston-hvac-autosize-seasons.xml,26597.0,41016.0,0.0,532.0,1230.0
 houston-hvac-autosize-setpoints-daily-schedules.xml,26597.0,41016.0,0.0,532.0,1230.0
 houston-hvac-autosize-setpoints-daily-setbacks.xml,26597.0,41016.0,0.0,532.0,1230.0
