@@ -2050,6 +2050,13 @@
     "hvac_control_heating_season_period": "Nov 1 - May 1",
     "hvac_control_cooling_season_period": "Jun 1 - Oct 1"
   },
+  "sample_files/base-hvac-seasons-and-inverted-setpoints.xml": {
+    "parent_hpxml": "sample_files/base-hvac-seasons.xml",
+    "hvac_control_heating_weekday_setpoint": "76",
+    "hvac_control_heating_weekend_setpoint": "76",
+    "hvac_control_cooling_weekday_setpoint": "75",
+    "hvac_control_cooling_weekend_setpoint": "75"
+  },
   "sample_files/base-hvac-setpoints.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "hvac_control_heating_weekday_setpoint": "60",
