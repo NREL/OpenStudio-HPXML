@@ -2,10 +2,8 @@
 
 __New Features__
 
-
 __Bugfixes__
 - Only issue a warning about adjusting inverted setpoints when heating setpoint is greater than cooling setpoint during overlapping heating/cooling seasons.
-
 
 ## OpenStudio-HPXML v1.11.0
 
