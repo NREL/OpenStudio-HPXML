@@ -1175,7 +1175,8 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
   # so remove these from the comparison
   annual_results_1x = annual_results_1x.dup
   annual_results_10x = annual_results_10x.dup
-  ['Fuel Use: *:',
+  ['Energy Use: *:',
+   'Fuel Use: *:',
    'System Use:',
    'Temperature:',
    'Humidity Ratio:', 'Relative Humidity:', 'Dewpoint Temperature:', 'Radiant Temperature:', 'Operative Temperature:',
@@ -1185,6 +1186,9 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
     [annual_results_1x, annual_results_10x, monthly_results_1x, monthly_results_10x].each do |results|
       results.each do |k, _v|
         results.delete(k) if k.start_with? key
+        if (key == 'Energy Use: *:') && (k.start_with? 'Energy Use:') && (k.split(':').size == 3)
+          results.delete(k)
+        end
         if (key == 'Fuel Use: *:') && (k.start_with? 'Fuel Use:') && (k.split(':').size == 4)
           results.delete(k)
         end
@@ -1292,6 +1296,7 @@ def _write_results(results, csv_out, output_groups_filter: [])
 
           key_split = key.split(':')
           next if key_type != key_split[0]
+          next if (key_type == 'Energy Use') && (key_split.size == 3)
           next if (key_type == 'Fuel Use') && (key_split.size == 4)
 
           output_keys << key
