@@ -1122,16 +1122,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
     bldg_id_zone_name_map = bldg_id_zone_name_map.sort_by { |k, v| [k, v] }.to_h
 
-    # Returns a user-friendly version of prefix + suffix for output.
-    # UNITX will be stripped from the suffix, if it exists.
+    # Returns a user-friendly version of bldg_id + object_name for output.
+    # UNITX will be stripped from the object_name, if it exists.
     #
-    # @param prefix [String or nil]
-    # @param suffix [String]
+    # @param bldg_id [String or nil] The HPML Building ID for the dwelling unit (if a whole SFA/MF building simulation)
+    # @param object_name [String] OpenStudio object name
     # @return [String] Output name
-    def sanitize_name(prefix, suffix)
-      sstrs = suffix.gsub('_', ' ').split
+    def sanitize_name(bldg_id, object_name)
+      sstrs = object_name.gsub('_', ' ').split
       sstrs.delete(sstrs[0]) if sstrs[0].include?('UNIT')
-      return "#{prefix} #{sstrs.map(&:capitalize).join(' ')}".strip
+      return "#{bldg_id} #{sstrs.map(&:capitalize).join(' ')}".strip
     end
 
     # Zone temperatures
