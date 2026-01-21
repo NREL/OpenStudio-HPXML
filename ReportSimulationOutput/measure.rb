@@ -2088,6 +2088,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         if meter_names[idx].include? Constants::ObjectTypeWaterHeaterAdjustment
           # Shift energy use adjustment to align with hot water energy use
           shift_values[idx] = true
+        elsif meter_names[idx].include? Constants::ObjectTypeCrankcaseHeater
+          # Shift energy use adjustment to align with HVAC operation and weather
+          shift_values[idx] = true
         elsif meter_names[idx].include? Constants::ObjectTypePanHeater
           # Shift energy use adjustment to align with HVAC operation and weather
           shift_values[idx] = true
@@ -3111,6 +3114,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           Constants::ObjectTypeMechanicalVentilationPreheating => EUT::MechVentPreheat,
           Constants::ObjectTypeMechanicalVentilationPrecooling => EUT::MechVentPrecool,
           Constants::ObjectTypeHPDefrostSupplHeat => EUT::HeatingHeatPumpBackup,
+          Constants::ObjectTypeCrankcaseHeater => EUT::Heating,
           Constants::ObjectTypePanHeater => EUT::Heating,
           Constants::ObjectTypeWaterHeaterAdjustment => EUT::HotWater,
           Constants::ObjectTypeBatteryLossesAdjustment => EUT::Battery }.each do |obj_name, eut|
