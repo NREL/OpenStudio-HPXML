@@ -610,10 +610,12 @@ class ReportSimulationOutputTest < Minitest::Test
             'MyBuilding_6']
   end
 
-  def unit_fuels_annual_cols
+  def dwelling_unit_annual_cols
     cols = []
     whole_building_unit_ids.each do |unit_id|
-      cols.concat(["Fuel Use: #{unit_id}: #{FT::Elec}: Total (MBtu)",
+      cols.concat(["Energy Use: #{unit_id}: #{TE::Total} (MBtu)",
+                   "Energy Use: #{unit_id}: #{TE::Net} (MBtu)",
+                   "Fuel Use: #{unit_id}: #{FT::Elec}: Total (MBtu)",
                    "Fuel Use: #{unit_id}: #{FT::Elec}: Net (MBtu)",
                    "Fuel Use: #{unit_id}: #{FT::Gas}: Total (MBtu)",
                    "Fuel Use: #{unit_id}: #{FT::Oil}: Total (MBtu)",
@@ -638,7 +640,6 @@ class ReportSimulationOutputTest < Minitest::Test
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_total_consumptions' => false,
                   'include_timeseries_fuel_consumptions' => false,
-                  'include_timeseries_unit_fuel_consumptions' => false,
                   'include_timeseries_end_use_consumptions' => false,
                   'include_timeseries_system_use_consumptions' => false,
                   'include_timeseries_emissions' => false,
@@ -652,7 +653,8 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_zone_conditions' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false,
-                  'include_timeseries_resilience' => false }
+                  'include_timeseries_resilience' => false,
+                  'include_timeseries_dwelling_unit_outputs' => false }
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
@@ -680,7 +682,6 @@ class ReportSimulationOutputTest < Minitest::Test
                   'timeseries_frequency' => 'none',
                   'include_timeseries_total_consumptions' => true,
                   'include_timeseries_fuel_consumptions' => true,
-                  'include_timeseries_unit_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
                   'include_timeseries_system_use_consumptions' => true,
                   'include_timeseries_emissions' => true,
@@ -694,7 +695,8 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_zone_conditions' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true,
-                  'include_timeseries_resilience' => true }
+                  'include_timeseries_resilience' => true,
+                  'include_timeseries_dwelling_unit_outputs' => true }
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
@@ -712,7 +714,7 @@ class ReportSimulationOutputTest < Minitest::Test
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
-    expected_annual_rows = AnnualRows + unit_fuels_annual_cols
+    expected_annual_rows = AnnualRows + dwelling_unit_annual_cols
     for i in 2..6
       expected_annual_rows << "System Use: HeatingSystem1_#{i}: #{FT::Elec}: Heating (MBtu)"
       expected_annual_rows << "System Use: CoolingSystem1_#{i}: #{FT::Elec}: Cooling (MBtu)"
@@ -734,7 +736,6 @@ class ReportSimulationOutputTest < Minitest::Test
                   'skip_validation' => true,
                   'include_annual_total_consumptions' => false,
                   'include_annual_fuel_consumptions' => false,
-                  'include_annual_unit_fuel_consumptions' => false,
                   'include_annual_end_use_consumptions' => false,
                   'include_annual_system_use_consumptions' => false,
                   'include_annual_emissions' => false,
@@ -747,7 +748,8 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_annual_component_loads' => false,
                   'include_annual_hot_water_uses' => false,
                   'include_annual_hvac_summary' => false,
-                  'include_annual_resilience' => false }
+                  'include_annual_resilience' => false,
+                  'include_annual_dwelling_unit_outputs' => false }
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
@@ -1056,17 +1058,25 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(8760, timeseries_rows.size - 2)
   end
 
-  def test_timeseries_hourly_unit_fuels_whole_mf_building
+  def test_timeseries_hourly_dwelling_unit_outputs_whole_mf_building
     args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-bldgtype-mf-whole-building.xml'),
                   'skip_validation' => true,
                   'timeseries_frequency' => 'hourly',
-                  'include_timeseries_unit_fuel_consumptions' => true }
+                  'include_timeseries_total_consumptions' => true,
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_dwelling_unit_outputs' => true }
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     expected_timeseries_cols = ['Time']
+    expected_timeseries_cols << "Energy Use: #{TE::Total}"
+    expected_timeseries_cols << "Energy Use: #{TE::Net}"
+    expected_timeseries_cols << "Fuel Use: #{FT::Elec}: #{TE::Total}"
+    expected_timeseries_cols << "Fuel Use: #{FT::Elec}: #{TE::Net}"
     whole_building_unit_ids.each do |unit_id|
+      expected_timeseries_cols << "Energy Use: #{unit_id}: #{TE::Total}"
+      expected_timeseries_cols << "Energy Use: #{unit_id}: #{TE::Net}"
       expected_timeseries_cols << "Fuel Use: #{unit_id}: #{FT::Elec}: #{TE::Total}"
       expected_timeseries_cols << "Fuel Use: #{unit_id}: #{FT::Elec}: #{TE::Net}"
       # No other fuels because this is an all-electric building.
