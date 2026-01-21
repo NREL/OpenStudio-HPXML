@@ -419,7 +419,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
   elsif ['base-schedules-simple-vacancy.xml',
          'base-schedules-detailed-occupancy-stochastic-vacancy.xml'].include? hpxml_file
     hpxml.header.unavailable_periods.add(column_name: 'Vacancy', begin_month: 12, begin_day: 1, end_month: 1, end_day: 31, natvent_availability: HPXML::ScheduleUnavailable)
-  elsif ['base-schedules-detailed-mixed-timesteps-power-outage.xml',
+  elsif ['base-hvac-air-to-air-heat-pump-1-speed-power-outage.xml',
+         'base-schedules-detailed-mixed-timesteps-power-outage.xml',
          'base-schedules-detailed-occupancy-stochastic-power-outage.xml'].include? hpxml_file
     hpxml.header.unavailable_periods.add(column_name: 'Power Outage', begin_month: 12, begin_day: 1, begin_hour: 5, end_month: 1, end_day: 31, end_hour: 14)
   elsif ['base-schedules-simple-no-space-heating.xml'].include? hpxml_file
