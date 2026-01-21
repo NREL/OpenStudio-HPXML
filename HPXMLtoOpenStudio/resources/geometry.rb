@@ -861,13 +861,16 @@ module Geometry
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param location [String] The location of interest (HPXML::LocationXXX)
-  # @param zone_multiplier [Integer] the number of similar zones represented
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [OpenStudio::Model::Space, nil] updated spaces hash if location is not already a key
-  def self.create_space_and_zone(model, spaces, location, zone_multiplier)
+  def self.create_space_and_zone(model, spaces, location, hpxml_bldg)
+    zone_multiplier = hpxml_bldg.building_construction.number_of_units
+    building_id = hpxml_bldg.building_id
     if not spaces.keys.include? location
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
       thermal_zone.setName(location)
       thermal_zone.additionalProperties.setFeature('ObjectType', location)
+      thermal_zone.additionalProperties.setFeature('BuildingID', building_id) # Used by reporting measure
       thermal_zone.setMultiplier(zone_multiplier)
 
       space = OpenStudio::Model::Space.new(model)
@@ -1749,7 +1752,7 @@ module Geometry
   # @return [OpenStudio::Model::Space] the OpenStudio::Model::Space object corresponding to HPXML::LocationXXX
   def self.create_or_get_space(model, spaces, location, hpxml_bldg)
     if spaces[location].nil?
-      create_space_and_zone(model, spaces, location, hpxml_bldg.building_construction.number_of_units)
+      create_space_and_zone(model, spaces, location, hpxml_bldg)
     end
     return spaces[location]
   end
@@ -1758,15 +1761,11 @@ module Geometry
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml [HPXML] HPXML object
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
-  def self.apply_building_unit(model, hpxml, hpxml_bldg)
+  def self.apply_building_unit(model, hpxml)
     return if hpxml.buildings.size == 1
 
-    unit_num = hpxml.buildings.index(hpxml_bldg) + 1
-
     unit = OpenStudio::Model::BuildingUnit.new(model)
-    unit.additionalProperties.setFeature('unit_num', unit_num)
     model.getSpaces.each do |s|
       s.setBuildingUnit(unit)
     end

@@ -360,7 +360,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Geometry.apply_thermal_mass(model, spaces, hpxml_bldg, hpxml.header)
     Geometry.set_zone_volumes(spaces, hpxml_bldg, hpxml.header)
     Geometry.explode_surfaces(model, hpxml_bldg)
-    Geometry.apply_building_unit(model, hpxml, hpxml_bldg)
+    Geometry.apply_building_unit(model, hpxml)
 
     # HVAC
     airloop_map = HVAC.apply_hvac_systems(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file, hvac_days)

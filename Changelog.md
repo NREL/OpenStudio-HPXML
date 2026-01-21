@@ -1,6 +1,8 @@
 ## OpenStudio-HPXML v1.12.0
 
 __New Features__
+- Output updates:
+  - **Breaking change**: Replaces "UnitX" prefixes with Building IDs in whole SFA/MF building timeseries outputs.
 
 __Bugfixes__
 - Only issue a warning about adjusting inverted setpoints when heating setpoint is greater than cooling setpoint during overlapping heating/cooling seasons.
