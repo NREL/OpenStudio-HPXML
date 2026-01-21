@@ -1216,6 +1216,61 @@ module Model
   def self.prefix_object_names(unit_model, unit_number)
     # FUTURE: Create objects with unique names up front so we don't have to do this
 
+    # Meter:Custom objects
+    unit_model.getMeterCustoms.each do |meter_custom|
+      key_var_groups = meter_custom.keyVarGroups
+      meter_custom.removeAllKeyVarGroups
+      key_var_groups.each do |key_var_group|
+        key, var = key_var_group
+
+        if not key.empty?
+          key = make_variable_name(key, unit_number)
+        end
+
+        # The following changes, for example:
+        #
+        # - Electricity:Facility
+        # to
+        # - unit1_Electricity_Facility
+        #
+        # --- or ---
+        #
+        # - cooking range:InteriorEquipment:Electricity:Zone:CONDITIONED SPACE
+        # to
+        # - cooking range:InteriorEquipment:Electricity:Zone:unit1_CONDITIONED_SPACE
+
+        if var.include?(':')
+          var = var.split(':')
+          if var.size == 2
+            var = ems_friendly_name("#{make_variable_name(var[0], unit_number)}:#{var[1]}")
+          else
+            var = "#{var[0..-2].join(':')}:#{make_variable_name(var[-1], unit_number)}"
+          end
+        end
+
+        meter_custom.addKeyVarGroup(key, var)
+      end
+    end
+
+    # Meter:CustomDecrement objects
+    unit_model.getMeterCustomDecrements.each do |meter_custom_decr|
+      source_meter_name = meter_custom_decr.sourceMeterName
+      source_meter_name = make_variable_name(source_meter_name, unit_number)
+      meter_custom_decr.setSourceMeterName(source_meter_name)
+
+      key_var_groups = meter_custom_decr.keyVarGroups
+      meter_custom_decr.removeAllKeyVarGroups
+      key_var_groups.each do |key_var_group|
+        key, var = key_var_group
+
+        if not key.empty?
+          key = make_variable_name(key, unit_number)
+        end
+
+        meter_custom_decr.addKeyVarGroup(key, var)
+      end
+    end
+
     # EMS objects
     ems_map = {}
 

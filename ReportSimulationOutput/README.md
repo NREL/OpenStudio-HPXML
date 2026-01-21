@@ -189,6 +189,17 @@ Generates annual resilience outputs.
 
 <br/>
 
+**Generate Annual Output: By Dwelling Unit**
+
+Generates annual outputs by dwelling unit.
+
+- **Name:** ``include_annual_dwelling_unit_outputs``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Timeseries Reporting Frequency**
 
 The frequency at which to report timeseries output data. Using 'none' will disable timeseries outputs.
@@ -372,6 +383,17 @@ Generates timeseries weather data.
 Generates timeseries resilience outputs.
 
 - **Name:** ``include_timeseries_resilience``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
+**Generate Timeseries Output: By Dwelling Unit**
+
+Generates timeseries outputs by dwelling unit.
+
+- **Name:** ``include_timeseries_dwelling_unit_outputs``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``

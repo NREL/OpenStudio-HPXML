@@ -1445,8 +1445,9 @@ module Outputs
   # Creates custom output meters that are used across reporting measures.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param custom_unit_meter [OpenStudio::Model::MeterCustom] optional OpenStudio custom meter object
   # @return [nil]
-  def self.create_custom_meters(model)
+  def self.create_custom_meters(model, custom_unit_meter = nil)
     # Create custom meters:
     # - Total Electricity (Electricity:Facility plus EV charging, batteries, generators)
     # - Net Electricity (above plus PV)
@@ -1476,17 +1477,27 @@ module Outputs
       elcd.generators.each do |generator|
         next unless generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypePhotovoltaics
 
-        net_key_vars << ['', 'Photovoltaic:ElectricityProduced']
-        pv_key_vars << net_key_vars[-1]
-        net_key_vars << ['', 'PowerConversion:ElectricityProduced']
-        pv_key_vars << net_key_vars[-1]
+        if generator.to_GeneratorPVWatts.is_initialized
+          net_key_vars << [generator.name.to_s.upcase, 'Generator Produced DC Electricity Energy']
+          pv_key_vars << net_key_vars[-1]
+        end
+      end
+
+      if elcd.inverter.is_initialized
+        inv = elcd.inverter.get
+        if inv.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypePhotovoltaics
+          net_key_vars << [inv.name.to_s.upcase, 'Inverter Conversion Loss Decrement Energy']
+          pv_key_vars << net_key_vars[-1]
+        end
       end
 
       # Generator output meter
       elcd.generators.each do |generator|
         next unless generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeGenerator
 
-        net_key_vars << ['', 'Cogeneration:ElectricityProduced']
+        next unless generator.to_GeneratorMicroTurbine.is_initialized
+
+        net_key_vars << [generator.name.to_s, 'Generator Produced AC Electricity Energy']
         total_key_vars << net_key_vars[-1]
         gen_key_vars << net_key_vars[-1]
       end
@@ -1498,7 +1509,11 @@ module Outputs
       MeterCustomElectricityCritical => pv_key_vars + gen_key_vars }.each do |meter_name, key_vars|
       if key_vars.empty?
         # Avoid OpenStudio warnings if nothing to decrement
-        key_vars << ['', 'Electricity:Facility']
+        if custom_unit_meter.nil?
+          key_vars << ['', 'Electricity:Facility']
+        else
+          key_vars = custom_unit_meter.keyVarGroups
+        end
         Model.add_meter_custom(
           model,
           name: meter_name,
@@ -1525,5 +1540,414 @@ module Outputs
         key_var_pairs: pv_key_vars
       )
     end
+  end
+
+  # Create custom meters with fuel usage *for each unit*.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml [HPXML] HPXML object
+  # @return [nil]
+  def self.create_custom_unit_meters(model, hpxml)
+    return if hpxml.buildings.size == 1
+
+    to_eplus = { FT::Elec => EPlus::FuelTypeElectricity,
+                 FT::Gas => EPlus::FuelTypeNaturalGas,
+                 FT::Oil => EPlus::FuelTypeOil,
+                 FT::Propane => EPlus::FuelTypePropane,
+                 FT::WoodCord => EPlus::FuelTypeWoodCord,
+                 FT::WoodPellets => EPlus::FuelTypeWoodPellets,
+                 FT::Coal => EPlus::FuelTypeCoal }
+
+    to_eplus.values.each do |fuel_type|
+      key_vars = []
+      model.getModelObjects.sort.each do |object|
+        next if object.to_AdditionalProperties.is_initialized
+        next if object.to_EnergyManagementSystemOutputVariable.is_initialized
+
+        vars_by_key = get_object_outputs_by_key(model, object, EUT)
+        vars_by_key.each do |key, output_vars|
+          ft, eut = key
+
+          if fuel_type == EPlus::FuelTypeElectricity
+            next if [EUT::PV, EUT::Generator, EUT::Vehicle, EUT::Battery].include?(eut) && !output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) || x.include?(Constants::ObjectTypeMiscElectricVehicleCharging) }
+          end
+
+          next unless to_eplus[ft] == fuel_type
+
+          output_vars.each do |output_var|
+            next if output_var.include? 'ExteriorLights:Electricity' # not associated with a zone, so the meter is across all units
+            next if output_var.include? 'InteriorLights:Electricity' # same as above; like interior equipment, we *could* switch to zone level
+            next if output_var.include? 'Electric Storage Charge Energy' # vehicles
+
+            key_vars << [object.name.to_s, output_var]
+          end
+        end
+
+        # FIXME: can we simplify all this special stuff?
+        if fuel_type == EPlus::FuelTypeElectricity
+          if object.to_ElectricLoadCenterInverterPVWatts.is_initialized
+            key_vars << [object.name.to_s, 'Inverter Ancillary AC Electricity Energy']
+          elsif object.to_ElectricLoadCenterStorageConverter.is_initialized
+            key_vars << [object.name.to_s, 'Converter Ancillary AC Electricity Energy']
+          elsif object.to_PumpVariableSpeed.is_initialized
+            key_vars << [object.name.to_s, 'Pump Electricity Energy']
+          elsif object.to_CoilHeatingGas.is_initialized
+            key_vars << [object.name.to_s, 'Heating Coil Electricity Energy']
+          elsif object.to_FanSystemModel.is_initialized
+            key_vars << [object.name.to_s, 'Fan Electricity Energy']
+          elsif object.to_Lights.is_initialized
+            key_vars << [object.name.to_s, 'Lights Electricity Energy']
+          elsif object.to_ExteriorLights.is_initialized
+            key_vars << [object.name.to_s, 'Exterior Lights Electricity Energy']
+          end
+        end
+      end
+
+      # Avoid the "Output Variable or Meter Name="x:y:z" referenced multiple times, only first instance will be used" E+ warning
+      key_vars.each_with_index do |key_var1, i|
+        key_vars.each_with_index do |key_var2, j|
+          next if key_var1 == key_var2
+
+          if key_var1[1].include?(':') && (key_var1[1] == key_var2[1])
+            key_vars[i] = ['', key_var1[1]]
+            key_vars[j] = ['', key_var2[1]]
+          end
+        end
+      end
+
+      next if key_vars.empty?
+
+      meter_custom = Model.add_meter_custom(
+        model,
+        name: "#{fuel_type}:Facility",
+        fuel_type: fuel_type,
+        key_var_pairs: key_vars
+      )
+
+      if fuel_type == EPlus::FuelTypeElectricity
+        Outputs.create_custom_meters(model, meter_custom)
+      end
+    end
+  end
+
+  # For a given object, returns the Output:Variables or Output:Meters to be requested,
+  # and associates them with the appropriate keys (e.g., [FT::Elec, EUT::Heating]).
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param object [OpenStudio::Model::Foo] A given object in the OpenStudio Model
+  # @param class_type [Module] The output class type
+  # @return [Hash] Map of output key => array of EnergyPlus output variable/meter names
+  def self.get_object_outputs_by_key(model, object, class_type)
+    object_type = object.additionalProperties.getFeatureAsString('ObjectType')
+    object_type = object_type.get if object_type.is_initialized
+
+    to_ft = { EPlus::FuelTypeElectricity => FT::Elec,
+              EPlus::FuelTypeNaturalGas => FT::Gas,
+              EPlus::FuelTypeOil => FT::Oil,
+              EPlus::FuelTypePropane => FT::Propane,
+              EPlus::FuelTypeWoodCord => FT::WoodCord,
+              EPlus::FuelTypeWoodPellets => FT::WoodPellets,
+              EPlus::FuelTypeCoal => FT::Coal }
+
+    if class_type == EUT
+
+      # End uses
+
+      if object.to_CoilHeatingDXSingleSpeed.is_initialized || object.to_CoilHeatingDXMultiSpeed.is_initialized
+        vars = { [FT::Elec, EUT::Heating] => ['Heating Coil Electricity Energy', 'Heating Coil Defrost Electricity Energy'] }
+        if object.additionalProperties.getFeatureAsDouble('FractionHeatLoadServed').is_initialized && object.additionalProperties.getFeatureAsDouble('FractionHeatLoadServed').get <= 0
+          # HP only provides cooling, allocate crankcase to cooling end use
+          vars[[FT::Elec, EUT::Cooling]] = ['Heating Coil Crankcase Heater Electricity Energy']
+        else
+          # Allocate crankcase to heating end use
+          vars[[FT::Elec, EUT::Heating]] << 'Heating Coil Crankcase Heater Electricity Energy'
+        end
+        return vars
+
+      elsif object.to_CoilHeatingElectric.is_initialized || object.to_CoilHeatingElectricMultiStage.is_initialized
+        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
+          return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ['Heating Coil Electricity Energy'] }
+        else
+          return { [FT::Elec, EUT::Heating] => ['Heating Coil Electricity Energy'] }
+        end
+
+      elsif object.to_CoilHeatingGas.is_initialized
+        fuel = object.to_CoilHeatingGas.get.fuelType
+        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
+          return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Heating Coil #{fuel} Energy", "Heating Coil Ancillary #{fuel} Energy"] }
+        else
+          return { [to_ft[fuel], EUT::Heating] => ["Heating Coil #{fuel} Energy", "Heating Coil Ancillary #{fuel} Energy"] }
+        end
+
+      elsif object.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized || object.to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
+        return { [FT::Elec, EUT::Heating] => ['Heating Coil Electricity Energy'] }
+
+      elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
+        object = object.to_ZoneHVACBaseboardConvectiveElectric.get
+        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
+          return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ['Baseboard Electricity Energy'] }
+        else
+          return { [FT::Elec, EUT::Heating] => ['Baseboard Electricity Energy'] }
+        end
+
+      elsif object.to_BoilerHotWater.is_initialized
+        is_combi_boiler = false
+        if object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').is_initialized
+          is_combi_boiler = object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').get
+        end
+        if not is_combi_boiler # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
+          fuel = object.to_BoilerHotWater.get.fuelType
+          if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
+            return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
+          else
+            return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
+          end
+        else
+          fuel = object.to_BoilerHotWater.get.fuelType
+          return { [to_ft[fuel], EUT::HotWater] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
+        end
+
+      elsif object.to_CoilCoolingDXSingleSpeed.is_initialized || object.to_CoilCoolingDXMultiSpeed.is_initialized
+        vars = { [FT::Elec, EUT::Cooling] => ['Cooling Coil Electricity Energy'] }
+        parent = model.getAirLoopHVACUnitarySystems.select { |u| u.coolingCoil.is_initialized && u.coolingCoil.get.handle.to_s == object.handle.to_s }
+        if (not parent.empty?) && parent[0].heatingCoil.is_initialized
+          htg_coil = parent[0].heatingCoil.get
+        end
+        if parent.empty?
+          parent = model.getZoneHVACPackagedTerminalAirConditioners.select { |u| u.coolingCoil.handle.to_s == object.handle.to_s }
+          if not parent.empty?
+            htg_coil = parent[0].heatingCoil
+          end
+        end
+        if parent.empty?
+          fail 'Could not find parent object.'
+        end
+
+        if htg_coil.nil? || (not (htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized || htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized))
+          # Crankcase variable only available if no DX heating coil on parent
+          vars[[FT::Elec, EUT::Cooling]] << 'Cooling Coil Crankcase Heater Electricity Energy'
+        end
+        return vars
+
+      elsif object.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized || object.to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
+        return { [FT::Elec, EUT::Cooling] => ['Cooling Coil Electricity Energy'] }
+
+      elsif object.to_EvaporativeCoolerDirectResearchSpecial.is_initialized
+        return { [FT::Elec, EUT::Cooling] => ['Evaporative Cooler Electricity Energy'] }
+
+      elsif object.to_CoilWaterHeatingAirToWaterHeatPumpWrapped.is_initialized
+        return { [FT::Elec, EUT::HotWater] => ['Cooling Coil Water Heating Electricity Energy'] }
+
+      elsif object.to_FanSystemModel.is_initialized
+        if object_type == Constants::ObjectTypeWaterHeater
+          return { [FT::Elec, EUT::HotWater] => ['Fan Electricity Energy'] }
+        end
+
+      elsif object.to_PumpConstantSpeed.is_initialized
+        if object_type == Constants::ObjectTypeSolarHotWater
+          return { [FT::Elec, EUT::HotWaterSolarThermalPump] => ['Pump Electricity Energy'] }
+        end
+
+      elsif object.to_WaterHeaterMixed.is_initialized
+        fuel = object.to_WaterHeaterMixed.get.heaterFuelType
+        return { [to_ft[fuel], EUT::HotWater] => ["Water Heater #{fuel} Energy", 'Water Heater Off Cycle Parasitic Electricity Energy', 'Water Heater On Cycle Parasitic Electricity Energy'] }
+
+      elsif object.to_WaterHeaterStratified.is_initialized
+        fuel = object.to_WaterHeaterStratified.get.heaterFuelType
+        return { [to_ft[fuel], EUT::HotWater] => ["Water Heater #{fuel} Energy", 'Water Heater Off Cycle Parasitic Electricity Energy', 'Water Heater On Cycle Parasitic Electricity Energy'] }
+
+      elsif object.to_ExteriorLights.is_initialized
+        subcategory = object.to_ExteriorLights.get.endUseSubcategory
+        return { [FT::Elec, EUT::LightsExterior] => ["#{subcategory}:ExteriorLights:Electricity"] }
+
+      elsif object.to_Lights.is_initialized
+        subcategory = object.to_Lights.get.endUseSubcategory
+        end_use = { Constants::ObjectTypeLightingInterior => EUT::LightsInterior,
+                    Constants::ObjectTypeLightingGarage => EUT::LightsGarage }[subcategory]
+        return { [FT::Elec, end_use] => ["#{subcategory}:InteriorLights:Electricity"] }
+
+      elsif object.to_ElectricLoadCenterInverterPVWatts.is_initialized
+        return { [FT::Elec, EUT::PV] => ['Inverter Conversion Loss Decrement Energy'] }
+
+      elsif object.to_GeneratorPVWatts.is_initialized
+        return { [FT::Elec, EUT::PV] => ['Generator Produced DC Electricity Energy'] }
+
+      elsif object.to_GeneratorMicroTurbine.is_initialized
+        fuel = object.to_GeneratorMicroTurbine.get.fuelType
+        return { [FT::Elec, EUT::Generator] => ['Generator Produced AC Electricity Energy'],
+                 [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
+
+      elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
+        if object_type == Constants::ObjectTypeVehicle
+          return { [FT::Elec, EUT::Vehicle] => ['Electric Storage Charge Energy'] }
+        elsif object_type == Constants::ObjectTypeBattery
+          return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
+        else
+          fail "Unexpected elcs: #{object.name}"
+        end
+
+      elsif object.to_ElectricEquipment.is_initialized
+        object = object.to_ElectricEquipment.get
+        subcategory = object.endUseSubcategory
+        end_use = nil
+        { Constants::ObjectTypeHotWaterRecircPump => EUT::HotWaterRecircPump,
+          Constants::ObjectTypeClothesWasher => EUT::ClothesWasher,
+          Constants::ObjectTypeClothesDryer => EUT::ClothesDryer,
+          Constants::ObjectTypeDishwasher => EUT::Dishwasher,
+          Constants::ObjectTypeRefrigerator => EUT::Refrigerator,
+          Constants::ObjectTypeFreezer => EUT::Freezer,
+          Constants::ObjectTypeCookingRange => EUT::RangeOven,
+          Constants::ObjectTypeCeilingFan => EUT::CeilingFan,
+          Constants::ObjectTypeWholeHouseFan => EUT::WholeHouseFan,
+          Constants::ObjectTypeMechanicalVentilation => EUT::MechVent,
+          Constants::ObjectTypeMiscPlugLoads => EUT::PlugLoads,
+          Constants::ObjectTypeMiscTelevision => EUT::Television,
+          Constants::ObjectTypeMiscPoolHeater => EUT::PoolHeater,
+          Constants::ObjectTypeMiscPoolPump => EUT::PoolPump,
+          Constants::ObjectTypeMiscPermanentSpaHeater => EUT::PermanentSpaHeater,
+          Constants::ObjectTypeMiscPermanentSpaPump => EUT::PermanentSpaPump,
+          Constants::ObjectTypeMiscElectricVehicleCharging => EUT::Vehicle,
+          Constants::ObjectTypeMiscWellPump => EUT::WellPump }.each do |obj_name, eut|
+          next unless subcategory.start_with? obj_name
+          fail 'Unexpected error: multiple matches.' unless end_use.nil?
+
+          end_use = eut
+        end
+
+        if not end_use.nil?
+          # Use Output:Meter instead of Output:Variable because they incorporate thermal zone multipliers
+          if object.space.is_initialized
+            zone_name = object.space.get.thermalZone.get.name.to_s.upcase
+            return { [FT::Elec, end_use] => ["#{subcategory}:InteriorEquipment:Electricity:Zone:#{zone_name}"] }
+          else
+            return { [FT::Elec, end_use] => ["#{subcategory}:InteriorEquipment:Electricity"] }
+          end
+        end
+
+      elsif object.to_OtherEquipment.is_initialized
+        object = object.to_OtherEquipment.get
+        subcategory = object.endUseSubcategory
+        fuel = object.fuelType
+        end_use = nil
+        { Constants::ObjectTypeClothesDryer => EUT::ClothesDryer,
+          Constants::ObjectTypeCookingRange => EUT::RangeOven,
+          Constants::ObjectTypeMiscGrill => EUT::Grill,
+          Constants::ObjectTypeMiscLighting => EUT::Lighting,
+          Constants::ObjectTypeMiscFireplace => EUT::Fireplace,
+          Constants::ObjectTypeMiscPoolHeater => EUT::PoolHeater,
+          Constants::ObjectTypeMiscPermanentSpaHeater => EUT::PermanentSpaHeater,
+          Constants::ObjectTypeMechanicalVentilationPreheating => EUT::MechVentPreheat,
+          Constants::ObjectTypeMechanicalVentilationPrecooling => EUT::MechVentPrecool,
+          Constants::ObjectTypeHPDefrostSupplHeat => EUT::HeatingHeatPumpBackup,
+          Constants::ObjectTypePanHeater => EUT::Heating,
+          Constants::ObjectTypeWaterHeaterAdjustment => EUT::HotWater,
+          Constants::ObjectTypeBatteryLossesAdjustment => EUT::Battery }.each do |obj_name, eut|
+          next unless subcategory.start_with? obj_name
+          fail 'Unexpected error: multiple matches.' unless end_use.nil?
+
+          end_use = eut
+        end
+
+        if not end_use.nil?
+          # Use Output:Meter instead of Output:Variable because they incorporate thermal zone multipliers
+          if object.space.is_initialized
+            zone_name = object.space.get.thermalZone.get.name.to_s.upcase
+            return { [to_ft[fuel], end_use] => ["#{subcategory}:InteriorEquipment:#{fuel}:Zone:#{zone_name}"] }
+          else
+            return { [to_ft[fuel], end_use] => ["#{subcategory}:InteriorEquipment:#{fuel}"] }
+          end
+        end
+
+      elsif object.to_ZoneHVACDehumidifierDX.is_initialized
+        return { [FT::Elec, EUT::Dehumidifier] => ['Zone Dehumidifier Electricity Energy'] }
+
+      elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
+        if object_type == Constants::ObjectTypeFanPumpDisaggregatePrimaryHeat
+          return { [FT::Elec, EUT::HeatingFanPump] => [object.name.to_s] }
+        elsif object_type == Constants::ObjectTypeFanPumpDisaggregateBackupHeat
+          return { [FT::Elec, EUT::HeatingHeatPumpBackupFanPump] => [object.name.to_s] }
+        elsif object_type == Constants::ObjectTypeFanPumpDisaggregateCool
+          return { [FT::Elec, EUT::CoolingFanPump] => [object.name.to_s] }
+        else
+          return { ems: [object.name.to_s] }
+        end
+
+      end
+
+    elsif class_type == HWT
+
+      # Hot Water Use
+
+      if object.to_WaterUseEquipment.is_initialized
+        hot_water_use = { Constants::ObjectTypeFixtures => HWT::Fixtures,
+                          Constants::ObjectTypeDistributionWaste => HWT::DistributionWaste,
+                          Constants::ObjectTypeClothesWasher => HWT::ClothesWasher,
+                          Constants::ObjectTypeDishwasher => HWT::Dishwasher }[object.to_WaterUseEquipment.get.waterUseEquipmentDefinition.endUseSubcategory]
+        return { hot_water_use => ['Water Use Equipment Hot Water Volume'] }
+
+      end
+
+    elsif class_type == LT
+
+      # Load
+
+      if object.to_WaterHeaterMixed.is_initialized || object.to_WaterHeaterStratified.is_initialized
+        if object.to_WaterHeaterMixed.is_initialized
+          capacity = object.to_WaterHeaterMixed.get.heaterMaximumCapacity.get
+          object_type = object.to_WaterHeaterMixed.get.additionalProperties.getFeatureAsString('ObjectType')
+        else
+          capacity = object.to_WaterHeaterStratified.get.heater1Capacity.get
+          object_type = object.to_WaterHeaterStratified.get.additionalProperties.getFeatureAsString('ObjectType')
+        end
+        object_type = object_type.get if object_type.is_initialized
+        is_combi_boiler = false
+        if object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').is_initialized
+          is_combi_boiler = object.additionalProperties.getFeatureAsBoolean('IsCombiBoiler').get
+        end
+        if capacity == 0 && object_type == Constants::ObjectTypeSolarHotWater
+          return { LT::HotWaterSolarThermal => ['Water Heater Use Side Heat Transfer Energy'] }
+        elsif capacity > 0 || is_combi_boiler # Active water heater only (e.g., exclude desuperheater and solar thermal storage tanks)
+          return { LT::HotWaterTankLosses => ['Water Heater Heat Loss Energy'] }
+        end
+
+      elsif object.to_WaterUseConnections.is_initialized
+        return { LT::HotWaterDelivered => ['Water Use Connections Plant Hot Water Energy'] }
+
+      elsif object.to_CoilWaterHeatingDesuperheater.is_initialized
+        return { LT::HotWaterDesuperheater => ['Water Heater Heating Energy'] }
+
+      elsif object.to_CoilHeatingGas.is_initialized || object.to_CoilHeatingElectric.is_initialized
+        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
+          return { LT::HeatingHeatPumpBackup => ['Heating Coil Heating Energy'] }
+        end
+
+      elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized || object.to_ZoneHVACBaseboardConvectiveWater.is_initialized
+        if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
+          return { LT::HeatingHeatPumpBackup => ['Baseboard Total Heating Energy'] }
+        end
+
+      elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
+        object_type = object.to_EnergyManagementSystemOutputVariable.get.additionalProperties.getFeatureAsString('ObjectType')
+        object_type = object_type.get if object_type.is_initialized
+        if object_type == Constants::ObjectTypeFanPumpDisaggregateBackupHeat
+          # Fan/pump energy is contributing to the load
+          return { LT::HeatingHeatPumpBackup => [object.name.to_s] }
+        end
+
+      end
+
+    elsif class_type == RT
+
+      # Resilience
+
+      if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
+        if object.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeBattery
+          return { RT::Battery => ['Electric Storage Charge Fraction'] }
+        end
+
+      end
+    end
+
+    return {}
   end
 end
