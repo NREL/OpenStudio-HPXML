@@ -1108,28 +1108,27 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Get zones of interest
-    zone_names = []
+    bldg_id_zone_name_map = {}
     @model.getThermalZones.each do |zone|
       next unless zone.floorArea > 1 # Skip e.g. plenum zone for duct model
 
       zone_name = zone.name.to_s.upcase
+      bldg_id = nil
       if @hpxml_bldgs.size > 1
-        building_id = zone.additionalProperties.getFeatureAsString('BuildingID')
-        zone_names << [building_id.get, zone_name]
-      else
-        zone_names << [nil, zone_name]
+        bldg_id = zone.additionalProperties.getFeatureAsString('BuildingID').get
       end
+      bldg_id_zone_name_map[bldg_id] = [] unless bldg_id_zone_name_map.keys.include?(bldg_id)
+      bldg_id_zone_name_map[bldg_id] << zone_name
     end
-    zone_names = zone_names.sort_by { |x| [x[0], x[1]] }
+    bldg_id_zone_name_map = bldg_id_zone_name_map.sort_by { |k, v| [k, v] }.to_h
 
-    # Returns a user-friendly version of the object name for output.
-    # UNITX prefix will be replaced with <BuildingID>, if <BuildingID> provided.
+    # Returns a user-friendly version of prefix + suffix for output.
+    # UNITX will be stripped from the suffix, if it exists.
     #
-    # @param object_name [Array<String or nil, String>] List of prefix/suffix pairs, e.g., [nil, "CONDITIONED SPACE"] or ["MyBuilding_2", "UNIT2_BASEMENT___UNCONDITIONED"]
+    # @param prefix [String or nil]
+    # @param suffix [String]
     # @return [String] Output name
-    def sanitize_name(object_name)
-      prefix = object_name[0]
-      suffix = object_name[1]
+    def sanitize_name(prefix, suffix)
       sstrs = suffix.gsub('_', ' ').split
       sstrs.delete(sstrs[0]) if sstrs[0].include?('UNIT')
       return "#{prefix} #{sstrs.map(&:capitalize).join(' ')}".strip
@@ -1138,11 +1137,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Zone temperatures
     if args[:include_timeseries_zone_temperatures]
 
-      zone_names.each do |zone_name|
-        @zone_temps[zone_name] = ZoneTemp.new
-        @zone_temps[zone_name].name = "Temperature: #{sanitize_name(zone_name)}"
-        @zone_temps[zone_name].timeseries_units = 'F'
-        @zone_temps[zone_name].timeseries_output = get_report_variable_data_timeseries([zone_name[1]], ['Zone Mean Air Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+      bldg_id_zone_name_map.each do |bldg_id, zone_names|
+        zone_names.each do |zone_name|
+          @zone_temps[zone_name] = ZoneTemp.new
+          @zone_temps[zone_name].name = "Temperature: #{sanitize_name(bldg_id, zone_name)}"
+          @zone_temps[zone_name].timeseries_units = 'F'
+          @zone_temps[zone_name].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Mean Air Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+        end
       end
 
       # Scheduled temperatures
@@ -1152,11 +1153,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         @model.getScheduleConstants.each do |schedule|
           next unless schedule.additionalProperties.getFeatureAsString('ObjectType').to_s == sch_location
 
-          sch_name = [nil, schedule.name.to_s.upcase]
+          sch_name = schedule.name.to_s.upcase
           @zone_temps[sch_name] = ZoneTemp.new
-          @zone_temps[sch_name].name = "Temperature: #{sanitize_name(sch_name)}"
+          @zone_temps[sch_name].name = "Temperature: #{sanitize_name(nil, sch_name)}"
           @zone_temps[sch_name].timeseries_units = 'F'
-          @zone_temps[sch_name].timeseries_output = get_report_variable_data_timeseries([sch_name[1]], ['Schedule Value'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+          @zone_temps[sch_name].timeseries_output = get_report_variable_data_timeseries([sch_name], ['Schedule Value'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
 
           break
         end
@@ -1167,7 +1168,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       heated_zones.each do |heated_zone|
         var_name = 'Temperature: Heating Setpoint'
         if @hpxml_header.whole_sfa_or_mf_building_sim
-          # building_id = @model.getThermalZones.find { |z| z.name.to_s == heated_zone }.spaces[0].buildingUnit.get.additionalProperties.getFeatureAsString('BuildingID').get
           building_id = @model.getThermalZones.find { |z| z.name.to_s == heated_zone }.additionalProperties.getFeatureAsString('BuildingID').get
           var_name = "Temperature: #{building_id} Heating Setpoint"
         end
@@ -1182,7 +1182,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       cooled_zones.each do |cooled_zone|
         var_name = 'Temperature: Cooling Setpoint'
         if @hpxml_header.whole_sfa_or_mf_building_sim
-          # building_id = @model.getThermalZones.find { |z| z.name.to_s == cooled_zone }.spaces[0].buildingUnit.get.additionalProperties.getFeatureAsString('BuildingID').get
           building_id = @model.getThermalZones.find { |z| z.name.to_s == cooled_zone }.additionalProperties.getFeatureAsString('BuildingID').get
           var_name = "Temperature: #{building_id} Cooling Setpoint"
         end
@@ -1197,43 +1196,53 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if args[:include_timeseries_zone_conditions]
 
       # Zone humidity ratios
-      zone_names.each do |zone_name|
-        @zone_conds["#{zone_name} Humidity Ratio"] = ZoneCond.new
-        @zone_conds["#{zone_name} Humidity Ratio"].name = "Humidity Ratio: #{sanitize_name(zone_name)}"
-        @zone_conds["#{zone_name} Humidity Ratio"].timeseries_units = 'fraction'
-        @zone_conds["#{zone_name} Humidity Ratio"].timeseries_output = get_report_variable_data_timeseries([zone_name[1]], ['Zone Air Humidity Ratio'], 1, 0, args[:timeseries_frequency])
+      bldg_id_zone_name_map.each do |bldg_id, zone_names|
+        zone_names.each do |zone_name|
+          @zone_conds["#{zone_name} Humidity Ratio"] = ZoneCond.new
+          @zone_conds["#{zone_name} Humidity Ratio"].name = "Humidity Ratio: #{sanitize_name(bldg_id, zone_name)}"
+          @zone_conds["#{zone_name} Humidity Ratio"].timeseries_units = 'fraction'
+          @zone_conds["#{zone_name} Humidity Ratio"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Air Humidity Ratio'], 1, 0, args[:timeseries_frequency])
+        end
       end
 
       # Zone relative humidities
-      zone_names.each do |zone_name|
-        @zone_conds["#{zone_name} Relative Humidity"] = ZoneCond.new
-        @zone_conds["#{zone_name} Relative Humidity"].name = "Relative Humidity: #{sanitize_name(zone_name)}"
-        @zone_conds["#{zone_name} Relative Humidity"].timeseries_units = '%'
-        @zone_conds["#{zone_name} Relative Humidity"].timeseries_output = get_report_variable_data_timeseries([zone_name[1]], ['Zone Air Relative Humidity'], 1, 0, args[:timeseries_frequency])
+      bldg_id_zone_name_map.each do |bldg_id, zone_names|
+        zone_names.each do |zone_name|
+          @zone_conds["#{zone_name} Relative Humidity"] = ZoneCond.new
+          @zone_conds["#{zone_name} Relative Humidity"].name = "Relative Humidity: #{sanitize_name(bldg_id, zone_name)}"
+          @zone_conds["#{zone_name} Relative Humidity"].timeseries_units = '%'
+          @zone_conds["#{zone_name} Relative Humidity"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Air Relative Humidity'], 1, 0, args[:timeseries_frequency])
+        end
       end
 
       # Zone dewpoint temperatures
-      zone_names.each do |zone_name|
-        @zone_conds["#{zone_name} Dewpoint Temperature"] = ZoneCond.new
-        @zone_conds["#{zone_name} Dewpoint Temperature"].name = "Dewpoint Temperature: #{sanitize_name(zone_name)}"
-        @zone_conds["#{zone_name} Dewpoint Temperature"].timeseries_units = 'F'
-        @zone_conds["#{zone_name} Dewpoint Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name[1]], ['Zone Mean Air Dewpoint Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+      bldg_id_zone_name_map.each do |bldg_id, zone_names|
+        zone_names.each do |zone_name|
+          @zone_conds["#{zone_name} Dewpoint Temperature"] = ZoneCond.new
+          @zone_conds["#{zone_name} Dewpoint Temperature"].name = "Dewpoint Temperature: #{sanitize_name(bldg_id, zone_name)}"
+          @zone_conds["#{zone_name} Dewpoint Temperature"].timeseries_units = 'F'
+          @zone_conds["#{zone_name} Dewpoint Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Mean Air Dewpoint Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+        end
       end
 
       # Zone mean radiant temperatures
-      zone_names.each do |zone_name|
-        @zone_conds["#{zone_name} Radiant Temperature"] = ZoneCond.new
-        @zone_conds["#{zone_name} Radiant Temperature"].name = "Radiant Temperature: #{sanitize_name(zone_name)}"
-        @zone_conds["#{zone_name} Radiant Temperature"].timeseries_units = 'F'
-        @zone_conds["#{zone_name} Radiant Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name[1]], ['Zone Mean Radiant Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+      bldg_id_zone_name_map.each do |bldg_id, zone_names|
+        zone_names.each do |zone_name|
+          @zone_conds["#{zone_name} Radiant Temperature"] = ZoneCond.new
+          @zone_conds["#{zone_name} Radiant Temperature"].name = "Radiant Temperature: #{sanitize_name(bldg_id, zone_name)}"
+          @zone_conds["#{zone_name} Radiant Temperature"].timeseries_units = 'F'
+          @zone_conds["#{zone_name} Radiant Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Mean Radiant Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+        end
       end
 
       # Zone operative temperatures
-      zone_names.each do |zone_name|
-        @zone_conds["#{zone_name} Operative Temperature"] = ZoneCond.new
-        @zone_conds["#{zone_name} Operative Temperature"].name = "Operative Temperature: #{sanitize_name(zone_name)}"
-        @zone_conds["#{zone_name} Operative Temperature"].timeseries_units = 'F'
-        @zone_conds["#{zone_name} Operative Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name[1]], ['Zone Operative Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+      bldg_id_zone_name_map.each do |bldg_id, zone_names|
+        zone_names.each do |zone_name|
+          @zone_conds["#{zone_name} Operative Temperature"] = ZoneCond.new
+          @zone_conds["#{zone_name} Operative Temperature"].name = "Operative Temperature: #{sanitize_name(bldg_id, zone_name)}"
+          @zone_conds["#{zone_name} Operative Temperature"].timeseries_units = 'F'
+          @zone_conds["#{zone_name} Operative Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Operative Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+        end
       end
     end
 
