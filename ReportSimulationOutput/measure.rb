@@ -1125,7 +1125,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Returns a user-friendly version of bldg_id + object_name for output.
     # UNITX will be stripped from the object_name, if it exists.
     #
-    # @param bldg_id [String or nil] The HPML Building ID for the dwelling unit (if a whole SFA/MF building simulation)
+    # @param bldg_id [String or nil] The HPXML Building ID for the dwelling unit (if a whole SFA/MF building simulation)
     # @param object_name [String] OpenStudio object name
     # @return [String] Output name
     def sanitize_name(bldg_id, object_name)
