@@ -1113,8 +1113,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless zone.floorArea > 1 # Skip e.g. plenum zone for duct model
 
       zone_name = zone.name.to_s.upcase
-      building_id = zone.additionalProperties.getFeatureAsString('BuildingID')
-      if building_id.is_initialized
+      if @hpxml_bldgs.size > 1
+        building_id = zone.additionalProperties.getFeatureAsString('BuildingID')
         zone_names << [building_id.get, zone_name]
       else
         zone_names << [nil, zone_name]
@@ -1167,7 +1167,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       heated_zones.each do |heated_zone|
         var_name = 'Temperature: Heating Setpoint'
         if @hpxml_header.whole_sfa_or_mf_building_sim
-          building_id = @model.getThermalZones.find { |z| z.name.to_s == heated_zone }.spaces[0].buildingUnit.get.additionalProperties.getFeatureAsString('BuildingID').get
+          # building_id = @model.getThermalZones.find { |z| z.name.to_s == heated_zone }.spaces[0].buildingUnit.get.additionalProperties.getFeatureAsString('BuildingID').get
+          building_id = @model.getThermalZones.find { |z| z.name.to_s == heated_zone }.additionalProperties.getFeatureAsString('BuildingID').get
           var_name = "Temperature: #{building_id} Heating Setpoint"
         end
         @zone_temps["#{heated_zone} Heating Setpoint"] = ZoneTemp.new
@@ -1181,7 +1182,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       cooled_zones.each do |cooled_zone|
         var_name = 'Temperature: Cooling Setpoint'
         if @hpxml_header.whole_sfa_or_mf_building_sim
-          building_id = @model.getThermalZones.find { |z| z.name.to_s == cooled_zone }.spaces[0].buildingUnit.get.additionalProperties.getFeatureAsString('BuildingID').get
+          # building_id = @model.getThermalZones.find { |z| z.name.to_s == cooled_zone }.spaces[0].buildingUnit.get.additionalProperties.getFeatureAsString('BuildingID').get
+          building_id = @model.getThermalZones.find { |z| z.name.to_s == cooled_zone }.additionalProperties.getFeatureAsString('BuildingID').get
           var_name = "Temperature: #{building_id} Cooling Setpoint"
         end
         @zone_temps["#{cooled_zone} Cooling Setpoint"] = ZoneTemp.new
