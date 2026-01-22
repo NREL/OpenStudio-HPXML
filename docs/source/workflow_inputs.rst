@@ -4473,7 +4473,7 @@ An in-unit recirculation hot water distribution system is entered as a ``/HPXML/
 
          Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence. If a building has both a conditioned and unconditioned basement on the same level, Bsmnt = 0 to avoid double counting.
 
-  .. [#] RecirculationPipingLoopLength is the recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
+  .. [#] RecirculationPipingLoopLength is the recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each conditioned floor level greater than one plus 10 feet of piping for unconditioned basements.
   .. [#] BranchPipingLength is the length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
   .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] Additional drain water heat recovery inputs are described in :ref:`water_heater_dwhr`.
@@ -4550,14 +4550,13 @@ If a drain water heat recovery (DWHR) device is specified, additional informatio
   =======================  =======  =====  ===========  ========  ========  =========================================
   Element                  Type     Units  Constraints  Required  Default   Notes
   =======================  =======  =====  ===========  ========  ========  =========================================
-  ``FacilitiesConnected``  string          See [#]_     Yes                 Specifies which facilities are connected
+  ``FacilitiesConnected``  string          See [#]_     Yes                 Specifies how many facilities are connected
   ``EqualFlow``            boolean                      Yes                 Specifies how the DHWR is configured [#]_
   ``Efficiency``           double   frac   > 0, <= 1    Yes                 Efficiency according to CSA 55.1
   =======================  =======  =====  ===========  ========  ========  =========================================
 
   .. [#] FacilitiesConnected choices are "one" or "all".
-         Use "one" if there are multiple showers and only one of them is connected to the DWHR.
-         Use "all" if there is one shower and it's connected to the DWHR or there are two or more showers connected to the DWHR.
+         Use "all" if all of the showers in the home are connected to WHR units, otherwise use "one" if at least one shower is connected to a DWHR unit.
   .. [#] EqualFlow should be true if the DWHR supplies pre-heated water to both the fixture cold water piping *and* the hot water heater potable supply piping.
 
 Drain water heat recovery is modeled according to the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.

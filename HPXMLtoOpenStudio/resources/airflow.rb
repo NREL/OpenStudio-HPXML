@@ -569,12 +569,21 @@ module Airflow
       vent_program.addLine("Set Tnvsp = (#{default_htg_sp} + #{default_clg_sp}) / 2")
     end
     vent_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
-    vent_program.addLine("Set ClgSsnAvail = #{sensors[:clg_ssn].name}")
     vent_program.addLine('Set Qnv = 0') # Init
     vent_program.addLine('Set Qwhf = 0') # Init
     vent_program.addLine("Set #{cond_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil? # Init
     vent_program.addLine("Set #{whf_elec_actuator.name} = 0") # Init
-    infil_constraints = 'If ((Wout < MaxHR) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0))'
+    if Constants::ERIVersions.index(hpxml_header.eri_calculation_versions[0]) >= Constants::ERIVersions.index('2025')
+      # From ANSI/RESNET/ICC 301-2025
+      # when the outdoor humidity ratio is less than 0.0115 lb_w/lb_da and either:
+      # A) outdoor temperature is below the indoor temperature and the indoor temperature is above the average of the heating and cooling setpoints, or
+      # B) outdoor temperature is above the indoor temperature and the indoor temperature is below the average of the heating and cooling setpoints
+      infil_constraints = 'If ((Wout < MaxHR) && ((Tout < Tin) && (Tin > Tnvsp)) || (Tout > Tin) && (Tin < Tnvsp))'
+    else
+      # From ANSI/RESNET/ICC 301-2022
+      # hours when natural ventilation will reduce annual cooling energy use and the outdoor humidity ratio is less than 0.0115
+      infil_constraints = 'If ((Wout < MaxHR) && (Tin > Tout) && (Tin > Tnvsp))'
+    end
     if not sensors[:hvac_avail].nil?
       # We are using the availability schedule, but we also constrain the window opening based on temperatures and humidity.
       # We're assuming that if the HVAC is not available, you'd ignore the humidity constraints we normally put on window opening per the old HSP guidance (RH < 70% and w < 0.015).
