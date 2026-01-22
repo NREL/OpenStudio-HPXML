@@ -154,15 +154,22 @@ module Airflow
       sensors[:hvac_avail].additionalProperties.setFeature('ObjectType', Constants::ObjectTypeHVACAvailabilitySensor)
     end
 
-    # Create cooling season schedule sensor (applies only to natural ventilation, not HVAC equipment).
-    # Uses BAHSP cooling season, not user-specified cooling season (which may be, e.g., year-round).
-    _, default_cooling_months = HVAC.get_building_america_hvac_seasons(weather, hpxml_bldg.latitude)
+    # Create season schedule sensors (applies only to natural ventilation, not HVAC equipment).
+    # Uses BAHSP seasons, not user-specified seasons (which are typically year-round).
+    default_heating_months, default_cooling_months = HVAC.get_building_america_hvac_seasons(weather, hpxml_bldg.latitude)
     clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), default_cooling_months, EPlus::ScheduleTypeLimitsFraction)
     sensors[:clg_ssn] = Model.add_ems_sensor(
       model,
       name: 'cool_season',
       output_var_or_meter_name: 'Schedule Value',
       key_name: clg_season_sch.schedule.name
+    )
+    htg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'heating season schedule', Array.new(24, 1), Array.new(24, 1), default_heating_months, EPlus::ScheduleTypeLimitsFraction)
+    sensors[:htg_ssn] = Model.add_ems_sensor(
+      model,
+      name: 'heat_season',
+      output_var_or_meter_name: 'Schedule Value',
+      key_name: htg_season_sch.schedule.name
     )
 
     return sensors
@@ -412,9 +419,7 @@ module Airflow
     conditioned_zone = conditioned_space.thermalZone.get
 
     # Natural Ventilation availability schedule and sensor
-    # FIXME: Should we change the default from 3 days/week to 7?
     nv_avail_sch = create_sched_from_num_days_per_week(model, Constants::ObjectTypeNaturalVentilation, hpxml_bldg.header.natvent_days_per_week, hpxml_header.unavailable_periods)
-
     nv_avail_sensor = Model.add_ems_sensor(
       model,
       name: "#{Constants::ObjectTypeNaturalVentilation} s",
@@ -569,7 +574,14 @@ module Airflow
       end
       vent_program.addLine("Set Tnvsp = (#{default_htg_sp} + #{default_clg_sp}) / 2")
     end
-    vent_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
+    vent_program.addLine("Set NVavailDay = #{nv_avail_sensor.name}")
+    if hpxml_bldg.header.natvent_seasons == HPXML::NatVentSeasonsYearRound
+      vent_program.addLine('Set NVavailSeason = 1')
+    elsif hpxml_bldg.header.natvent_seasons == HPXML::NatVentSeasonsCooling
+      vent_program.addLine("Set NVavailSeason = #{sensors[:clg_ssn].name}")
+    elsif hpxml_bldg.header.natvent_seasons == HPXML::NatVentSeasonsHeating
+      vent_program.addLine("Set NVavailSeason = #{sensors[:htg_ssn].name}")
+    end
     vent_program.addLine('Set Qnv = 0') # Init
     vent_program.addLine('Set Qwhf = 0') # Init
     vent_program.addLine("Set #{cond_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil? # Init
@@ -579,17 +591,18 @@ module Airflow
       # when the outdoor humidity ratio is less than 0.0115 lb_w/lb_da and either:
       # A) outdoor temperature is below the indoor temperature and the indoor temperature is above the average of the heating and cooling setpoints, or
       # B) outdoor temperature is above the indoor temperature and the indoor temperature is below the average of the heating and cooling setpoints
-      infil_constraints = 'If ((Wout < MaxHR) && (((Tout < Tin) && (Tin > Tnvsp)) || ((Tout > Tin) && (Tin < Tnvsp))))'
+      infil_constraints = 'If (((Tout < Tin) && (Tin > Tnvsp)) || ((Tout > Tin) && (Tin < Tnvsp)))'
     else
       # From ANSI/RESNET/ICC 301-2022
       # hours when natural ventilation will reduce annual cooling energy use and the outdoor humidity ratio is less than 0.0115
-      infil_constraints = 'If ((Wout < MaxHR) && (Tout < Tin) && (Tin > Tnvsp))'
+      infil_constraints = 'If ((Tout < Tin) && (Tin > Tnvsp))'
     end
     if not sensors[:hvac_avail].nil?
-      # We are using the availability schedule, but we also constrain the window opening based on temperatures and humidity.
-      # We're assuming that if the HVAC is not available, you'd ignore the humidity constraints we normally put on window opening per the old HSP guidance (RH < 70% and w < 0.015).
-      # Without, the humidity constraints prevent the window from opening during the entire period even though the sensible cooling would have really helped.
-      infil_constraints += "|| ((Tin > Tout) && (Tin > Tnvsp) && (#{sensors[:hvac_avail].name} == 0))" # FIXME
+      # Ignore the humidity constraint when the HVAC is not available (e.g., power outage), in order to allow as much natural ventilation as possible
+      # FIXME: We should use separate heating/cooling sensors, not a single HVAC sensor.
+      infil_constraints += " && ((Wout < MaxHR) || (#{sensors[:hvac_avail].name} == 0))"
+    else
+      infil_constraints += ' && (Wout < MaxHR)'
     end
     vent_program.addLine(infil_constraints)
     vent_program.addLine('  Set WHF_Flow = 0')
@@ -613,7 +626,7 @@ module Airflow
       end
     end
     vent_program.addLine("    Set #{whf_elec_actuator.name} = WHF_W*Adj")
-    vent_program.addLine('  ElseIf (NVavail > 0)') # Natural ventilation
+    vent_program.addLine('  ElseIf (NVavailDay > 0) && (NVavailSeason > 0)') # Natural ventilation
     if hpxml_bldg.building_occupancy.number_of_residents == 0
       # Operational calculation w/ zero occupants, zero out natural ventilation
       vent_program.addLine('    Set NVArea = 0')
