@@ -456,14 +456,12 @@ module HVAC
 
     add_variable_speed_power_ems_program(runner, model, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
 
-    if is_heatpump
-      ems_program = apply_defrost_ems_program(model, htg_coil, control_zone.spaces[0], cooling_system, hpxml_bldg, hpxml_header, hvac_unavailable_periods[:htg])
-      if cooling_system.pan_heater_watts.to_f > 0
-        apply_pan_heater_ems_program(model, ems_program, htg_coil, control_zone.spaces[0], cooling_system, htg_ap.hp_min_temp, hpxml_bldg, hpxml_header)
+    if not cooling_system.nil?
+      if is_heatpump
+        ems_program = apply_defrost_ems_program(model, htg_coil, control_zone.spaces[0], cooling_system, hpxml_bldg.building_construction.number_of_units)
+        apply_pan_heater_ems_program(model, ems_program, htg_coil, control_zone.spaces[0], cooling_system, htg_ap.hp_min_temp, hvac_unavailable_periods[:htg])
       end
-      if cooling_system.crankcase_heater_watts.to_f > 0
-        apply_crankcase_heater_ems_program(model, ems_program, htg_coil, control_zone.spaces[0], cooling_system, hpxml_bldg, hpxml_header)
-      end
+      apply_crankcase_heater_ems_program(model, clg_coil, control_zone.spaces[0], cooling_system)
     end
     return air_loop
   end
@@ -4657,18 +4655,18 @@ module HVAC
   # A crankcase heater ...
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param ems_program [OpenStudio::Model::EnergyManagementSystemProgram] OpenStudio EMS program w/ defrost model
-  # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
+  # @param clg_coil [OpenStudio::Model::CoilCoolingDXSingleSpeed or OpenStudio::Model::CoilCoolingDXMultiSpeed] OpenStudio Cooling Coil object
   # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
   # @return [nil]
-  def self.apply_crankcase_heater_ems_program(model, ems_program, htg_coil, conditioned_space, heat_pump, hpxml_bldg, hpxml_header)
+  def self.apply_crankcase_heater_ems_program(model, clg_coil, conditioned_space, heat_pump)
+    return unless heat_pump.crankcase_heater_watts.to_f > 0
+
     # Other equipment/actuator
     cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeCrankcaseHeater } # Ensure unique meter for each heat pump
     crankcase_heater_energy_oe = Model.add_other_equipment(
       model,
-      name: "#{htg_coil.name} crankcase heater energy",
+      name: "#{clg_coil.name} crankcase heater energy",
       end_use: "#{Constants::ObjectTypeCrankcaseHeater}#{cnt + 1}",
       space: conditioned_space,
       design_level: 0,
@@ -4686,34 +4684,28 @@ module HVAC
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
 
-    sim_year = hpxml_header.sim_calendar_year
-    hvac_control = hpxml_bldg.hvac_controls[0]
-    season_day_nums = {
-      htg_start: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day),
-      htg_end: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day),
-      clg_start: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day),
-      clg_end: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
-    }
-
-    htg_avail_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHeatingAvailabilitySensor }
+    hvac_avail_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHVACAvailabilitySensor }
 
     # EMS program
-    max_oat_crankcase = htg_coil.maximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation
+    if clg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
+      max_oat_crankcase = clg_coil.maximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation
+    elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
+      max_oat_crankcase = clg_coil.maximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation
+    end
     temp_criteria = "If (T_out <= #{max_oat_crankcase})"
-    if season_day_nums[:htg_end] >= season_day_nums[:htg_start]
-      temp_criteria += " && ((DayOfYear >= #{season_day_nums[:htg_start]}) && (DayOfYear <= #{season_day_nums[:htg_end]}))"
-    else
-      temp_criteria += " && ((DayOfYear >= #{season_day_nums[:htg_start]}) || (DayOfYear <= #{season_day_nums[:htg_end]}))"
+    if not hvac_avail_sensor.nil?
+      # Don't run crankcase heater during HVAC unavailable period either
+      temp_criteria += " && (#{hvac_avail_sensor.name} == 1)"
     end
-    if not htg_avail_sensor.nil?
-      # Don't run crankcase heater during heating unavailable period either
-      temp_criteria += " && (#{htg_avail_sensor.name} == 1)"
-    end
-    ems_program.addLine(temp_criteria)
-    ems_program.addLine("  Set #{crankcase_heater_energy_oe_act.name} = #{heat_pump.crankcase_heater_watts}")
-    ems_program.addLine('Else')
-    ems_program.addLine("  Set #{crankcase_heater_energy_oe_act.name} = 0.0")
-    ems_program.addLine('EndIf')
+    program = Model.add_ems_program(
+      model,
+      name: "#{clg_coil.name} crankcase program"
+    )
+    program.addLine(temp_criteria)
+    program.addLine("  Set #{crankcase_heater_energy_oe_act.name} = #{heat_pump.crankcase_heater_watts}")
+    program.addLine('Else')
+    program.addLine("  Set #{crankcase_heater_energy_oe_act.name} = 0.0")
+    program.addLine('EndIf')
   end
 
   # Creates an EMS program to add pan heater energy use for a heat pump.
@@ -4726,8 +4718,11 @@ module HVAC
   # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
+  # @param heating_unavailable_periods [HPXML::UnavailablePeriods] Unavailable periods for heating
   # @return [nil]
-  def self.apply_pan_heater_ems_program(model, ems_program, htg_coil, conditioned_space, heat_pump, hp_min_temp, hpxml_bldg, hpxml_header)
+  def self.apply_pan_heater_ems_program(model, ems_program, htg_coil, conditioned_space, heat_pump, hp_min_temp, heating_unavailable_periods)
+    return unless heat_pump.pan_heater_watts.to_f > 0
+
     # Other equipment/actuator
     cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypePanHeater } # Ensure unique meter for each heat pump
     pan_heater_energy_oe = Model.add_other_equipment(
@@ -4750,24 +4745,20 @@ module HVAC
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
 
-    sim_year = hpxml_header.sim_calendar_year
-    hvac_control = hpxml_bldg.hvac_controls[0]
-    season_day_nums = {
-      htg_start: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day),
-      htg_end: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day),
-      clg_start: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day),
-      clg_end: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
-    }
+    # Create HVAC availability sensor
+    if not heating_unavailable_periods.empty?
+      htg_avail_sch = ScheduleConstant.new(model, 'heating availability schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: heating_unavailable_periods)
 
-    htg_avail_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHeatingAvailabilitySensor }
+      htg_avail_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{htg_avail_sch.schedule.name} s",
+        output_var_or_meter_name: 'Schedule Value',
+        key_name: htg_avail_sch.schedule.name
+      )
+    end
 
     # EMS program
     temp_criteria = "If (T_out <= #{UnitConversions.convert(32.0, 'F', 'C')}) && (T_out >= #{UnitConversions.convert(hp_min_temp, 'F', 'C').round(2)})"
-    if season_day_nums[:htg_end] >= season_day_nums[:htg_start]
-      temp_criteria += " && ((DayOfYear >= #{season_day_nums[:htg_start]}) && (DayOfYear <= #{season_day_nums[:htg_end]}))"
-    else
-      temp_criteria += " && ((DayOfYear >= #{season_day_nums[:htg_start]}) || (DayOfYear <= #{season_day_nums[:htg_end]}))"
-    end
     if not htg_avail_sensor.nil?
       # Don't run pan heater during heating unavailable period either
       temp_criteria += " && (#{htg_avail_sensor.name} == 1)"
@@ -4783,6 +4774,7 @@ module HVAC
     ems_program.addLine('Else')
     ems_program.addLine("  Set #{pan_heater_energy_oe_act.name} = 0.0")
     ems_program.addLine('EndIf')
+    return ems_program
   end
 
   # Create EMS program and Other equipment objects to account for delivered cooling load and supplemental heating energy during defrost.
@@ -4793,10 +4785,8 @@ module HVAC
   # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
   # @param unit_multiplier [Integer] Number of similar dwelling units
-  # @param heating_unavailable_periods [HPXML::UnavailablePeriods] Unavailable periods for heating
   # @return [OpenStudio::Model::EnergyManagementSystemProgram] OpenStudio EMS program for defrost model
-  def self.apply_defrost_ems_program(model, htg_coil, conditioned_space, heat_pump, hpxml_bldg, hpxml_header, heating_unavailable_periods)
-    unit_multiplier = hpxml_bldg.building_construction.number_of_units
+  def self.apply_defrost_ems_program(model, htg_coil, conditioned_space, heat_pump, unit_multiplier)
     if heat_pump.backup_heating_active_during_defrost && heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
       supp_sys_fuel = heat_pump.backup_heating_fuel
       supp_sys_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W') / unit_multiplier
@@ -4879,32 +4869,10 @@ module HVAC
 
     htg_coil_htg_rate_sensor = Model.add_ems_sensor(
       model,
-      name: "#{htg_coil.name} delivered htg",
+      name: "#{htg_coil.name} deliverd htg",
       output_var_or_meter_name: 'Heating Coil Heating Rate',
       key_name: htg_coil.name
     )
-
-    sim_year = hpxml_header.sim_calendar_year
-    hvac_control = hpxml_bldg.hvac_controls[0]
-    season_day_nums = {
-      htg_start: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day),
-      htg_end: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day),
-      clg_start: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day),
-      clg_end: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
-    }
-
-    # Create heating availability sensor
-    if not heating_unavailable_periods.empty?
-      htg_avail_sch = ScheduleConstant.new(model, 'heating availability schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: heating_unavailable_periods)
-
-      htg_avail_sensor = Model.add_ems_sensor(
-        model,
-        name: "#{htg_avail_sch.schedule.name} s",
-        output_var_or_meter_name: 'Schedule Value',
-        key_name: htg_avail_sch.schedule.name
-      )
-      htg_avail_sensor.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeHeatingAvailabilitySensor)
-    end
 
     # EMS program
     max_oat_defrost = htg_coil.maximumOutdoorDryBulbTemperatureforDefrostOperation
@@ -4918,16 +4886,7 @@ module HVAC
     program.addLine('Set F_defrost = @Max F_defrost 0')
     program.addLine("Set #{frost_cap_multiplier_act.name} = 1.0 - (1.8 * F_defrost)")
     program.addLine("Set #{frost_pow_multiplier_act.name} = 1.0 - (0.3 * F_defrost)")
-    temp_criteria = "If (T_out <= #{max_oat_defrost})"
-    if season_day_nums[:htg_end] >= season_day_nums[:htg_start]
-      temp_criteria += " && ((DayOfYear >= #{season_day_nums[:htg_start]}) && (DayOfYear <= #{season_day_nums[:htg_end]}))"
-    else
-      temp_criteria += " && ((DayOfYear >= #{season_day_nums[:htg_start]}) || (DayOfYear <= #{season_day_nums[:htg_end]}))"
-    end
-    if not htg_avail_sensor.nil?
-      temp_criteria += " && (#{htg_avail_sensor.name} == 1)"
-    end
-    program.addLine(temp_criteria)
+    program.addLine("If T_out <= #{max_oat_defrost}")
     program.addLine('  Set F_compressor = 1.0 - F_defrost')
     program.addLine("  Set fraction_heating = #{htg_coil_rtf_sensor.name}")
     program.addLine('  Set fraction_defrost = F_defrost * fraction_heating') # Defrost fraction with RTF
@@ -5110,7 +5069,6 @@ module HVAC
       clg_sys.cooling_capacity *= unit_multiplier
       clg_sys.cooling_design_airflow_cfm *= unit_multiplier
       clg_ap.cooling_actual_airflow_cfm *= unit_multiplier
-      clg_sys.crankcase_heater_watts *= unit_multiplier unless clg_sys.crankcase_heater_watts.nil?
       clg_sys.integrated_heating_system_capacity *= unit_multiplier unless clg_sys.integrated_heating_system_capacity.nil?
       clg_sys.integrated_heating_system_airflow_cfm *= unit_multiplier unless clg_sys.integrated_heating_system_airflow_cfm.nil?
       clg_sys.cooling_detailed_performance_data.each do |dp|
@@ -5127,7 +5085,6 @@ module HVAC
       hp_ap.heating_actual_airflow_cfm *= unit_multiplier
       hp_sys.heating_capacity_17F *= unit_multiplier unless hp_sys.heating_capacity_17F.nil?
       hp_sys.backup_heating_capacity *= unit_multiplier unless hp_sys.backup_heating_capacity.nil?
-      hp_sys.crankcase_heater_watts *= unit_multiplier unless hp_sys.crankcase_heater_watts.nil?
       hpxml_header.heat_pump_backup_heating_capacity_increment *= unit_multiplier unless hpxml_header.heat_pump_backup_heating_capacity_increment.nil?
       hp_sys.heating_detailed_performance_data.each do |dp|
         dp.capacity *= unit_multiplier unless dp.capacity.nil?
