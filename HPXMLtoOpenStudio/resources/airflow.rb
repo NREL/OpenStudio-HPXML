@@ -412,6 +412,7 @@ module Airflow
     conditioned_zone = conditioned_space.thermalZone.get
 
     # Natural Ventilation availability schedule and sensor
+    # FIXME: Should we change the default from 3 days/week to 7?
     nv_avail_sch = create_sched_from_num_days_per_week(model, Constants::ObjectTypeNaturalVentilation, hpxml_bldg.header.natvent_days_per_week, hpxml_header.unavailable_periods)
 
     nv_avail_sensor = Model.add_ems_sensor(
@@ -578,24 +579,28 @@ module Airflow
       # when the outdoor humidity ratio is less than 0.0115 lb_w/lb_da and either:
       # A) outdoor temperature is below the indoor temperature and the indoor temperature is above the average of the heating and cooling setpoints, or
       # B) outdoor temperature is above the indoor temperature and the indoor temperature is below the average of the heating and cooling setpoints
-      infil_constraints = 'If ((Wout < MaxHR) && ((Tout < Tin) && (Tin > Tnvsp)) || (Tout > Tin) && (Tin < Tnvsp))'
+      infil_constraints = 'If ((Wout < MaxHR) && (((Tout < Tin) && (Tin > Tnvsp)) || ((Tout > Tin) && (Tin < Tnvsp))))'
     else
       # From ANSI/RESNET/ICC 301-2022
       # hours when natural ventilation will reduce annual cooling energy use and the outdoor humidity ratio is less than 0.0115
-      infil_constraints = 'If ((Wout < MaxHR) && (Tin > Tout) && (Tin > Tnvsp))'
+      infil_constraints = 'If ((Wout < MaxHR) && (Tout < Tin) && (Tin > Tnvsp))'
     end
     if not sensors[:hvac_avail].nil?
       # We are using the availability schedule, but we also constrain the window opening based on temperatures and humidity.
       # We're assuming that if the HVAC is not available, you'd ignore the humidity constraints we normally put on window opening per the old HSP guidance (RH < 70% and w < 0.015).
       # Without, the humidity constraints prevent the window from opening during the entire period even though the sensible cooling would have really helped.
-      infil_constraints += "|| ((Tin > Tout) && (Tin > Tnvsp) && (#{sensors[:hvac_avail].name} == 0))"
+      infil_constraints += "|| ((Tin > Tout) && (Tin > Tnvsp) && (#{sensors[:hvac_avail].name} == 0))" # FIXME
     end
     vent_program.addLine(infil_constraints)
     vent_program.addLine('  Set WHF_Flow = 0')
     vent_fans[:whf].each do |vent_whf|
       vent_program.addLine("  Set WHF_Flow = WHF_Flow + #{UnitConversions.convert(vent_whf.flow_rate, 'cfm', 'm^3/s')} * #{whf_avail_sensors[vent_whf.id].name}")
     end
-    vent_program.addLine('  Set Adj = (Tin-Tnvsp)/(Tin-Tout)')
+    vent_program.addLine('  If Tin > Tout')
+    vent_program.addLine('    Set Adj = (Tin-Tnvsp)/(Tin-Tout)')
+    vent_program.addLine('  Else')
+    vent_program.addLine('    Set Adj = (Tnvsp-Tin)/(Tout-Tin)')
+    vent_program.addLine('  EndIf')
     vent_program.addLine('  Set Adj = (@Min Adj 1)')
     vent_program.addLine('  Set Adj = (@Max Adj 0)')
     vent_program.addLine('  If (WHF_Flow > 0)') # If available, prioritize whole house fan
