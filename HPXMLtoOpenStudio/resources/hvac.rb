@@ -4677,11 +4677,24 @@ module HVAC
       fuel_type: HPXML::FuelTypeElectricity
     )
     crankcase_heater_energy_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
+    if heat_pump.is_a? HPXML::CoolingSystem
+      crankcase_heater_energy_oe.additionalProperties.setFeature('FractionHeatLoadServed', 0.0) # Used by reporting measure
+    elsif heat_pump.is_a? HPXML::HeatPump
+      crankcase_heater_energy_oe.additionalProperties.setFeature('FractionHeatLoadServed', heat_pump.fraction_heat_load_served) # Used by reporting measure
+    end
 
     crankcase_heater_energy_oe_act = Model.add_ems_actuator(
       name: "#{crankcase_heater_energy_oe.name} act",
       model_object: crankcase_heater_energy_oe,
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
+    )
+
+    # Sensors
+    tout_db_sensor = Model.add_ems_sensor(
+      model,
+      name: "#{clg_coil.name} tout s",
+      output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+      key_name: 'Environment'
     )
 
     hvac_avail_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHVACAvailabilitySensor }
@@ -4692,20 +4705,28 @@ module HVAC
     elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
       max_oat_crankcase = clg_coil.maximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation
     end
+    program = Model.add_ems_program(
+      model,
+      name: "#{clg_coil.name} crankcase program"
+    )
+    program.addLine("Set T_out = #{tout_db_sensor.name}")
     temp_criteria = "If (T_out <= #{max_oat_crankcase})"
     if not hvac_avail_sensor.nil?
       # Don't run crankcase heater during HVAC unavailable period either
       temp_criteria += " && (#{hvac_avail_sensor.name} == 1)"
     end
-    program = Model.add_ems_program(
-      model,
-      name: "#{clg_coil.name} crankcase program"
-    )
     program.addLine(temp_criteria)
     program.addLine("  Set #{crankcase_heater_energy_oe_act.name} = #{heat_pump.crankcase_heater_watts}")
     program.addLine('Else')
     program.addLine("  Set #{crankcase_heater_energy_oe_act.name} = 0.0")
     program.addLine('EndIf')
+
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{program.name} calling manager",
+      calling_point: 'InsideHVACSystemIterationLoop',
+      ems_programs: [program]
+    )
   end
 
   # Creates an EMS program to add pan heater energy use for a heat pump.
