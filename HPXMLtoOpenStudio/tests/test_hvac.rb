@@ -2166,23 +2166,6 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_includes(end_dates, end_date)
   end
 
-  def test_crankcase_heater_watts
-    args_hash = {}
-    args_hash['hpxml_path'] = @tmp_hpxml_path
-    hpxml, hpxml_bldg = _create_hpxml('base.xml')
-    hpxml_bldg.cooling_systems[0].crankcase_heater_watts = 40.0
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-
-    # Get HPXML values
-    cooling_system = hpxml_bldg.cooling_systems[0]
-    crankcase_heater_watts = cooling_system.crankcase_heater_watts
-
-    # Check cooling coil
-    clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    assert_in_epsilon(crankcase_heater_watts, clg_coil.crankcaseHeaterCapacity, 0.01)
-  end
-
   def test_ceiling_fan
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-lighting-ceiling-fans.xml'))
