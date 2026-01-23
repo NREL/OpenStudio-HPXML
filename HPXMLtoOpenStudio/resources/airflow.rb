@@ -574,29 +574,26 @@ module Airflow
       end
       vent_program.addLine("Set Tnvsp = (#{default_htg_sp} + #{default_clg_sp}) / 2")
     end
-    vent_program.addLine("Set NVavailDay = #{nv_avail_sensor.name}")
+    vent_program.addLine("Set NVavailDayofWeek = #{nv_avail_sensor.name}")
     if hpxml_bldg.header.natvent_seasons == HPXML::NatVentSeasonsYearRound
-      vent_program.addLine('Set NVavailSeason = 1')
+      vent_program.addLine('Set NVavailSeasonHtg = 1')
+      vent_program.addLine('Set NVavailSeasonClg = 1')
     elsif hpxml_bldg.header.natvent_seasons == HPXML::NatVentSeasonsCooling
-      vent_program.addLine("Set NVavailSeason = #{sensors[:clg_ssn].name}")
+      vent_program.addLine("Set NVavailSeasonClg = #{sensors[:clg_ssn].name}")
+      vent_program.addLine('Set NVavailSeasonHtg = 0')
     elsif hpxml_bldg.header.natvent_seasons == HPXML::NatVentSeasonsHeating
-      vent_program.addLine("Set NVavailSeason = #{sensors[:htg_ssn].name}")
+      vent_program.addLine("Set NVavailSeasonHtg = #{sensors[:htg_ssn].name}")
+      vent_program.addLine('Set NVavailSeasonClg = 0')
     end
     vent_program.addLine('Set Qnv = 0') # Init
     vent_program.addLine('Set Qwhf = 0') # Init
     vent_program.addLine("Set #{cond_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil? # Init
     vent_program.addLine("Set #{whf_elec_actuator.name} = 0") # Init
-    if Constants::ERIVersions.index(hpxml_header.eri_calculation_versions[0]) >= Constants::ERIVersions.index('2025')
-      # From ANSI/RESNET/ICC 301-2025
-      # when the outdoor humidity ratio is less than 0.0115 lb_w/lb_da and either:
-      # A) outdoor temperature is below the indoor temperature and the indoor temperature is above the average of the heating and cooling setpoints, or
-      # B) outdoor temperature is above the indoor temperature and the indoor temperature is below the average of the heating and cooling setpoints
-      infil_constraints = 'If (((Tout < Tin) && (Tin > Tnvsp)) || ((Tout > Tin) && (Tin < Tnvsp)))'
-    else
-      # From ANSI/RESNET/ICC 301-2022
-      # hours when natural ventilation will reduce annual cooling energy use and the outdoor humidity ratio is less than 0.0115
-      infil_constraints = 'If ((Tout < Tin) && (Tin > Tnvsp))'
-    end
+    # From ANSI/RESNET/ICC 301-2025
+    # allow natural ventilation when the outdoor humidity ratio is less than 0.0115 lb_w/lb_da and either:
+    # A) outdoor temperature is below the indoor temperature and the indoor temperature is above the average of the heating and cooling setpoints, or
+    # B) outdoor temperature is above the indoor temperature and the indoor temperature is below the average of the heating and cooling setpoints
+    infil_constraints = 'If (((Tout < Tin) && (Tin > Tnvsp) && (NVavailSeasonClg == 1)) || ((Tout > Tin) && (Tin < Tnvsp) && (NVavailSeasonHtg == 1)))'
     if not sensors[:hvac_avail].nil?
       # Ignore the humidity constraint when the HVAC is not available (e.g., power outage), in order to allow as much natural ventilation as possible
       # FIXME: We should use separate heating/cooling sensors, not a single HVAC sensor.
@@ -626,7 +623,7 @@ module Airflow
       end
     end
     vent_program.addLine("    Set #{whf_elec_actuator.name} = WHF_W*Adj")
-    vent_program.addLine('  ElseIf (NVavailDay > 0) && (NVavailSeason > 0)') # Natural ventilation
+    vent_program.addLine('  ElseIf NVavailDayofWeek > 0') # Natural ventilation
     if hpxml_bldg.building_occupancy.number_of_residents == 0
       # Operational calculation w/ zero occupants, zero out natural ventilation
       vent_program.addLine('    Set NVArea = 0')
