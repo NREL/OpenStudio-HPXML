@@ -324,6 +324,7 @@ class ReportSimulationOutputTest < Minitest::Test
     "Component Load: Heating: #{CLT::InternalGains}",
     "Component Load: Heating: #{CLT::InternalMass}",
     "Component Load: Heating: #{CLT::MechanicalVentilation}",
+    "Component Load: Heating: #{CLT::NaturalVentilation}",
     "Component Load: Heating: #{CLT::RimJoists}",
     "Component Load: Heating: #{CLT::Slabs}",
     "Component Load: Heating: #{CLT::Walls}",
