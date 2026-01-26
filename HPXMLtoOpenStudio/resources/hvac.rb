@@ -3076,7 +3076,7 @@ module HVAC
 
     clg_coil.setName(coil_name)
     clg_coil.setCondenserType('AirCooled')
-    clg_coil.setCrankcaseHeaterCapacity(0.000001) # We model crankcase heater via EMS. Use non-zero value to prevent E+ warning
+    clg_coil.setCrankcaseHeaterCapacity(0) # We model crankcase heater via EMS.
     clg_coil.additionalProperties.setFeature('HPXML_ID', cooling_system.id) # Used by reporting measure
     if has_deadband_control
       # Apply startup capacity degradation
@@ -3244,7 +3244,7 @@ module HVAC
 
     # Per E+ documentation, if an air-to-air heat pump, the crankcase heater defined for the DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil is used
     htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(CrankcaseHeaterTemp, 'F', 'C'))
-    htg_coil.setCrankcaseHeaterCapacity(0.000001) # We model crankcase heater via EMS. Use non-zero value to prevent E+ warning
+    htg_coil.setCrankcaseHeaterCapacity(0) # We model crankcase heater via EMS.
     htg_coil.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     htg_coil.additionalProperties.setFeature('FractionHeatLoadServed', heating_system.fraction_heat_load_served) # Used by reporting measure
     if has_deadband_control
@@ -4710,7 +4710,7 @@ module HVAC
       name: "#{clg_coil.name} crankcase program"
     )
     program.addLine("Set T_out = #{tout_db_sensor.name}")
-    temp_criteria = "If (T_out <= #{max_oat_crankcase})"
+    temp_criteria = "If (T_out < #{max_oat_crankcase})"
     if not hvac_avail_sensor.nil?
       # Don't run crankcase heater during HVAC unavailable period either
       temp_criteria += " && (#{hvac_avail_sensor.name} == 1)"
