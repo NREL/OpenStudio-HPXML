@@ -454,7 +454,7 @@ base-schedules-detailed-mixed-timesteps.xml,0.5,29.5,0.0,1286.4,890.5,11335.9,38
 base-schedules-detailed-occupancy-stochastic-10-mins.xml,0.0,99.0,0.0,1286.4,890.5,11468.3,3942.2,6006.9,6961.5,6961.5,6006.9,6961.5,6961.5,36.212,22.916,0.0
 base-schedules-detailed-occupancy-stochastic-no-space-cooling.xml,0.0,68.0,0.0,1286.4,890.5,11469.9,3942.8,6413.9,6451.5,6969.7,6413.9,6451.5,6969.7,36.212,23.022,0.0
 base-schedules-detailed-occupancy-stochastic-no-space-heating.xml,1.0,99.0,0.0,1286.4,890.5,11469.9,3942.8,6262.0,6427.1,6971.6,6262.0,6427.1,6971.6,36.214,22.913,0.0
-base-schedules-detailed-occupancy-stochastic-power-outage.xml,36.0,95.0,0.0,1090.4,777.9,9323.6,3205.0,6214.2,6422.7,6971.8,6214.2,6422.7,6971.8,40.997,22.877,0.0
+base-schedules-detailed-occupancy-stochastic-power-outage.xml,36.0,95.0,0.0,1090.4,777.9,9323.6,3205.0,6194.2,6422.7,6971.8,6194.2,6422.7,6971.8,40.997,22.877,0.0
 base-schedules-detailed-occupancy-stochastic-vacancy.xml,0.0,99.0,0.0,1090.4,777.9,9319.3,3203.5,5382.9,6427.0,6971.6,5382.9,6427.0,6971.6,36.233,22.913,0.0
 base-schedules-detailed-occupancy-stochastic.xml,0.0,99.0,0.0,1286.4,890.5,11469.9,3942.8,6414.3,6427.2,6971.5,6414.3,6427.2,6971.5,36.212,22.914,0.0
 base-schedules-detailed-setpoints-daily-schedules.xml,129.0,178.0,0.0,1286.4,890.5,11468.6,3942.3,2382.8,3778.7,3778.7,2382.8,3778.7,3778.7,35.973,22.725,0.0
