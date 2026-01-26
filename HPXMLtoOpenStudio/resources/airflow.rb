@@ -22,7 +22,7 @@ module Airflow
   # @param airloop_map [Hash] Map of HPXML System ID => OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) objects
   # @return [nil]
   def self.apply(runner, model, weather, spaces, hpxml_bldg, hpxml_header, schedules_file, airloop_map)
-    sensors = create_sensors(runner, model, weather, spaces, hpxml_bldg, hpxml_header)
+    sensors = create_sensors(model, weather, spaces, hpxml_bldg)
 
     # Ventilation fans
     vent_fans = { mech: [], cfis_suppl: [], whf: [], kitchen: [], bath: [] }
@@ -83,14 +83,12 @@ module Airflow
 
   # Creates a variety of EMS sensors used in airflow calculations.
   #
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [Hash] Map of :sensor_types => OpenStudio::Model::EnergyManagementSystemSensor objects
-  def self.create_sensors(runner, model, weather, spaces, hpxml_bldg, hpxml_header)
+  def self.create_sensors(model, weather, spaces, hpxml_bldg)
     conditioned_space = spaces[HPXML::LocationConditionedSpace]
     conditioned_zone = conditioned_space.thermalZone.get
 
@@ -137,22 +135,6 @@ module Airflow
       output_var_or_meter_name: 'Zone Outdoor Air Drybulb Temperature',
       key_name: conditioned_zone.name
     )
-
-    # Create HVAC availability sensor
-    sensors[:hvac_avail] = nil
-    heating_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceHeating].name, hpxml_header.unavailable_periods)
-    cooling_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceCooling].name, hpxml_header.unavailable_periods)
-    if (not heating_unavailable_periods.empty?) || (not cooling_unavailable_periods.empty?)
-      avail_sch = ScheduleConstant.new(model, 'hvac availability schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: heating_unavailable_periods + cooling_unavailable_periods)
-
-      sensors[:hvac_avail] = Model.add_ems_sensor(
-        model,
-        name: "#{avail_sch.schedule.name} s",
-        output_var_or_meter_name: 'Schedule Value',
-        key_name: avail_sch.schedule.name
-      )
-      sensors[:hvac_avail].additionalProperties.setFeature('ObjectType', Constants::ObjectTypeHVACAvailabilitySensor)
-    end
 
     # Create cooling season schedule sensor (applies only to natural ventilation, not HVAC equipment).
     # Uses BAHSP cooling season, not user-specified cooling season (which may be, e.g., year-round).
@@ -537,6 +519,8 @@ module Airflow
     c_w, c_s = calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, HPXML::LocationConditionedSpace, infil_values[:height])
     max_oa_hr = 0.0115 # From ANSI/RESNET/ICC 301-2022
 
+    clg_avail_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeCoolingAvailabilitySensor }
+
     # Program
     vent_program = Model.add_ems_program(
       model,
@@ -575,11 +559,11 @@ module Airflow
     vent_program.addLine("Set #{cond_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil? # Init
     vent_program.addLine("Set #{whf_elec_actuator.name} = 0") # Init
     infil_constraints = 'If ((Wout < MaxHR) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0))'
-    if not sensors[:hvac_avail].nil?
+    if not clg_avail_sensor.nil?
       # We are using the availability schedule, but we also constrain the window opening based on temperatures and humidity.
       # We're assuming that if the HVAC is not available, you'd ignore the humidity constraints we normally put on window opening per the old HSP guidance (RH < 70% and w < 0.015).
       # Without, the humidity constraints prevent the window from opening during the entire period even though the sensible cooling would have really helped.
-      infil_constraints += "|| ((Tin > Tout) && (Tin > Tnvsp) && (#{sensors[:hvac_avail].name} == 0))"
+      infil_constraints += "|| ((Tin > Tout) && (Tin > Tnvsp) && (#{clg_avail_sensor.name} == 0))"
     end
     vent_program.addLine(infil_constraints)
     vent_program.addLine('  Set WHF_Flow = 0')

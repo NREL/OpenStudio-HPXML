@@ -39,7 +39,6 @@ module Constants
   ObjectTypeHotWaterRecircPump = 'dhw recirc pump'
   ObjectTypeHPDefrostSupplHeat = 'heat pump defrost suppl heat'
   ObjectTypeHPDefrostHeatLoad = 'heat pump defrost heat load'
-  ObjectTypeHVACAvailabilitySensor = 'hvac availability sensor'
   ObjectTypeHeatingAvailabilitySensor = 'heating availability sensor'
   ObjectTypeCoolingAvailabilitySensor = 'cooling availability sensor'
   ObjectTypeIdealAirSystem = 'ideal air system'
