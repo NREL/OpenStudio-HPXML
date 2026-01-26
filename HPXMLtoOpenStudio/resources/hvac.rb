@@ -4723,7 +4723,8 @@ module HVAC
       key_name: 'Environment'
     )
 
-    hvac_avail_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHVACAvailabilitySensor }
+    htg_avail_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHeatingAvailabilitySensor }
+    clg_avail_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeCoolingAvailabilitySensor }
 
     # EMS program
     if clg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
@@ -4737,9 +4738,17 @@ module HVAC
     )
     program.addLine("Set T_out = #{tout_db_sensor.name}")
     temp_criteria = "If (T_out < #{max_oat_crankcase})"
-    if not hvac_avail_sensor.nil?
-      # Don't run crankcase heater during HVAC unavailable period either
-      temp_criteria += " && (#{hvac_avail_sensor.name} == 1)"
+    # Don't run crankcase heater during heating/cooling unavailable periods either
+    if heat_pump.is_a? HPXML::CoolingSystem
+      temp_criteria += " && (#{clg_avail_sensor.name} == 1)" if not clg_avail_sensor.nil?
+    elsif heat_pump.is_a? HPXML::HeatPump
+      if (not htg_avail_sensor.nil?) && (not clg_avail_sensor.nil?) && (heat_pump.fraction_heat_load_served > 0.0) && (heat_pump.fraction_cool_load_served > 0.0)
+        temp_criteria += " && ((#{htg_avail_sensor.name} == 1) || (#{clg_avail_sensor.name} == 1))"
+      elsif (not htg_avail_sensor.nil?) && (heat_pump.fraction_heat_load_served > 0.0)
+        temp_criteria += " && (#{htg_avail_sensor.name} == 1)"
+      elsif (not clg_avail_sensor.nil?) && (heat_pump.fraction_cool_load_served > 0.0)
+        temp_criteria += " && (#{clg_avail_sensor.name} == 1)"
+      end
     end
     program.addLine(temp_criteria)
     program.addLine("  Set #{crankcase_heater_energy_oe_act.name} = #{heat_pump.crankcase_heater_watts}")
