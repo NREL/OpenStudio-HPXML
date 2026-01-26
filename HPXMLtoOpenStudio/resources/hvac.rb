@@ -41,6 +41,32 @@ module HVAC
     hvac_unavailable_periods = { htg: Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceHeating].name, hpxml_header.unavailable_periods),
                                  clg: Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceCooling].name, hpxml_header.unavailable_periods) }
 
+    # Create heating availability sensor
+    if not hvac_unavailable_periods[:htg].empty?
+      htg_avail_sch = ScheduleConstant.new(model, 'heating availability schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: hvac_unavailable_periods[:htg])
+
+      htg_avail_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{htg_avail_sch.schedule.name} s",
+        output_var_or_meter_name: 'Schedule Value',
+        key_name: htg_avail_sch.schedule.name
+      )
+      htg_avail_sensor.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeHeatingAvailabilitySensor)
+    end
+
+    # Create cooling availability sensor
+    if not hvac_unavailable_periods[:clg].empty?
+      clg_avail_sch = ScheduleConstant.new(model, 'cooling availability schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: hvac_unavailable_periods[:clg])
+
+      clg_avail_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{clg_avail_sch.schedule.name} s",
+        output_var_or_meter_name: 'Schedule Value',
+        key_name: clg_avail_sch.schedule.name
+      )
+      clg_avail_sensor.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeCoolingAvailabilitySensor)
+    end
+
     apply_unit_multiplier(hpxml_bldg, hpxml_header)
     ensure_nonzero_sizing_values(hpxml_bldg)
     apply_ideal_air_systems(model, weather, spaces, hpxml_bldg, hpxml_header, hvac_season_days, hvac_unavailable_periods, hvac_remaining_load_fracs)
@@ -459,7 +485,7 @@ module HVAC
     if is_heatpump
       ems_program = apply_defrost_ems_program(model, htg_coil, control_zone.spaces[0], cooling_system, hpxml_bldg.building_construction.number_of_units)
       if cooling_system.pan_heater_watts.to_f > 0
-        apply_pan_heater_ems_program(model, ems_program, htg_coil, control_zone.spaces[0], cooling_system, htg_ap.hp_min_temp, hvac_unavailable_periods[:htg])
+        apply_pan_heater_ems_program(model, ems_program, htg_coil, control_zone.spaces[0], cooling_system, htg_ap.hp_min_temp)
       end
     end
     return air_loop
@@ -4663,9 +4689,8 @@ module HVAC
   # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
-  # @param heating_unavailable_periods [HPXML::UnavailablePeriods] Unavailable periods for heating
   # @return [nil]
-  def self.apply_pan_heater_ems_program(model, ems_program, htg_coil, conditioned_space, heat_pump, hp_min_temp, heating_unavailable_periods)
+  def self.apply_pan_heater_ems_program(model, ems_program, htg_coil, conditioned_space, heat_pump, hp_min_temp)
     # Other equipment/actuator
     cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypePanHeater } # Ensure unique meter for each heat pump
     pan_heater_energy_oe = Model.add_other_equipment(
@@ -4688,17 +4713,7 @@ module HVAC
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
 
-    # Create HVAC availability sensor
-    if not heating_unavailable_periods.empty?
-      htg_avail_sch = ScheduleConstant.new(model, 'heating availability schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: heating_unavailable_periods)
-
-      htg_avail_sensor = Model.add_ems_sensor(
-        model,
-        name: "#{htg_avail_sch.schedule.name} s",
-        output_var_or_meter_name: 'Schedule Value',
-        key_name: htg_avail_sch.schedule.name
-      )
-    end
+    htg_avail_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHeatingAvailabilitySensor }
 
     # EMS program
     temp_criteria = "If (T_out <= #{UnitConversions.convert(32.0, 'F', 'C')}) && (T_out >= #{UnitConversions.convert(hp_min_temp, 'F', 'C').round(2)})"
