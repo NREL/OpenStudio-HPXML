@@ -4757,19 +4757,17 @@ module HVAC
     if not htg_coil_rtf_sensor.nil?
       program.addLine("Set frac_htg = #{htg_coil_rtf_sensor.name}")
     else
-      program.addLine("Set frac_htg = 0.0")
+      program.addLine('Set frac_htg = 0.0')
     end
     temp_criteria = "If (T_out < #{max_oat_crankcase})"
     # Don't run crankcase heater during heating/cooling unavailable periods either
     if heat_pump.is_a? HPXML::CoolingSystem
       temp_criteria += " && (#{clg_avail_sensor.name} == 1)" if not clg_avail_sensor.nil?
     elsif heat_pump.is_a? HPXML::HeatPump
-      if (not htg_avail_sensor.nil?) && (not clg_avail_sensor.nil?) && (heat_pump.fraction_heat_load_served > 0.0) && (heat_pump.fraction_cool_load_served > 0.0)
-        temp_criteria += " && ((#{htg_avail_sensor.name} == 1) || (#{clg_avail_sensor.name} == 1))"
-      elsif (not htg_avail_sensor.nil?) && (heat_pump.fraction_heat_load_served > 0.0)
-        temp_criteria += " && (#{htg_avail_sensor.name} == 1)"
-      elsif (not clg_avail_sensor.nil?) && (heat_pump.fraction_cool_load_served > 0.0)
-        temp_criteria += " && (#{clg_avail_sensor.name} == 1)" # wouldn't the crankcase operate during the winter regardless?
+      if heat_pump.fraction_heat_load_served > 0
+        temp_criteria += " && (#{htg_avail_sensor.name} == 1)" if not htg_avail_sensor.nil?
+      else
+        temp_criteria += " && (#{clg_avail_sensor.name} == 1)" if not clg_avail_sensor.nil?
       end
     end
     program.addLine(temp_criteria)
