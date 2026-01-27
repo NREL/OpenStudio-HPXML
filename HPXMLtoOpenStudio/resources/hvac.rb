@@ -487,7 +487,7 @@ module HVAC
         ems_program = apply_defrost_ems_program(model, htg_coil, control_zone.spaces[0], cooling_system, hpxml_bldg.building_construction.number_of_units)
         apply_pan_heater_ems_program(model, ems_program, htg_coil, control_zone.spaces[0], cooling_system, htg_ap.hp_min_temp)
       end
-      apply_crankcase_heater_ems_program(model, clg_coil, control_zone.spaces[0], cooling_system)
+      apply_crankcase_heater_ems_program(model, htg_coil, clg_coil, control_zone.spaces[0], cooling_system)
     end
     return air_loop
   end
@@ -4681,18 +4681,26 @@ module HVAC
   # A crankcase heater ...
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param htg_coil [TODO] TODO
   # @param clg_coil [OpenStudio::Model::CoilCoolingDXSingleSpeed or OpenStudio::Model::CoilCoolingDXMultiSpeed] OpenStudio Cooling Coil object
   # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @return [nil]
-  def self.apply_crankcase_heater_ems_program(model, clg_coil, conditioned_space, heat_pump)
+  def self.apply_crankcase_heater_ems_program(model, htg_coil, clg_coil, conditioned_space, heat_pump)
     return unless heat_pump.crankcase_heater_watts.to_f > 0
+
+    coil_name = clg_coil.name.to_s
+    if (heat_pump.is_a? HPXML::HeatPump) && (heat_pump.fraction_heat_load_served > 0)
+      coil_name = htg_coil.name.to_s
+    else
+      htg_coil = nil
+    end
 
     # Other equipment/actuator
     cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeCrankcaseHeater } # Ensure unique meter for each heat pump
     crankcase_heater_energy_oe = Model.add_other_equipment(
       model,
-      name: "#{clg_coil.name} crankcase heater energy",
+      name: "#{coil_name} crankcase heater energy",
       end_use: "#{Constants::ObjectTypeCrankcaseHeater}#{cnt + 1}",
       space: conditioned_space,
       design_level: 0,
@@ -4726,6 +4734,15 @@ module HVAC
     htg_avail_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHeatingAvailabilitySensor }
     clg_avail_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeCoolingAvailabilitySensor }
 
+    if not htg_coil.nil?
+      htg_coil_rtf_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{htg_coil.name} rtf s",
+        output_var_or_meter_name: 'Heating Coil Runtime Fraction',
+        key_name: htg_coil.name
+      )
+    end
+
     # EMS program
     if clg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
       max_oat_crankcase = clg_coil.maximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation
@@ -4734,9 +4751,14 @@ module HVAC
     end
     program = Model.add_ems_program(
       model,
-      name: "#{clg_coil.name} crankcase program"
+      name: "#{coil_name} crankcase program"
     )
     program.addLine("Set T_out = #{tout_db_sensor.name}")
+    if not htg_coil_rtf_sensor.nil?
+      program.addLine("Set frac_htg = #{htg_coil_rtf_sensor.name}")
+    else
+      program.addLine("Set frac_htg = 0.0")
+    end
     temp_criteria = "If (T_out < #{max_oat_crankcase})"
     # Don't run crankcase heater during heating/cooling unavailable periods either
     if heat_pump.is_a? HPXML::CoolingSystem
@@ -4747,11 +4769,11 @@ module HVAC
       elsif (not htg_avail_sensor.nil?) && (heat_pump.fraction_heat_load_served > 0.0)
         temp_criteria += " && (#{htg_avail_sensor.name} == 1)"
       elsif (not clg_avail_sensor.nil?) && (heat_pump.fraction_cool_load_served > 0.0)
-        temp_criteria += " && (#{clg_avail_sensor.name} == 1)"
+        temp_criteria += " && (#{clg_avail_sensor.name} == 1)" # wouldn't the crankcase operate during the winter regardless?
       end
     end
     program.addLine(temp_criteria)
-    program.addLine("  Set #{crankcase_heater_energy_oe_act.name} = #{heat_pump.crankcase_heater_watts}")
+    program.addLine("  Set #{crankcase_heater_energy_oe_act.name} = #{heat_pump.crankcase_heater_watts} * (1 - frac_htg)")
     program.addLine('Else')
     program.addLine("  Set #{crankcase_heater_energy_oe_act.name} = 0.0")
     program.addLine('EndIf')
