@@ -1418,6 +1418,14 @@
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-seer-hspf.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-power-outage.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
+  },
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-hvac-seasons.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
+    "hvac_control_heating_season_period": "Nov 1 - May 1",
+    "hvac_control_cooling_season_period": "Jun 1 - Oct 1"
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "hvac_heat_pump": "Central HP, SEER2 17.0, HSPF2 8.2"

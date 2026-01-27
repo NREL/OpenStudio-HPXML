@@ -1240,22 +1240,24 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     _check_onoff_thermostat_EMS(model, clg_coil, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
   end
 
-  def test_heat_pump_defrost_and_pan_heater
+  def test_heat_pump_defrost_and_pan_heater_and_crankcase_heater
     # Single Speed heat pump test
     args_hash = {}
     args_hash['hpxml_path'] = @tmp_hpxml_path
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
     hpxml_bldg.heat_pumps[0].pan_heater_watts = 60.0
+    hpxml_bldg.heat_pumps[0].crankcase_heater_watts = 20.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     backup_fuel = EPlus.fuel_type(hpxml_bldg.heat_pumps[0].backup_heating_fuel)
     pan_heater_watts = hpxml_bldg.heat_pumps[0].pan_heater_watts
+    crankcase_heater_watts = hpxml_bldg.heat_pumps[0].crankcase_heater_watts
 
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
-    _check_defrost_and_pan_heater(model, htg_coil, 10000, 1.0, backup_fuel, 0.1, 0.0, pan_heater_watts)
+    _check_defrost_and_pan_heater_and_crankcase_heater(model, htg_coil, 10000, 1.0, backup_fuel, 0.1, 0.0, pan_heater_watts, crankcase_heater_watts)
 
     # Ductless heat pump test
     args_hash = {}
@@ -1267,7 +1269,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    _check_defrost_and_pan_heater(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 0.0)
+    _check_defrost_and_pan_heater_and_crankcase_heater(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 0.0)
 
     # Ductless heat pump w/ backup heat during defrost test
     args_hash = {}
@@ -1279,7 +1281,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    _check_defrost_and_pan_heater(model, htg_coil, 10000, 1.0, backup_fuel, 0.06667, 0.0)
+    _check_defrost_and_pan_heater_and_crankcase_heater(model, htg_coil, 10000, 1.0, backup_fuel, 0.06667, 0.0)
 
     # Dual fuel heat pump test
     args_hash = {}
@@ -1291,7 +1293,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    _check_defrost_and_pan_heater(model, htg_coil, 10000, 0.95, backup_fuel, 0.06667, 0.0)
+    _check_defrost_and_pan_heater_and_crankcase_heater(model, htg_coil, 10000, 0.95, backup_fuel, 0.06667, 0.0)
 
     # Two heat pump test
     args_hash = {}
@@ -1304,10 +1306,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     assert_equal(2, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    _check_defrost_and_pan_heater(model, htg_coil, 10000, 1.0, backup_fuel, 0.06667, 0.0, 150.0, 2)
+    _check_defrost_and_pan_heater_and_crankcase_heater(model, htg_coil, 10000, 1.0, backup_fuel, 0.06667, 0.0, 150.0, 30.0, 2)
 
     htg_coil = model.getCoilHeatingDXMultiSpeeds[1]
-    _check_defrost_and_pan_heater(model, htg_coil, 10000, 1.0, backup_fuel, 0.06667, 0.0, 150.0, 2)
+    _check_defrost_and_pan_heater_and_crankcase_heater(model, htg_coil, 10000, 1.0, backup_fuel, 0.06667, 0.0, 150.0, 30.0, 2)
 
     # Separate backup heat pump test
     args_hash = {}
@@ -1319,7 +1321,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    _check_defrost_and_pan_heater(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 0.0)
+    _check_defrost_and_pan_heater_and_crankcase_heater(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 0.0, 150.0, 15.0)
   end
 
   def test_mini_split_heat_pump_ductless
@@ -2157,23 +2159,6 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_includes(end_dates, end_date)
   end
 
-  def test_crankcase_heater_watts
-    args_hash = {}
-    args_hash['hpxml_path'] = @tmp_hpxml_path
-    hpxml, hpxml_bldg = _create_hpxml('base.xml')
-    hpxml_bldg.cooling_systems[0].crankcase_heater_watts = 40.0
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-
-    # Get HPXML values
-    cooling_system = hpxml_bldg.cooling_systems[0]
-    crankcase_heater_watts = cooling_system.crankcase_heater_watts
-
-    # Check cooling coil
-    clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    assert_in_epsilon(crankcase_heater_watts, clg_coil.crankcaseHeaterCapacity, 0.01)
-  end
-
   def test_ceiling_fan
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-lighting-ceiling-fans.xml'))
@@ -2388,7 +2373,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     return program_values
   end
 
-  def _check_defrost_and_pan_heater(model, htg_coil, supp_capacity, supp_efficiency, backup_fuel, defrost_time_fraction, defrost_power, pan_heater_watts = 150.0, num_of_ems = 1)
+  def _check_defrost_and_pan_heater_and_crankcase_heater(model, htg_coil, supp_capacity, supp_efficiency, backup_fuel, defrost_time_fraction, defrost_power, pan_heater_watts = 150.0, crankcase_heater_watts = 30.0, num_of_ems = 1)
     # Check Other equipment inputs
     defrost_heat_load_oe = model.getOtherEquipments.select { |oe| oe.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHPDefrostHeatLoad }
     assert_equal(num_of_ems, defrost_heat_load_oe.size)
@@ -2407,12 +2392,18 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(htg_coil.defrostTimePeriodFraction, defrost_time_fraction, 0.01)
     assert_in_delta(htg_coil.resistiveDefrostHeaterCapacity.get, defrost_power, 1.0)
 
-    # Check EMS
+    # Check EMS defrost/pan heater
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{htg_coil.name} defrost program")
     assert_in_epsilon(program_values['supp_capacity'].sum, supp_capacity, 0.01)
     assert_in_epsilon(program_values['supp_efficiency'].sum, supp_efficiency, 0.01)
     pan_heater_act_name = program_values.keys.find { |k| k.include? 'pan_heater_energy_act' }
     assert_equal(pan_heater_watts, program_values[pan_heater_act_name][0])
+    assert(!program_values.empty?)
+
+    # Check EMS crankcase heater
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{htg_coil.name} crankcase program")
+    crankcase_heater_act_name = program_values.keys.find { |k| k.include? 'crankcase_heater_energy_act' }
+    assert_equal(crankcase_heater_watts, program_values[crankcase_heater_act_name][0])
     assert(!program_values.empty?)
   end
 

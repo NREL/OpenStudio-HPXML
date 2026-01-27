@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>6f3658e4-715f-4ef2-aa75-2e82ec6dcbef</version_id>
-  <version_modified>2026-01-26T16:58:29Z</version_modified>
+  <version_id>4fc5923a-28ca-4ba5-b750-aceb525de9ff</version_id>
+  <version_modified>2026-01-27T18:32:29Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -216,7 +216,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C1C12650</checksum>
+      <checksum>52C8B837</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
@@ -414,7 +414,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6B182496</checksum>
+      <checksum>59FE4272</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -654,7 +654,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>662E62CE</checksum>
+      <checksum>D064707B</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -762,7 +762,7 @@
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E70D77B1</checksum>
+      <checksum>2F1F54D9</checksum>
     </file>
     <file>
       <filename>test_hvac_sizing.rb</filename>
@@ -810,7 +810,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1A14E141</checksum>
+      <checksum>4ACBE620</checksum>
     </file>
     <file>
       <filename>test_vehicle.rb</filename>
