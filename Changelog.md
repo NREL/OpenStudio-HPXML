@@ -5,7 +5,9 @@ __New Features__
   - **Breaking change**: Replaces "UnitX" prefixes with Building IDs in whole SFA/MF building timeseries outputs.
 
 __Bugfixes__
-- Only issue a warning about adjusting inverted setpoints when heating setpoint is greater than cooling setpoint during overlapping heating/cooling seasons.
+- Fixes a misleading warning about adjusting inverted setpoints when heating setpoint is greater than cooling setpoint during non-overlapping heating/cooling seasons.
+- Fixes possible incorrect unmet hours outputs for unavailable periods with no space heating only (or no space cooling only).
+- Fixes PanHeaterControlType="heat pump mode" incorrectly disallowed for mini-split heat pumps.
 
 ## OpenStudio-HPXML v1.11.0
 
