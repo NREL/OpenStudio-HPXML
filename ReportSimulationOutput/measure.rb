@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see the URL below for information on how to write OpenStudio measures
-# http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
+# http://natlabrockies.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
 require 'msgpack'
 require 'time'
@@ -1914,7 +1914,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           data = data.map { |a| a[1..-1] }
         end
 
-        # Add header per DataFileTemplate.pdf; see https://github.com/NREL/wex/wiki/DView
+        # Add header per DataFileTemplate.pdf; see https://github.com/NatLabRockies/wex/wiki/DView
         year = @hpxml_header.sim_calendar_year
         start_day = Calendar.get_day_num_from_month_day(year, @hpxml_header.sim_begin_month, @hpxml_header.sim_begin_day)
         start_hr = (start_day - 1) * 24

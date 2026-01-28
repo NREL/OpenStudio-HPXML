@@ -48,7 +48,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_resnet_dx_ac_and_hp
     # Test to verify the model is consistent with RESNET's NEEP-Statistical-Model.xlsm
-    # Spreadsheet can be found in https://github.com/NREL/OpenStudio-HPXML/pull/1879
+    # Spreadsheet can be found in https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1879
 
     tol = 0.02 # 2%, higher tolerance because expected values from spreadsheet are not rounded like they are in the RESNET Standard
 

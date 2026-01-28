@@ -12470,7 +12470,7 @@ class HPXML < Object
               adjacent_ap.adjacent_unit_number = hpxml.buildings.index(sameas_object.parent_object)
               # Note: sameas surface is assumed to have the same interior_adjacent_to as the adjacent surface.
               # If that's not the case, we would have to allow InteriorAdjacentTo to be provided for the sameas
-              # surface. See https://github.com/NREL/OpenStudio-HPXML/pull/2105#discussion_r2583146171.
+              # surface. See https://github.com/NatLabRockies/OpenStudio-HPXML/pull/2105#discussion_r2583146171.
               adjacent_ap.adjacent_space_type = adjacent_obj.interior_adjacent_to
             elsif adjacent_ap.adjacent_hpxml_id != sameas_object.id
               fail "'#{adjacent_obj.id}' is referenced by multiple objects."

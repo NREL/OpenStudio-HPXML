@@ -21,7 +21,7 @@
       <sch:assert role='ERROR' test='count(h:extension/h:ElectricPanelLoadCalculations) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ElectricPanelLoadCalculations</sch:assert> <!-- See [ElectricPanelLoadCalculations] -->
       <sch:assert role='ERROR' test='count(h:extension/h:WholeSFAorMFBuildingSimulation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WholeSFAorMFBuildingSimulation</sch:assert>
       <sch:assert role='ERROR' test='h:extension/h:WholeSFAorMFBuildingSimulation[text()="true" or text()="false"] or not(h:extension/h:WholeSFAorMFBuildingSimulation)'>Expected extension/WholeSFAorMFBuildingSimulation to be 'true' or 'false'</sch:assert>
-      <!-- Moved multiple inputs to allow variation across MF dwelling units; see https://github.com/NREL/OpenStudio-HPXML/pull/1478 -->
+      <!-- Moved multiple inputs to allow variation across MF dwelling units; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1478 -->
       <sch:assert role='ERROR' test='count(h:extension/h:SchedulesFilePath) = 0'>extension/SchedulesFilePath has been replaced by /HPXML/Building/BuildingDetails/BuildingSummary/extension/SchedulesFilePath</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HVACSizingControl) = 0'>extension/HVACSizingControl has been replaced by /HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:ShadingControl) = 0'>extension/ShadingControl has been replaced by /HPXML/Building/BuildingDetails/BuildingSummary/extension/ShadingControl</sch:assert>
@@ -40,13 +40,13 @@
       <sch:assert role='ERROR' test='number(h:CalendarYear) &gt;= 1600 or not(h:CalendarYear)'>Expected CalendarYear to be greater than or equal to 1600</sch:assert>
       <sch:assert role='ERROR' test='number(h:CalendarYear) &lt;= 9999 or not(h:CalendarYear)'>Expected CalendarYear to be less than or equal to 9999</sch:assert>
       <sch:assert role='ERROR' test='count(h:AdvancedResearchFeatures) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AdvancedResearchFeatures</sch:assert> <!-- See [AdvancedResearchFeatures] -->
-      <!-- Moved/deprecated DaylightSaving input; see https://github.com/NREL/OpenStudio-HPXML/pull/1165 -->
+      <!-- Moved/deprecated DaylightSaving input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1165 -->
       <sch:assert role='ERROR' test='count(h:DaylightSaving/h:Enabled) = 0'>DaylightSaving/Enabled has been replaced by /HPXML/Building/Site/TimeZone/DSTObserved</sch:assert>
       <sch:assert role='ERROR' test='count(h:DaylightSaving/h:BeginMonth) = 0'>DaylightSaving/BeginMonth has been replaced by /HPXML/Building/Site/TimeZone/extension/DSTBeginMonth</sch:assert>
       <sch:assert role='ERROR' test='count(h:DaylightSaving/h:BeginDayOfMonth) = 0'>DaylightSaving/BeginDayOfMonth has been replaced by /HPXML/Building/Site/TimeZone/extension/DSTBeginDayOfMonth</sch:assert>
       <sch:assert role='ERROR' test='count(h:DaylightSaving/h:EndMonth) = 0'>DaylightSaving/EndMonth has been replaced by /HPXML/Building/Site/TimeZone/extension/DSTEndMonth</sch:assert>
       <sch:assert role='ERROR' test='count(h:DaylightSaving/h:EndDayOfMonth) = 0'>DaylightSaving/EndDayOfMonth has been replaced by /HPXML/Building/Site/TimeZone/extension/DSTEndDayOfMonth</sch:assert>
-      <!-- Moved/deprecated TemperatureCapacitanceMultiplier input; see https://github.com/NREL/OpenStudio-HPXML/pull/1674 -->
+      <!-- Moved/deprecated TemperatureCapacitanceMultiplier input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1674 -->
       <sch:assert role='ERROR' test='count(h:TemperatureCapacitanceMultiplier) = 0'>TemperatureCapacitanceMultiplier has been replaced by AdvancedResearchFeatures/TemperatureCapacitanceMultiplier</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -55,7 +55,7 @@
     <sch:title>[AdvancedResearchFeatures]</sch:title>
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl/h:AdvancedResearchFeatures'>
       <sch:assert role='ERROR' test='count(h:TemperatureCapacitanceMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: TemperatureCapacitanceMultiplier</sch:assert>
-      <!-- Deprecated DefrostModelType input; see https://github.com/NREL/OpenStudio-HPXML/pull/2015 -->
+      <!-- Deprecated DefrostModelType input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/2015 -->
       <sch:assert role='ERROR' test='count(h:DefrostModelType) = 0'>DefrostModelType has been deprecated</sch:assert>
       <sch:assert role='ERROR' test='count(h:OnOffThermostatDeadbandTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: OnOffThermostatDeadbandTemperature</sch:assert> <!-- See [OnOffThermostatDeadbandTemperature] -->
       <sch:assert role='ERROR' test='number(h:OnOffThermostatDeadbandTemperature) &gt; 0 or not(h:OnOffThermostatDeadbandTemperature)'>Expected OnOffThermostatDeadbandTemperature to be greater than 0</sch:assert>
@@ -385,7 +385,7 @@
       <sch:assert role='ERROR' test='number(h:ManualJInputs/h:InfiltrationShieldingClass) &lt;= 5 or not(h:ManualJInputs/h:InfiltrationShieldingClass)'>Expected ManualJInputs/InfiltrationShieldingClass to be less than or equal to 5</sch:assert>
       <sch:assert role='ERROR' test='count(h:ManualJInputs/h:InfiltrationMethod) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ManualJInputs/InfiltrationMethod</sch:assert> <!-- See [ManualJInfiltrationMethod=DefaultInfiltrationTable] or [ManualJInfiltrationMethod=BlowerDoor] -->
       <sch:assert role='ERROR' test='h:ManualJInputs/h:InfiltrationMethod[text()="default infiltration table" or text()="blower door"] or not(h:ManualJInputs/h:InfiltrationMethod)'>Expected InfiltrationMethod/DailyTemperatureRange to be 'default infiltration table' or 'blower door'</sch:assert>
-      <!-- Moved/deprecated UseMaxLoadForHeatPumps input; see https://github.com/NREL/OpenStudio-HPXML/pull/1039 -->
+      <!-- Moved/deprecated UseMaxLoadForHeatPumps input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1039 -->
       <sch:assert role='ERROR' test='count(h:UseMaxLoadForHeatPumps) = 0'>UseMaxLoadForHeatPumps has been replaced by HeatPumpSizingMethodology</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -422,9 +422,9 @@
       <sch:assert role='ERROR' test='h:ShieldingofHome[text()="well-shielded" or text()="normal" or text()="exposed"] or not(h:ShieldingofHome)'>Expected ShieldingofHome to be 'well-shielded' or 'normal' or 'exposed'</sch:assert>
       <sch:assert role='ERROR' test='count(h:Soil) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Soil</sch:assert> <!-- See [Soil] -->
       <sch:assert role='ERROR' test='count(h:extension/h:Neighbors) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/Neighbors</sch:assert> <!-- See [Neighbors] -->
-      <!-- Moved/deprecated ShelterCoefficient input; see https://github.com/NREL/OpenStudio-HPXML/pull/653 -->
+      <!-- Moved/deprecated ShelterCoefficient input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/653 -->
       <sch:assert role='ERROR' test='count(h:extension/h:ShelterCoefficient) = 0'>extension/ShelterCoefficient has been replaced by ShieldingofHome</sch:assert>
-      <!-- Moved/deprecated extension/GroundConductivity input; see https://github.com/NREL/OpenStudio-HPXML/pull/1391 -->
+      <!-- Moved/deprecated extension/GroundConductivity input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1391 -->
       <sch:assert role='ERROR' test='count(h:extension/h:GroundConductivity) = 0'>extension/GroundConductivity has been replaced by Soil/Conductivity</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -483,7 +483,7 @@
       <sch:assert role='ERROR' test='count(h:NumberofUnits) &lt;= 1'>Expected 0 or 1 element(s) for xpath: NumberofUnits</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofConditionedFloors) = 1'>Expected 1 element(s) for xpath: NumberofConditionedFloors</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofConditionedFloorsAboveGrade) = 1'>Expected 1 element(s) for xpath: NumberofConditionedFloorsAboveGrade</sch:assert>
-      <!-- We are more strict than HPXML schema for NumberofConditionedFloorsAboveGrade; see https://github.com/NREL/OpenStudio-HPXML/issues/1755 -->
+      <!-- We are more strict than HPXML schema for NumberofConditionedFloorsAboveGrade; see https://github.com/NatLabRockies/OpenStudio-HPXML/issues/1755 -->
       <sch:assert role='ERROR' test='number(h:NumberofConditionedFloorsAboveGrade) &gt; 0 or not(h:NumberofConditionedFloorsAboveGrade)'>Expected NumberofConditionedFloorsAboveGrade to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:NumberofConditionedFloors) &gt;= number(h:NumberofConditionedFloorsAboveGrade) or not(h:NumberofConditionedFloors) or not(h:NumberofConditionedFloorsAboveGrade)'>Expected NumberofConditionedFloors to be greater than or equal to NumberofConditionedFloorsAboveGrade</sch:assert>
       <sch:assert role='ERROR' test='count(h:AverageCeilingHeight) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AverageCeilingHeight</sch:assert>
@@ -492,7 +492,7 @@
       <sch:assert role='ERROR' test='count(h:ConditionedFloorArea) = 1'>Expected 1 element(s) for xpath: ConditionedFloorArea</sch:assert>
       <sch:assert role='ERROR' test='number(h:ConditionedFloorArea) &gt;= (sum(../../h:Enclosure/h:Slabs/h:Slab[h:InteriorAdjacentTo="conditioned space" or h:InteriorAdjacentTo="basement - conditioned"]/h:Area) + sum(../../h:Enclosure/h:Floors/h:Floor[h:InteriorAdjacentTo="conditioned space" and not(h:ExteriorAdjacentTo="attic - vented" or h:ExteriorAdjacentTo="attic - unvented" or ((h:ExteriorAdjacentTo="other housing unit" or h:ExteriorAdjacentTo="other heated space" or h:ExteriorAdjacentTo="other multifamily buffer space" or h:ExteriorAdjacentTo="other non-freezing space") and h:FloorOrCeiling="ceiling"))]/h:Area) - 1) or not(h:ConditionedFloorArea)'>Expected ConditionedFloorArea to be greater than or equal to the sum of conditioned slab/floor areas.</sch:assert>
       <sch:assert role='ERROR' test='count(h:ConditionedBuildingVolume) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ConditionedBuildingVolume</sch:assert>
-      <!-- Moved/deprecated HasFlueOrChimney input; see https://github.com/NREL/OpenStudio-HPXML/pull/1379 -->
+      <!-- Moved/deprecated HasFlueOrChimney input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1379 -->
       <sch:assert role='ERROR' test='count(h:extension/h:HasFlueOrChimney) = 0'>extension/HasFlueOrChimney has been replaced by /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/extension/HasFlueOrChimneyInConditionedSpace</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:NumberofUnits) &gt; 1'>NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.</sch:report>
@@ -800,7 +800,7 @@
       <sch:assert role='ERROR' test='count(h:DistanceToBottomOfInsulation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DistanceToBottomOfInsulation</sch:assert>
       <sch:assert role='ERROR' test='number(h:DistanceToBottomOfInsulation) &gt;= number(h:DistanceToTopOfInsulation) or not(h:DistanceToBottomOfInsulation) or not(h:DistanceToTopOfInsulation)'>Expected DistanceToBottomOfInsulation to be greater than or equal to DistanceToTopOfInsulation</sch:assert>
       <sch:assert role='ERROR' test='number(h:DistanceToBottomOfInsulation) &lt;= number(../../h:Height) or not(h:DistanceToBottomOfInsulation) or not(../../h:Height)'>Expected DistanceToBottomOfInsulation to be less than or equal to ../../Height</sch:assert>
-      <!-- Moved/deprecated extension/DistanceToTopOfInsulation & extension/DistanceToBottomOfInsulation inputs; see https://github.com/NREL/OpenStudio-HPXML/pull/894 -->
+      <!-- Moved/deprecated extension/DistanceToTopOfInsulation & extension/DistanceToBottomOfInsulation inputs; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/894 -->
       <sch:assert role='ERROR' test='count(h:extension/h:DistanceToTopOfInsulation) = 0'>extension/DistanceToTopOfInsulation has been replaced by DistanceToTopOfInsulation</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:DistanceToBottomOfInsulation) = 0'>extension/DistanceToBottomOfInsulation has been replaced by DistanceToBottomOfInsulation</sch:assert>
     </sch:rule>
@@ -821,7 +821,7 @@
       <sch:assert role='ERROR' test='count(h:InteriorFinish/h:Thickness) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InteriorFinish/Thickness</sch:assert>
       <sch:assert role='ERROR' test='count(h:RadiantBarrier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RadiantBarrier</sch:assert> <!-- See [Floor_RadiantBarrier] -->
       <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/AssemblyEffectiveRValue</sch:assert>
-      <!-- Moved/deprecated extension/OtherSpaceAboveOrBelow input; see https://github.com/NREL/OpenStudio-HPXML/pull/1203 -->
+      <!-- Moved/deprecated extension/OtherSpaceAboveOrBelow input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1203 -->
       <sch:assert role='ERROR' test='count(h:extension/h:OtherSpaceAboveOrBelow) = 0'>extension/OtherSpaceAboveOrBelow has been replaced by FloorOrCeiling</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -1524,7 +1524,7 @@
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
-      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NREL/OpenStudio-HPXML/pull/1931 -->
+      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1931 -->
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityRetention) = 0'>extension/HeatingCapacityRetention has been replaced by extension/HeatingCapacityFraction17F</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityFraction17F) + count(h:HeatingCapacity17F) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeatingCapacityFraction17F | HeatingCapacity17F</sch:assert> <!-- See [HeatPumpCapacityRetention] -->
       <sch:assert role='ERROR' test='number(h:extension/h:HeatingCapacityFraction17F) &lt; 1 or not(h:extension/h:HeatingCapacityFraction17F)'>Expected extension/HeatingCapacityFraction17F to be less than 1</sch:assert>
@@ -1592,7 +1592,7 @@
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
-      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NREL/OpenStudio-HPXML/pull/1931 -->
+      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1931 -->
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityRetention) = 0'>extension/HeatingCapacityRetention has been replaced by extension/HeatingCapacityFraction17F</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityFraction17F) + count(h:HeatingCapacity17F) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeatingCapacityFraction17F | HeatingCapacity17F</sch:assert> <!-- See [HeatPumpCapacityRetention] -->
       <sch:assert role='ERROR' test='number(h:extension/h:HeatingCapacityFraction17F) &lt; 1 or not(h:extension/h:HeatingCapacityFraction17F)'>Expected extension/HeatingCapacityFraction17F to be less than 1</sch:assert>
@@ -1727,7 +1727,7 @@
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
-      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NREL/OpenStudio-HPXML/pull/1931 -->
+      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1931 -->
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityRetention) = 0'>extension/HeatingCapacityRetention has been replaced by extension/HeatingCapacityFraction17F</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityFraction17F) + count(h:HeatingCapacity17F) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeatingCapacityFraction17F | HeatingCapacity17F</sch:assert> <!-- See [HeatPumpCapacityRetention] -->
       <sch:assert role='ERROR' test='number(h:extension/h:HeatingCapacityFraction17F) &lt; 1 or not(h:extension/h:HeatingCapacityFraction17F)'>Expected extension/HeatingCapacityFraction17F to be less than 1</sch:assert>
@@ -2594,7 +2594,7 @@
       <sch:assert role='ERROR' test='count(h:UsesDesuperheater) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UsesDesuperheater</sch:assert> <!-- See [Desuperheater] -->
       <sch:assert role='ERROR' test='count(h:extension/h:HPWHInConfinedSpaceWithoutMitigation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HPWHInConfinedSpaceWithoutMitigation</sch:assert> <!-- See [HPWHInConfinedSpaceWithoutMitigation] -->
       <sch:assert role='ERROR' test='h:extension/h:HPWHInConfinedSpaceWithoutMitigation[text()="true" or text()="false"] or not(h:extension/h:HPWHInConfinedSpaceWithoutMitigation)'>Expected extension/HPWHInConfinedSpaceWithoutMitigation to be 'true' or 'false'</sch:assert>
-      <!-- Moved/deprecated extension/OperatingMode input; see https://github.com/NREL/OpenStudio-HPXML/pull/1289 -->
+      <!-- Moved/deprecated extension/OperatingMode input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1289 -->
       <sch:assert role='ERROR' test='count(h:extension/h:OperatingMode) = 0'>extension/OperatingMode has been replaced by HPWHOperatingMode</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:HotWaterTemperature) &lt; 110'>Hot water setpoint should typically be greater than or equal to 110 deg-F.</sch:report>
@@ -3017,7 +3017,7 @@
       <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
-      <!-- Moved/deprecated extension/IsVented and extension/VentedFlowRate inputs; see https://github.com/NREL/OpenStudio-HPXML/pull/751 -->
+      <!-- Moved/deprecated extension/IsVented and extension/VentedFlowRate inputs; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/751 -->
       <sch:assert role='ERROR' test='count(h:extension/h:IsVented) = 0'>extension/IsVented has been replaced by Vented</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:VentedFlowRate) = 0'>extension/VentedFlowRate has been replaced by VentedFlowRate</sch:assert>
     </sch:rule>

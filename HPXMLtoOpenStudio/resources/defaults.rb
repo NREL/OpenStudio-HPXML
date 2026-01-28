@@ -340,7 +340,7 @@ module Defaults
       else
         # Manual J default: full time occupants = 1 + number of bedrooms
         # If the actual number of full time occupants exceeds the default value, the actual occupant count is used
-        # See https://github.com/NREL/OpenStudio-HPXML/issues/1841
+        # See https://github.com/NatLabRockies/OpenStudio-HPXML/issues/1841
         hpxml_bldg.header.manualj_num_occupants = [hpxml_bldg.building_construction.number_of_bedrooms + 1, hpxml_bldg.building_occupancy.number_of_residents.to_f].max
       end
       hpxml_bldg.header.manualj_num_occupants_isdefaulted = true
@@ -5118,7 +5118,7 @@ module Defaults
 
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
       # C1/C2 coefficients derived from ASHRAE 2021 Handbook of Fundamentals Chapter 15 Table 14
-      # See spreadsheet in https://github.com/NREL/OpenStudio-HPXML/pull/1826 for derivation
+      # See spreadsheet in https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1826 for derivation
       if [HPXML::InteriorShadingTypeDarkBlinds,
           HPXML::InteriorShadingTypeMediumBlinds,
           HPXML::InteriorShadingTypeLightBlinds].include? type
@@ -5209,7 +5209,7 @@ module Defaults
   # @return [Array<Double, Double>] The summer and winter shading factors
   def self.get_window_insect_screen_factors(window)
     # C1/C2 coefficients derived from ASHRAE 2021 Handbook of Fundamentals Chapter 15 Table 14
-    # See spreadsheet in https://github.com/NREL/OpenStudio-HPXML/pull/1826 for derivation
+    # See spreadsheet in https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1826 for derivation
     c_map = {
       HPXML::LocationExterior => [0.64, 0.0],
       HPXML::LocationInterior => [0.99, 0.1],

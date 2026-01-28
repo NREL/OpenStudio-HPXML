@@ -17,7 +17,7 @@ concurrency:
 env:
   OS_VERSION: "3.11.0"
   OS_SHA: 241b8abb4d
-  OS_URL: https://github.com/NREL/OpenStudio/releases/download
+  OS_URL: https://github.com/NatLabRockies/OpenStudio/releases/download
 
 jobs:
   run-unit-tests:
