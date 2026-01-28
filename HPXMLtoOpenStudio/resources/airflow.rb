@@ -2039,7 +2039,7 @@ module Airflow
 
       infil_program.addLine("Set f_operation = #{[vent_mech.hours_in_operation / 24.0, 0.0001].max}") # Operation, fraction of hour
       infil_program.addLine("Set oa_cfm_ah = #{UnitConversions.convert(vent_mech.oa_unit_flow_rate, 'cfm', 'm^3/s')}")
-      infil_program.addLine('Set oa_cfm_ah = @Max oa_cfm_ah 0.00001') # Fix for https://github.com/NREL/OpenStudio-HPXML/issues/2072
+      infil_program.addLine('Set oa_cfm_ah = @Max oa_cfm_ah 0.00001') # Fix for https://github.com/NatLabRockies/OpenStudio-HPXML/issues/2072
 
       case vent_mech.cfis_addtl_runtime_operating_mode
       when HPXML::CFISModeSupplementalFan
