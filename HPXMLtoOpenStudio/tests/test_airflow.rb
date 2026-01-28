@@ -222,10 +222,10 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
 
     # Check natural ventilation is available 3 days/wk
     nv_sched = model.getScheduleRulesets.find { |s| s.name.to_s.start_with? Constants::ObjectTypeNaturalVentilation }
-    assert_equal(3768, Schedule.annual_equivalent_full_load_hrs(2007, nv_sched))
+    assert_equal(8760, Schedule.annual_equivalent_full_load_hrs(2007, nv_sched))
   end
 
-  def test_natural_ventilation_7_days_per_week
+  def test_natural_ventilation_3_days_per_week
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-enclosure-windows-natural-ventilation-availability.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
@@ -239,7 +239,7 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
 
     # Check natural ventilation is available 7 days/wk
     nv_sched = model.getScheduleRulesets.find { |s| s.name.to_s.start_with? Constants::ObjectTypeNaturalVentilation }
-    assert_equal(8760, Schedule.annual_equivalent_full_load_hrs(2007, nv_sched))
+    assert_equal(3768, Schedule.annual_equivalent_full_load_hrs(2007, nv_sched))
   end
 
   def test_mechanical_ventilation_none

@@ -51,7 +51,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     schedule_constants = 13
-    schedule_rulesets = 16
+    schedule_rulesets = 17
     schedule_fixed_intervals = 0
     schedule_files = 0
 
@@ -81,7 +81,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     schedule_constants = 12
-    schedule_rulesets = 20
+    schedule_rulesets = 21
     schedule_fixed_intervals = 0
     schedule_files = 0
 
@@ -654,7 +654,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
 
   def test_set_unavailable_periods_natvent
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-enclosure-windows-natural-ventilation-availability.xml'))
 
     # normal availability
     begin_month = 1

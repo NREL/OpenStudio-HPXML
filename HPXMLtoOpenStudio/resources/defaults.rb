@@ -399,8 +399,13 @@ module Defaults
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [nil]
   def self.apply_building_header(hpxml_header, hpxml_bldg, weather)
+    if hpxml_bldg.header.natvent_seasons.nil?
+      hpxml_bldg.header.natvent_seasons = HPXML::NatVentSeasonsYearRound
+      hpxml_bldg.header.natvent_seasons_isdefaulted = true
+    end
+
     if hpxml_bldg.header.natvent_days_per_week.nil?
-      hpxml_bldg.header.natvent_days_per_week = 3
+      hpxml_bldg.header.natvent_days_per_week = 7
       hpxml_bldg.header.natvent_days_per_week_isdefaulted = true
     end
 

@@ -859,20 +859,15 @@ module Outputs
         program.addLine('    Set htg_season = 1')
         program.addLine('  EndIf')
       end
-      program.addLine("  If ((#{natvent_sensors[0].name} <> 0) || (#{natvent_sensors[1].name} <> 0)) && (clg_season == 1)") # Assign hour to cooling if natural ventilation is operating
-      program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
-      program.addLine("  ElseIf ((#{whf_sensors[0].name} <> 0) || (#{whf_sensors[1].name} <> 0)) && (clg_season == 1)") # Assign hour to cooling if whole house fan is operating
-      program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
       if not thermostat.nil?
-        program.addLine('  Else') # Indoor temperature floating between setpoints; determine assignment by comparing to average of heating/cooling setpoints
-        program.addLine("    Set Tmid_setpoint = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2")
-        program.addLine("    If (#{tin_sensor.name} > Tmid_setpoint) && (clg_season == 1)")
-        program.addLine("      Set clg_mode = #{total_cool_load_serveds[unit]}")
-        program.addLine("    ElseIf (#{tin_sensor.name} < Tmid_setpoint) && (htg_season == 1)")
-        program.addLine("      Set htg_mode = #{total_heat_load_serveds[unit]}")
-        program.addLine('    EndIf')
+        # Indoor temperature floating between setpoints; determine assignment by comparing to average of heating/cooling setpoints
+        program.addLine("  Set Tmid_setpoint = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2")
+        program.addLine("  If (#{tin_sensor.name} > Tmid_setpoint) && (clg_season == 1)")
+        program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
+        program.addLine("  ElseIf (#{tin_sensor.name} < Tmid_setpoint) && (htg_season == 1)")
+        program.addLine("    Set htg_mode = #{total_heat_load_serveds[unit]}")
+        program.addLine('  EndIf')
       end
-      program.addLine('  EndIf')
       program.addLine('EndIf')
 
       unit_multiplier = hpxml_bldg.building_construction.number_of_units

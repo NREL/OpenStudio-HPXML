@@ -1598,7 +1598,7 @@ Each window or glass door area is entered as a ``/HPXML/Building/BuildingDetails
   .. [#] FractionOperable reflects whether the windows are operable (can be opened), not how they are used by the occupants.
          If a ``Window`` represents a single window, the value should be 0 or 1.
          If a ``Window`` represents multiple windows, the value is calculated as the total window area for any operable windows divided by the total window area.
-         The total open window area for natural ventilation is calculated using A) the operable fraction, B) the assumption that 50% of the area of operable windows can be open, and C) the assumption that 20% of that openable area is actually opened by occupants whenever outdoor conditions are favorable for cooling.
+         The total open window area for natural ventilation is calculated using A) the operable fraction, B) the assumption that 50% of the area of operable windows can be open, and C) the assumption that 20% of that openable area is actually opened by occupants.
          See additional inputs in :ref:`natural_ventilation`.
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
 
@@ -1855,13 +1855,16 @@ Natural Ventilation
 
 If operable windows are defined, the availability of natural ventilation is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension``.
 
-  =============================================  ========  =========  ===========  ========  ========  ========================================================
-  Element                                        Type      Units      Constraints  Required  Default   Notes
-  =============================================  ========  =========  ===========  ========  ========  ========================================================
-  ``NaturalVentilationAvailabilityDaysperWeek``  integer   days/week  >= 0, <= 7   No        3 [#]_    How often windows can be opened by occupants for natural ventilation
-  =============================================  ========  =========  ===========  ========  ========  ========================================================
+  =============================================  ========  =========  ===========  ========  ==========  ========================================================
+  Element                                        Type      Units      Constraints  Required  Default     Notes
+  =============================================  ========  =========  ===========  ========  ==========  ========================================================
+  ``NaturalVentilationAvailabilitySeasons``      string               See [#]_     No        year-round  When during the year occupants open windows
+  ``NaturalVentilationAvailabilityDaysperWeek``  integer   days/week  >= 0, <= 7   No        7           How many days/week occupants open windows
+  =============================================  ========  =========  ===========  ========  ==========  ========================================================
 
-  .. [#] Default of 3 days per week (Monday/Wednesday/Friday) is based on `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+  .. [#] NaturalVentilationAvailabilitySeasons choices are "year-round", "cooling", or "heating".
+         The cooling/heating seasons are determined by the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_
+         Natural ventilation will be available when the outdoor humidity ratio is less than 0.0115 and either A) outdoor temperature is below the indoor temperature and the indoor temperature is above the average of the heating and cooling setpoints, or B) outdoor temperature is above the indoor temperature and the indoor temperature is below the average of the heating and cooling setpoints, per ANSI/RESNET/ICC 301-2025.
 
 HPXML Skylights
 ***************
@@ -4473,7 +4476,7 @@ An in-unit recirculation hot water distribution system is entered as a ``/HPXML/
 
          Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence. If a building has both a conditioned and unconditioned basement on the same level, Bsmnt = 0 to avoid double counting.
 
-  .. [#] RecirculationPipingLoopLength is the recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
+  .. [#] RecirculationPipingLoopLength is the recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each conditioned floor level greater than one plus 10 feet of piping for unconditioned basements.
   .. [#] BranchPipingLength is the length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
   .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] Additional drain water heat recovery inputs are described in :ref:`water_heater_dwhr`.
@@ -4550,14 +4553,13 @@ If a drain water heat recovery (DWHR) device is specified, additional informatio
   =======================  =======  =====  ===========  ========  ========  =========================================
   Element                  Type     Units  Constraints  Required  Default   Notes
   =======================  =======  =====  ===========  ========  ========  =========================================
-  ``FacilitiesConnected``  string          See [#]_     Yes                 Specifies which facilities are connected
+  ``FacilitiesConnected``  string          See [#]_     Yes                 Specifies how many facilities are connected
   ``EqualFlow``            boolean                      Yes                 Specifies how the DHWR is configured [#]_
   ``Efficiency``           double   frac   > 0, <= 1    Yes                 Efficiency according to CSA 55.1
   =======================  =======  =====  ===========  ========  ========  =========================================
 
   .. [#] FacilitiesConnected choices are "one" or "all".
-         Use "one" if there are multiple showers and only one of them is connected to the DWHR.
-         Use "all" if there is one shower and it's connected to the DWHR or there are two or more showers connected to the DWHR.
+         Use "all" if all of the showers in the home are connected to WHR units, otherwise use "one" if at least one shower is connected to a DWHR unit.
   .. [#] EqualFlow should be true if the DWHR supplies pre-heated water to both the fixture cold water piping *and* the hot water heater potable supply piping.
 
 Drain water heat recovery is modeled according to the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
