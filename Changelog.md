@@ -1,3 +1,14 @@
+## OpenStudio-HPXML v1.12.0
+
+__New Features__
+- Output updates:
+  - **Breaking change**: Replaces "UnitX" prefixes with Building IDs in whole SFA/MF building timeseries outputs.
+
+__Bugfixes__
+- Fixes a misleading warning about adjusting inverted setpoints when heating setpoint is greater than cooling setpoint during non-overlapping heating/cooling seasons.
+- Fixes possible incorrect unmet hours outputs for unavailable periods with no space heating only (or no space cooling only).
+- Fixes PanHeaterControlType="heat pump mode" incorrectly disallowed for mini-split heat pumps.
+
 ## OpenStudio-HPXML v1.11.0
 
 __New Features__
@@ -16,6 +27,8 @@ __New Features__
   - Updates supplemental heating energy use during defrost based on RESNET HERS Addendum 82.
   - Updates shared pump power for ground-source heat pumps on a shared recirculation loop to cycle with heating/cooling load rather than operate continuously per RESNET HERS Addendum 94.
   - Allows desuperheaters to be used with the experimental ground-source heat pump model.
+  - Adds `PanHeaterControlType="heat pump mode"`, in which the pan heater will run when the HP is running (and the outdoor temperature is below 32F).
+  - Updates `PanHeaterControlType="continuous"` to avoid pan heater operation when the outdoor temperature is below the minimum compressor temperature.
 - Allows optional `UsageMultiplier` for electric vehicles described using `Vehicles`.
 - Water heater improvements:
   - Allows HPWHs to have exhaust air ducted to the outside using `HPWHDucting/ExhaustAirTermination="outside"`.

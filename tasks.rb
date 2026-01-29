@@ -1608,7 +1608,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.attics[0].attached_to_roof_idrefs << hpxml_bldg.roofs[-1].id
       end
     elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
-      # Test relaxed overhangs validation; https://github.com/NREL/OpenStudio-HPXML/issues/866
+      # Test relaxed overhangs validation; https://github.com/NatLabRockies/OpenStudio-HPXML/issues/866
       hpxml_bldg.windows.each do |window|
         next unless window.overhangs_depth.nil?
 
@@ -2217,6 +2217,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
           hpxml_bldg.heat_pumps[0].pan_heater_control_type = HPXML::HVACPanHeaterControlTypeContinuous
         elsif hpxml_file.include? 'pan-heater-defrost-mode'
           hpxml_bldg.heat_pumps[0].pan_heater_control_type = HPXML::HVACPanHeaterControlTypeDefrost
+        elsif hpxml_file.include? 'pan-heater-heat-pump-mode'
+          hpxml_bldg.heat_pumps[0].pan_heater_control_type = HPXML::HVACPanHeaterControlTypeHeatPump
         end
       end
     end
