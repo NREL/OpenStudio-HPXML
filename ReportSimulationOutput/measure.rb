@@ -1075,10 +1075,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       keys = resilience.variables.select { |v| v[2] == vars[0] }.map { |v| v[1] }
       batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, resilience_frequency)
 
-      vars = ['Other Equipment Electricity Energy']
-      keys = resilience.variables.select { |v| v[2] == vars[0] }.map { |v| v[1] }
-      batt_loss = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-
       min_soc = elcd.minimumStorageStateofChargeFraction
       batt_kw = elcd.designStorageControlDischargePower.get / 1000.0
       batt_roundtrip_eff = elcs.dctoDCChargingEfficiency
@@ -1089,7 +1085,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
       elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
       elec = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-      crit_load = elec.zip(elec_prod, batt_loss).map { |x, y, z| x + y + z }
+      crit_load = elec.zip(elec_prod).map { |x, y| x + y }
 
       resilience_timeseries = []
       n_timesteps = crit_load.size
@@ -2058,7 +2054,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       load_kw = crit_load[t]
 
       # even if load_kw is negative, we return if batt_soc_kwh isn't charged at all
-      return i / Float(ts_per_hr) if batt_soc_kwh <= 0
+      return i / Float(ts_per_hr) if batt_soc_kwh <= Constants::Small
 
       if load_kw < 0 # load is met with PV
         if batt_soc_kwh < batt_kwh # charge battery if there's room in the battery
@@ -3232,11 +3228,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         if object.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeBattery
           return { RT::Battery => ['Electric Storage Charge Fraction'] }
-        end
-
-      elsif object.to_OtherEquipment.is_initialized
-        if object_type == Constants::ObjectTypeBatteryLossesAdjustment
-          return { RT::Battery => ['Other Equipment Electricity Energy'] }
         end
 
       end
