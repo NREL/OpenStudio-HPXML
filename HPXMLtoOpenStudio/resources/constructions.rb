@@ -2215,7 +2215,7 @@ module Constructions
         cool_setpoint = schedules_file.schedules[SchedulesFile::Columns[:CoolingSetpoint].name][sim_begin_hour]
       end
 
-      # Methodology adapted from https://github.com/NREL/EnergyPlus/blob/b18a2733c3131db808feac44bc278a14b05d8e1f/src/EnergyPlus/HeatBalanceKivaManager.cc#L303-L313
+      # Methodology adapted from https://github.com/NatLabRockies/EnergyPlus/blob/b18a2733c3131db808feac44bc278a14b05d8e1f/src/EnergyPlus/HeatBalanceKivaManager.cc#L303-L313
       heat_balance_temp = UnitConversions.convert(10.0, 'C', 'F')
       cool_balance_temp = UnitConversions.convert(15.0, 'C', 'F')
       if outdoor_temp < heat_balance_temp
@@ -2235,8 +2235,8 @@ module Constructions
 
     # Determine initial temperature
     # For unconditioned spaces, this overrides EnergyPlus's built-in assumption of 22C (71.6F);
-    #   see https://github.com/NREL/EnergyPlus/blob/b18a2733c3131db808feac44bc278a14b05d8e1f/src/EnergyPlus/HeatBalanceKivaManager.cc#L257-L259
-    # For conditioned spaces, this avoids an E+ 22.2 bug; see https://github.com/NREL/EnergyPlus/issues/9692
+    #   see https://github.com/NatLabRockies/EnergyPlus/blob/b18a2733c3131db808feac44bc278a14b05d8e1f/src/EnergyPlus/HeatBalanceKivaManager.cc#L257-L259
+    # For conditioned spaces, this avoids an E+ 22.2 bug; see https://github.com/NatLabRockies/EnergyPlus/issues/9692
     if HPXML::conditioned_locations.include? interior_adjacent_to
       initial_temp = indoor_temp
     else

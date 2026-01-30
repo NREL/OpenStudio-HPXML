@@ -441,7 +441,7 @@ module Waterheater
 
   # Adds an EMS program to control the boiler operation based on domestic hot water demand.
   # The program modulates the source side mass flow rate to achieve better control and accuracy
-  # compared to not having the EMS program. See https://github.com/NREL/OpenStudio-HPXML/pull/225.
+  # compared to not having the EMS program. See https://github.com/NatLabRockies/OpenStudio-HPXML/pull/225.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param water_heating_systems [Array<HPXML::WaterHeatingSystem>] The HPXML water heaters of interest
@@ -2151,7 +2151,7 @@ module Waterheater
   end
 
   # Returns the water heater setpoint, accounting for any deadband, in deg-C. The deadband is currently
-  # centered, not single-sided; see https://github.com/NREL/OpenStudio-HPXML/issues/642.
+  # centered, not single-sided; see https://github.com/NatLabRockies/OpenStudio-HPXML/issues/642.
   #
   # @param t_set [Double] Water heater setpoint (F)
   # @param wh_type [String] Type of water heater (HPXML::WaterHeaterTypeXXX)

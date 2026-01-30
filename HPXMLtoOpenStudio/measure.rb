@@ -276,7 +276,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         # Batteries use "TrackFacilityElectricDemandStoreExcessOnSite"; to support modeling of batteries in whole
         # SFA/MF building simulations, we'd need to create custom meters with electricity usage *for each unit*
         # and switch to "TrackMeterDemandStoreExcessOnSite".
-        # https://github.com/NREL/OpenStudio-HPXML/issues/1499
+        # https://github.com/NatLabRockies/OpenStudio-HPXML/issues/1499
         fail 'Modeling batteries for whole SFA/MF buildings is not currently supported.'
       end
     end
@@ -360,7 +360,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Geometry.apply_thermal_mass(model, spaces, hpxml_bldg, hpxml.header)
     Geometry.set_zone_volumes(spaces, hpxml_bldg, hpxml.header)
     Geometry.explode_surfaces(model, hpxml_bldg)
-    Geometry.apply_building_unit(model, hpxml, hpxml_bldg)
+    Geometry.apply_building_unit(model, hpxml)
 
     # HVAC
     airloop_map = HVAC.apply_hvac_systems(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file, hvac_days)
@@ -404,7 +404,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # we didn't go this, we'd end up with successful EnergyPlus simulations that
     # use the wrong (default) value unless we check the return value of *every*
     # OS SDK setter method to notice there was an invalid value provided.
-    # See https://github.com/NREL/OpenStudio/pull/4505 for more background.
+    # See https://github.com/NatLabRockies/OpenStudio/pull/4505 for more background.
     model.setStrictnessLevel('None'.to_StrictnessLevel)
 
     # Store the fraction of windows operable before we collapse surfaces

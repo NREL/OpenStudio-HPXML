@@ -256,7 +256,7 @@ class ReportUtilityBillsTest < Minitest::Test
 
   def test_workflow_detailed_calculations
     # Detailed Rate.json was renamed from Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json
-    # See https://github.com/NREL/OpenStudio-HPXML/issues/1444
+    # See https://github.com/NatLabRockies/OpenStudio-HPXML/issues/1444
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Detailed Rate.json')
@@ -268,7 +268,7 @@ class ReportUtilityBillsTest < Minitest::Test
 
   def test_workflow_detailed_calculations_scheduled_battery
     # Detailed Rate.json was renamed from Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json
-    # See https://github.com/NREL/OpenStudio-HPXML/issues/1444
+    # See https://github.com/NatLabRockies/OpenStudio-HPXML/issues/1444
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-battery-scheduled.xml'))
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Detailed Rate.json')
@@ -280,7 +280,7 @@ class ReportUtilityBillsTest < Minitest::Test
 
   def test_workflow_detailed_calculations_all_electric
     # Detailed Rate.json was renamed from Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json
-    # See https://github.com/NREL/OpenStudio-HPXML/issues/1444
+    # See https://github.com/NatLabRockies/OpenStudio-HPXML/issues/1444
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed.xml'))
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/tests/Detailed Rate.json')

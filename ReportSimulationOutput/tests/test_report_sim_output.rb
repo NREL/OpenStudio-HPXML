@@ -990,14 +990,15 @@ class ReportSimulationOutputTest < Minitest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     expected_timeseries_cols = ['Time']
     for i in 1..6
-      expected_timeseries_cols << "Temperature: Unit#{i} Conditioned Space"
+      i == 1 ? building_id = 'MyBuilding' : building_id = "MyBuilding_#{i}"
+      expected_timeseries_cols << "Temperature: #{building_id} Conditioned Space"
       if i <= 2
-        expected_timeseries_cols << "Temperature: Unit#{i} Basement Unconditioned"
+        expected_timeseries_cols << "Temperature: #{building_id} Basement Unconditioned"
       elsif i >= 5
-        expected_timeseries_cols << "Temperature: Unit#{i} Attic Vented"
+        expected_timeseries_cols << "Temperature: #{building_id} Attic Vented"
       end
-      expected_timeseries_cols << "Temperature: Unit#{i} Heating Setpoint"
-      expected_timeseries_cols << "Temperature: Unit#{i} Cooling Setpoint"
+      expected_timeseries_cols << "Temperature: #{building_id} Heating Setpoint"
+      expected_timeseries_cols << "Temperature: #{building_id} Cooling Setpoint"
     end
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)

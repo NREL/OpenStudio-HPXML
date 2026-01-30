@@ -188,7 +188,7 @@ module Battery
     return if is_ev
 
     # Apply round trip efficiency as EMS program b/c E+ input is not hooked up.
-    # Replace this when the first item in https://github.com/NREL/EnergyPlus/issues/9176 is fixed.
+    # Replace this when the first item in https://github.com/NatLabRockies/EnergyPlus/issues/9176 is fixed.
     charge_sensor = Model.add_ems_sensor(
       model,
       name: 'battery_charge',
