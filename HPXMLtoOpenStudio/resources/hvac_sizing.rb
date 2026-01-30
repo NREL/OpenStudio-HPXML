@@ -469,7 +469,7 @@ module HVACSizing
                 end
               when HPXML::RoofTypeWoodShingles
                 cool_temp += 110.0 * roof.net_area
-              when HPXML::RoofTypeMetal, HPXML::RoofTypePlasticRubber, HPXML::RoofTypeEPS, HPXML::RoofTypeCool
+              when HPXML::RoofTypeMetal, HPXML::RoofTypePlasticRubber, HPXML::RoofTypeEPS
                 case roof.roof_color
                 when HPXML::ColorDark, HPXML::ColorMediumDark
                   cool_temp += 120.0 * roof.net_area
