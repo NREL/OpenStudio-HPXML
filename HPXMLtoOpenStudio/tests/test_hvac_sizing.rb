@@ -1749,6 +1749,49 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_epsilon(2.1, rvalue, tol)
   end
 
+  def test_vented_attic_roof_types
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml, hpxml_bldg = _create_hpxml('base-atticroof-vented.xml')
+    hpxml_bldg.heating_systems[0].heating_capacity = nil
+    hpxml_bldg.cooling_systems[0].cooling_capacity = nil
+    # ClayTile, Concrete, Cool
+    hpxml_bldg.roofs[0].roof_type = HPXML::RoofTypeClayTile
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model_mult, _base_hpxml, test_hpxml_bldg_1 = _test_measure(args_hash)
+    hpxml_bldg.roofs[0].roof_type = HPXML::RoofTypeCool
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model_mult, _base_hpxml, test_hpxml_bldg_2 = _test_measure(args_hash)
+    hpxml_bldg.roofs[0].roof_type = HPXML::RoofTypeConcrete
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model_mult, _base_hpxml, test_hpxml_bldg_3 = _test_measure(args_hash)
+    # Added roof type in the same category is sized the same as existing roof type in the same category
+    assert_equal(test_hpxml_bldg_1.cooling_systems[0].cooling_capacity, test_hpxml_bldg_2.cooling_systems[0].cooling_capacity)
+    assert_equal(test_hpxml_bldg_1.cooling_systems[0].cooling_capacity, test_hpxml_bldg_3.cooling_systems[0].cooling_capacity)
+    # Metal, PlasticRubber, EPS
+    hpxml_bldg.roofs[0].roof_type = HPXML::RoofTypeMetal
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model_mult, _base_hpxml, test_hpxml_bldg_1 = _test_measure(args_hash)
+    hpxml_bldg.roofs[0].roof_type = HPXML::RoofTypePlasticRubber
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model_mult, _base_hpxml, test_hpxml_bldg_2 = _test_measure(args_hash)
+    hpxml_bldg.roofs[0].roof_type = HPXML::RoofTypeEPS
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model_mult, _base_hpxml, test_hpxml_bldg_3 = _test_measure(args_hash)
+    # Added roof type in the same category is sized the same as existing roof type in the same category
+    assert_equal(test_hpxml_bldg_1.cooling_systems[0].cooling_capacity, test_hpxml_bldg_2.cooling_systems[0].cooling_capacity)
+    assert_equal(test_hpxml_bldg_1.cooling_systems[0].cooling_capacity, test_hpxml_bldg_3.cooling_systems[0].cooling_capacity)
+    # AsphaltShingles, Shingles
+    hpxml_bldg.roofs[0].roof_type = HPXML::RoofTypeAsphaltShingles
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model_mult, _base_hpxml, test_hpxml_bldg_1 = _test_measure(args_hash)
+    hpxml_bldg.roofs[0].roof_type = HPXML::RoofTypeShingles
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model_mult, _base_hpxml, test_hpxml_bldg_2 = _test_measure(args_hash)
+    # Added roof type in the same category is sized the same as existing roof type in the same category
+    assert_equal(test_hpxml_bldg_1.cooling_systems[0].cooling_capacity, test_hpxml_bldg_2.cooling_systems[0].cooling_capacity)
+  end
+
   def test_multiple_zones
     # Run base-zones-spaces-multiple.xml
     args_hash = {}
