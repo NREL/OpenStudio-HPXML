@@ -6393,7 +6393,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       assert_equal(tank_volume, wh_system.tank_volume)
       assert_in_epsilon(recovery_efficiency, wh_system.recovery_efficiency, 0.01)
       assert_equal(location, wh_system.location)
-      assert_equal(temperature, wh_system.temperature)
+      if temperature.nil?
+        assert_nil(wh_system.temperature)
+      else
+        assert_equal(temperature, wh_system.temperature)
+      end
       if not wh_system.uniform_energy_factor.nil?
         assert_equal(efficiency, wh_system.uniform_energy_factor)
       else

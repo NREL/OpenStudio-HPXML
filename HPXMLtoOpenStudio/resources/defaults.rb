@@ -76,7 +76,7 @@ module Defaults
     apply_infiltration(hpxml_bldg, unit_num)
     apply_hvac_location(hpxml_bldg)
     apply_ventilation_fans(hpxml_bldg, weather, eri_version)
-    apply_water_heaters(hpxml_bldg, eri_version, schedules_file)
+    apply_water_heaters(runner, hpxml_bldg, eri_version, schedules_file)
     apply_flue_or_chimney(hpxml_bldg)
     apply_hot_water_distribution(hpxml_bldg, schedules_file)
     apply_water_fixtures(hpxml_bldg, schedules_file)
@@ -3283,11 +3283,12 @@ module Defaults
 
   # Assigns default values for omitted optional inputs in the HPXML::WaterHeatingSystem objects
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_water_heaters(hpxml_bldg, eri_version, schedules_file)
+  def self.apply_water_heaters(runner, hpxml_bldg, eri_version, schedules_file)
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     nbaths = hpxml_bldg.building_construction.number_of_bathrooms
     n_occ = hpxml_bldg.building_occupancy.number_of_residents
@@ -3427,6 +3428,17 @@ module Defaults
       if water_heating_system.has_mixing_valve && water_heating_system.mixing_valve_setpoint.nil?
         water_heating_system.mixing_valve_setpoint = [125.0, min_setpoint].min
         water_heating_system.mixing_valve_setpoint_isdefaulted = true
+      end
+
+      if schedules_file_includes_water_heater_setpoint_temp
+        # Detailed schedule file error-checking that cannot be performed in the schematron.
+        # This matches schematron logic for simple (constant) water heater setpoints.
+        if min_setpoint < 105
+          runner.registerError("Expected minimum value for detailed water heater setpoint schedule (#{min_setpoint} deg-F) to be greater than or equal to 105 deg-F.")
+        end
+        if water_heating_system.has_mixing_valve && water_heating_system.mixing_valve_setpoint > min_setpoint
+          runner.registerError("Expected MixingValveSetpoint (#{water_heating_system.mixing_valve_setpoint} deg-F) to be less than or equal to minimum value for detailed water heater setpoint schedule (#{min_setpoint} deg-F).")
+        end
       end
 
       next unless water_heating_system.location.nil?

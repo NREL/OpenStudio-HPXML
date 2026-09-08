@@ -374,7 +374,7 @@ module HotWaterAndAppliances
 
     if Constants::ERIVersions.index(eri_version) < Constants::ERIVersions.index('2014A')
       # Calculate annual average mixed water fraction
-      avg_mw_fraction = calc_mixed_water_fraction(eri_version, hpxml_bldg, t_mix, weather)
+      avg_mw_fraction = calc_mixed_water_fraction(hpxml_bldg, t_mix, weather, schedules_file)
     end
 
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
@@ -1095,19 +1095,23 @@ module HotWaterAndAppliances
   # Calculates the annual average mixed water adjustment fraction. The fraction converts from
   # gallons of mixed water to gallons of hot water that needs to be served by the water heater.
   #
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param t_mix [Double] Temperature of mixed water at fixtures (F)
   # @param weather [WeatherFile] Weather object containing EPW information
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [Double] Annual average mixed water adjustment fraction
-  def self.calc_mixed_water_fraction(eri_version, hpxml_bldg, t_mix, weather)
+  def self.calc_mixed_water_fraction(hpxml_bldg, t_mix, weather, schedules_file)
     hot_water_distribution = hpxml_bldg.hot_water_distributions[0]
 
     # WH Setpoint: Weighted average by fraction DHW load served
     t_set = 0.0
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       wh_setpoint = water_heating_system.temperature
-      wh_setpoint = Defaults.get_water_heater_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
+      if wh_setpoint.nil?
+        # Detailed setpoint schedule; use average value
+        sf = schedules_file.schedules[SchedulesFile::Columns[:WaterHeaterSetpoint].name]
+        wh_setpoint = sf.sum.to_f / sf.size
+      end
       t_set += wh_setpoint * water_heating_system.fraction_dhw_load_served
     end
 
