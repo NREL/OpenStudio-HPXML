@@ -272,7 +272,7 @@ module HVAC
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
   # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
-  # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
+  # @param hvac_sequential_load_fracs [Hash] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
@@ -507,7 +507,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
-  # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
+  # @param hvac_sequential_load_fracs [Hash] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
   # @return [OpenStudio::Model::AirLoopHVAC] The newly created air loop hvac object
@@ -570,7 +570,7 @@ module HVAC
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
+  # @param hvac_sequential_load_fracs [Hash] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
   # @return [OpenStudio::Model::AirLoopHVAC] The newly created air loop hvac object
@@ -987,7 +987,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
+  # @param hvac_sequential_load_fracs [Hash] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
   # @return [OpenStudio::Model::AirLoopHVAC] The newly created air loop hvac object
@@ -1095,7 +1095,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
-  # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
+  # @param hvac_sequential_load_fracs [Hash] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
   # @return [OpenStudio::Model::ZoneHVACFourPipeFanCoil or OpenStudio::Model::ZoneHVACBaseboardConvectiveWater] The newly created zone hvac object
@@ -1107,7 +1107,8 @@ module HVAC
     oat_low = nil
     oat_hwst_high = nil
     oat_hwst_low = nil
-    design_temp = 180.0 # F
+    supply_temp = 180.0 # F
+    return_temp = supply_temp - 20.0 # F
 
     if oat_reset_enabled
       if oat_high.nil? || oat_low.nil? || oat_hwst_low.nil? || oat_hwst_high.nil?
@@ -1124,8 +1125,8 @@ module HVAC
 
     loop_sizing = plant_loop.sizingPlant
     loop_sizing.setLoopType('Heating')
-    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(design_temp, 'F', 'C'))
-    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'deltaF', 'deltaC'))
+    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(supply_temp, 'F', 'C'))
+    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(supply_temp - return_temp, 'deltaF', 'deltaC'))
 
     # Pump
     pump_w = get_pump_power_watts(heating_system)
@@ -1148,7 +1149,7 @@ module HVAC
       boiler_RatedHWRT = UnitConversions.convert(80.0, 'F', 'C')
       plr_Rated = 1.0
       plr_Design = 1.0
-      boiler_DesignHWRT = UnitConversions.convert(design_temp - 20.0, 'F', 'C')
+      boiler_DesignHWRT = UnitConversions.convert(return_temp, 'F', 'C')
       # Efficiency curves are normalized using 80F return water temperature, at 0.254PLR
       condBlr_TE_Coeff = [1.058343061, 0.052650153, 0.0087272, 0.001742217, 0.00000333715, 0.000513723]
       boilerEff_Norm = heating_efficiency / (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Rated - condBlr_TE_Coeff[2] * plr_Rated**2 - condBlr_TE_Coeff[3] * boiler_RatedHWRT + condBlr_TE_Coeff[4] * boiler_RatedHWRT**2 + condBlr_TE_Coeff[5] * boiler_RatedHWRT * plr_Rated)
@@ -1199,7 +1200,7 @@ module HVAC
     supply_setpoint = Model.add_schedule_constant(
       model,
       name: "#{obj_name} hydronic heat supply setpoint",
-      value: UnitConversions.convert(design_temp, 'F', 'C'),
+      value: UnitConversions.convert(supply_temp, 'F', 'C'),
       limits: EPlus::ScheduleTypeLimitsTemperature
     )
 
@@ -1220,20 +1221,20 @@ module HVAC
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
     bb_ua = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
-    max_water_flow = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'deltaF', 'deltaC') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
-
+    max_water_flow = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / loop_sizing.loopDesignTemperatureDifference / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
     if heating_system.distribution_system.air_type.to_s == HPXML::AirTypeFanCoil
       # Fan
       fan_cfm = ActualCFMPerTonHeat * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton') # CFM
       fan = create_supply_fan(model, obj_name, 0.0, [fan_cfm], heating_system) # fan energy included in above pump via Electric Auxiliary Energy (EAE)
 
       # Heating Coil
-      htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, model.alwaysOnDiscreteSchedule)
-      htg_coil.setRatedCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
-      htg_coil.setUFactorTimesAreaValue(bb_ua)
-      htg_coil.setMaximumWaterFlowRate(max_water_flow)
-      htg_coil.setPerformanceInputMethod('NominalCapacity')
-      htg_coil.setName(obj_name + ' htg coil')
+      htg_coil = Model.add_coil_heating_water(
+        model,
+        name: "#{obj_name} htg coil",
+        capacity: UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'),
+        ua_value: bb_ua,
+        max_flow_rate: max_water_flow
+      )
       plant_loop.addDemandBranchForComponent(htg_coil)
 
       # Cooling Coil (always off)
@@ -1264,13 +1265,13 @@ module HVAC
       add_fan_pump_disaggregation_ems_program(model, pump, zone_hvac, nil, nil, heating_system)
     else
       # Heating Coil
-      htg_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
-      htg_coil.setName(obj_name + ' htg coil')
-      htg_coil.setConvergenceTolerance(0.001)
-      htg_coil.setHeatingDesignCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
-      htg_coil.setUFactorTimesAreaValue(bb_ua)
-      htg_coil.setMaximumWaterFlowRate(max_water_flow)
-      htg_coil.setHeatingDesignCapacityMethod('HeatingDesignCapacity')
+      htg_coil = Model.add_coil_heating_water_baseboard(
+        model,
+        name: "#{obj_name} htg coil",
+        capacity: UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'),
+        ua_value: bb_ua,
+        max_flow_rate: max_water_flow
+      )
       plant_loop.addDemandBranchForComponent(htg_coil)
 
       # Baseboard
@@ -1297,7 +1298,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
-  # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
+  # @param hvac_sequential_load_fracs [Hash] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
   # @return [nil]
@@ -1323,7 +1324,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
-  # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
+  # @param hvac_sequential_load_fracs [Hash] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
   # @return [nil]
@@ -1423,7 +1424,7 @@ module HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
-  # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
+  # @param hvac_sequential_load_fracs [Hash] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
   # @return [nil]
   def self.apply_ideal_air_system(model, control_zone, hvac_sequential_load_fracs, hvac_unavailable_periods)
@@ -2558,7 +2559,7 @@ module HVAC
   # @param obj_name [String] Name for the OpenStudio object
   # @param hvac_object [OpenStudio::Model::AirLoopHVACUnitarySystem or OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial] The HVAC model object
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
-  # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
+  # @param hvac_sequential_load_fracs [Hash] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param airflow_cfm [Double] Maximum airflow rate (cfm)
   # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
@@ -4550,7 +4551,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_object [OpenStudio::Model::Foo] HVAC model object that the sequential fraction schedule is assigned to
-  # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
+  # @param hvac_sequential_load_fracs [Hash] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
   # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
   # @return [nil]
@@ -5280,6 +5281,7 @@ module HVAC
   #
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @param obj_name [String] Name for the OpenStudio object
   # @return [nil]
@@ -5304,7 +5306,10 @@ module HVAC
 
     return if (hvac_dse - 1).abs < Constants::Small
 
-    # Converts the [ft, eut] key to an ems-friendly name
+    # Converts the fuel type/end use type key to an ems-friendly name
+    #
+    # @param key [[FT::XXX, EUT::XXX]] The key to convert
+    # @return [String] The ems-friendly name for the key
     def self.key_name(key)
       return Model.ems_friendly_name(key.join('_')).downcase
     end

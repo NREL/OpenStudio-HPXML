@@ -81,7 +81,7 @@
               </Attic>
             </AtticType>
             <AttachedToRoof idref='Roof1'/>
-            <AttachedToWall idref='Wall12'/>
+            <AttachedToWall idref='Wall2'/>
             <AttachedToFloor idref='Floor1'/>
           </Attic>
         </Attics>
@@ -94,16 +94,6 @@
               </Basement>
             </FoundationType>
             <AttachedToRimJoist idref='RimJoist1'/>
-            <AttachedToRimJoist idref='RimJoist2'/>
-            <AttachedToRimJoist idref='RimJoist3'/>
-            <AttachedToRimJoist idref='RimJoist4'/>
-            <AttachedToRimJoist idref='RimJoist5'/>
-            <AttachedToRimJoist idref='RimJoist6'/>
-            <AttachedToRimJoist idref='RimJoist7'/>
-            <AttachedToRimJoist idref='RimJoist8'/>
-            <AttachedToRimJoist idref='RimJoist9'/>
-            <AttachedToRimJoist idref='RimJoist10'/>
-            <AttachedToRimJoist idref='RimJoist11'/>
             <AttachedToFoundationWall idref='FoundationWall1'/>
             <AttachedToSlab idref='Slab1'/>
           </Foundation>
@@ -127,132 +117,12 @@
             <SystemIdentifier id='RimJoist1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>10.0</Area>
-            <Siding>aluminum siding</Siding>
-            <Color>dark</Color>
+            <Area>115.6</Area>
+            <Siding>wood siding</Siding>
+            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoist2'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>10.0</Area>
-            <Siding>asbestos siding</Siding>
-            <Color>medium</Color>
-            <Insulation>
-              <SystemIdentifier id='RimJoist2Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoist3'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>10.0</Area>
-            <Siding>brick veneer</Siding>
-            <Color>reflective</Color>
-            <Insulation>
-              <SystemIdentifier id='RimJoist3Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoist4'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>10.0</Area>
-            <Siding>composite shingle siding</Siding>
-            <Color>dark</Color>
-            <Insulation>
-              <SystemIdentifier id='RimJoist4Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoist5'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>10.0</Area>
-            <Siding>fiber cement siding</Siding>
-            <Color>medium dark</Color>
-            <Insulation>
-              <SystemIdentifier id='RimJoist5Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoist6'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>10.0</Area>
-            <Siding>masonite siding</Siding>
-            <Color>light</Color>
-            <Insulation>
-              <SystemIdentifier id='RimJoist6Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoist7'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>10.0</Area>
-            <Siding>stucco</Siding>
-            <Color>medium</Color>
-            <Insulation>
-              <SystemIdentifier id='RimJoist7Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoist8'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>10.0</Area>
-            <Siding>synthetic stucco</Siding>
-            <Color>medium dark</Color>
-            <Insulation>
-              <SystemIdentifier id='RimJoist8Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoist9'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>10.0</Area>
-            <Siding>vinyl siding</Siding>
-            <Color>light</Color>
-            <Insulation>
-              <SystemIdentifier id='RimJoist9Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoist10'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>10.0</Area>
-            <Siding>not present</Siding>
-            <Color>medium</Color>
-            <Insulation>
-              <SystemIdentifier id='RimJoist10Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoist11'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>10.0</Area>
-            <Siding>stone veneer</Siding>
-            <Color>medium light</Color>
-            <Insulation>
-              <SystemIdentifier id='RimJoist11Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>13.9</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
         </RimJoists>
@@ -262,211 +132,18 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
-              <ConcreteMasonryUnit/>
+              <WoodStud/>
             </WallType>
-            <Area>109.0</Area>
-            <Siding>aluminum siding</Siding>
-            <Color>reflective</Color>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
+            <Area>1200.0</Area>
+            <Siding>wood siding</Siding>
+            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>12.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
             <SystemIdentifier id='Wall2'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <DoubleWoodStud/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>asbestos siding</Siding>
-            <Color>light</Color>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-              <Thickness>1.0</Thickness>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall2Insulation'/>
-              <AssemblyEffectiveRValue>28.7</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall3'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <InsulatedConcreteForms/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>brick veneer</Siding>
-            <Color>medium dark</Color>
-            <InteriorFinish>
-              <Type>gypsum composite board</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall3Insulation'/>
-              <AssemblyEffectiveRValue>21.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall4'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <LogWall/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>composite shingle siding</Siding>
-            <Color>white</Color>
-            <InteriorFinish>
-              <Type>plaster</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall4Insulation'/>
-              <AssemblyEffectiveRValue>7.1</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall5'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <StructuralInsulatedPanel/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>fiber cement siding</Siding>
-            <Color>medium</Color>
-            <InteriorFinish>
-              <Type>wood</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall5Insulation'/>
-              <AssemblyEffectiveRValue>16.1</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall6'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <SolidConcrete/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>masonite siding</Siding>
-            <Color>dark</Color>
-            <InteriorFinish>
-              <Type>not present</Type>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall6Insulation'/>
-              <AssemblyEffectiveRValue>1.35</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall7'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <SteelFrame/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>stucco</Siding>
-            <Color>light</Color>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall7Insulation'/>
-              <AssemblyEffectiveRValue>8.1</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall8'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <Stone/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>synthetic stucco</Siding>
-            <Color>medium</Color>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-              <Thickness>1.0</Thickness>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall8Insulation'/>
-              <AssemblyEffectiveRValue>5.4</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall9'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <StrawBale/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>vinyl siding</Siding>
-            <Color>dark</Color>
-            <InteriorFinish>
-              <Type>gypsum composite board</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall9Insulation'/>
-              <AssemblyEffectiveRValue>58.8</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall10'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <StructuralBrick/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>not present</Siding>
-            <Color>medium</Color>
-            <InteriorFinish>
-              <Type>plaster</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall10Insulation'/>
-              <AssemblyEffectiveRValue>7.9</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall11'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <Adobe/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>stone veneer</Siding>
-            <Color>medium light</Color>
-            <InteriorFinish>
-              <Type>wood</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall11Insulation'/>
-              <AssemblyEffectiveRValue>5.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall12'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <AtticWallType>gable</AtticWallType>
@@ -477,7 +154,7 @@
             <Siding>wood siding</Siding>
             <Color>medium</Color>
             <Insulation>
-              <SystemIdentifier id='Wall12Insulation'/>
+              <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
@@ -549,53 +226,62 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>13.0</Area>
+            <Area>108.0</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.35</UFactor>
             <SHGC>0.44</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window1InteriorShading'/>
+              <Type>light curtains</Type>
+            </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>9.0</Area>
+            <Area>72.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.35</UFactor>
             <SHGC>0.44</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window2InteriorShading'/>
+              <Type>light curtains</Type>
+            </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall2'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window3'/>
-            <Area>13.0</Area>
+            <Area>108.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.35</UFactor>
             <SHGC>0.44</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window3InteriorShading'/>
+              <Type>light curtains</Type>
+            </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall3'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
-            <Area>9.0</Area>
+            <Area>72.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.35</UFactor>
             <SHGC>0.44</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window4InteriorShading'/>
+              <Type>light curtains</Type>
+            </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall4'/>
+            <AttachedToWall idref='Wall1'/>
           </Window>
         </Windows>
         <Doors>
           <Door>
             <SystemIdentifier id='Door1'/>
-            <AttachedToWall idref='Wall9'/>
-            <Area>20.0</Area>
-            <Azimuth>0</Azimuth>
-            <RValue>4.4</RValue>
-          </Door>
-          <Door>
-            <SystemIdentifier id='Door2'/>
-            <AttachedToWall idref='Wall10'/>
-            <Area>20.0</Area>
+            <AttachedToWall idref='Wall1'/>
+            <Area>40.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
@@ -724,6 +410,21 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
         </WaterHeating>
+        <Photovoltaics>
+          <PVSystem>
+            <SystemIdentifier id='PVSystem1'/>
+            <ArrayAzimuth>180</ArrayAzimuth>
+            <ArrayTilt>20.0</ArrayTilt>
+            <NumberOfPanels>10</NumberOfPanels>
+          </PVSystem>
+          <PVSystem>
+            <SystemIdentifier id='PVSystem2'/>
+            <ModuleType>premium</ModuleType>
+            <ArrayAzimuth>90</ArrayAzimuth>
+            <ArrayTilt>20.0</ArrayTilt>
+            <NumberOfPanels>4</NumberOfPanels>
+          </PVSystem>
+        </Photovoltaics>
       </Systems>
       <Appliances>
         <ClothesWasher>

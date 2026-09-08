@@ -32,7 +32,6 @@
       <sch:assert role='ERROR' test='60 mod number(h:Timestep) = 0 or not(h:Timestep)'>Expected Timestep to be 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, or 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:CalendarYear) &lt;= 1'>Expected at most one CalendarYear</sch:assert>
       <sch:assert role='ERROR' test='number(h:CalendarYear) &gt;= 1600 or not(h:CalendarYear)'>Expected CalendarYear to be greater than or equal to 1600</sch:assert>
-      <sch:assert role='ERROR' test='number(h:CalendarYear) &lt;= 9999 or not(h:CalendarYear)'>Expected CalendarYear to be less than or equal to 9999</sch:assert>
       <sch:assert role='ERROR' test='count(h:AdvancedResearchFeatures) &lt;= 1'>Expected at most one AdvancedResearchFeatures</sch:assert>
       <!-- Moved/deprecated DaylightSaving input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1165 -->
       <sch:assert role='ERROR' test='count(h:DaylightSaving/h:Enabled) = 0'>DaylightSaving/Enabled has been replaced by /HPXML/Building/Site/TimeZone/DSTObserved</sch:assert>
@@ -258,7 +257,7 @@
       <sch:assert role='ERROR' test='count(h:ClimateandRiskZones/h:ClimateZoneIECC) &lt;= 1'>Expected at most one ClimateandRiskZones/ClimateZoneIECC</sch:assert>
       <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:extension/h:HasFlueOrChimneyInConditionedSpace) &lt;= 1'>Expected at most one Enclosure/AirInfiltration/extension/HasFlueOrChimneyInConditionedSpace</sch:assert>
       <sch:assert role='ERROR' test='h:Enclosure/h:AirInfiltration/h:extension/h:HasFlueOrChimneyInConditionedSpace[text()="true" or text()="false"] or not(h:Enclosure/h:AirInfiltration/h:extension/h:HasFlueOrChimneyInConditionedSpace)'>Expected Enclosure/AirInfiltration/extension/HasFlueOrChimneyInConditionedSpace to be 'true' or 'false'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea | h:SpecificLeakageArea | h:LeakinessDescription]) = 1'>Expected one Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/AirLeakage | EffectiveLeakageArea | SpecificLeakageArea | LeakinessDescription]</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea | h:SpecificLeakageArea | h:LeakinessDescription]) = 1'>Expected one Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage | EffectiveLeakageArea | SpecificLeakageArea | LeakinessDescription]</sch:assert>
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Walls/h:Wall) + count(h:Enclosure/h:FoundationWalls/h:FoundationWall) &gt;= 1'>Expected Enclosure/Walls/Wall or Enclosure/FoundationWalls/FoundationWall</sch:assert>
       <sch:assert role='ERROR' test='count(h:Enclosure/h:extension/h:PartitionWallMass) &lt;= 1'>Expected at most one Enclosure/extension/PartitionWallMass</sch:assert>
       <sch:assert role='ERROR' test='count(h:Enclosure/h:extension/h:FurnitureMass) &lt;= 1'>Expected at most one Enclosure/extension/FurnitureMass</sch:assert>
@@ -343,8 +342,8 @@
       <sch:assert role='ERROR' test='h:HeatPumpBackupSizingMethodology[text()="emergency" or text()="supplemental"] or not(h:HeatPumpBackupSizingMethodology)'>Expected HeatPumpBackupSizingMethodology to be 'emergency' or 'supplemental'</sch:assert>
       <sch:assert role='ERROR' test='count(h:AllowIncreasedFixedCapacities) &lt;= 1'>Expected at most one AllowIncreasedFixedCapacities</sch:assert>
       <sch:assert role='ERROR' test='h:AllowIncreasedFixedCapacities[text()="true" or text()="false"] or not(h:AllowIncreasedFixedCapacities)'>Expected AllowIncreasedFixedCapacities to be 'true' or 'false'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:ManualJInputs/h:HeatingDesignTemperature) &lt;= 1'>Expected at most one ManualJInputs/WinterDesignTemperature</sch:assert>
-      <sch:assert role='ERROR' test='count(h:ManualJInputs/h:CoolingDesignTemperature) &lt;= 1'>Expected at most one ManualJInputs/SummerDesignTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ManualJInputs/h:HeatingDesignTemperature) &lt;= 1'>Expected at most one ManualJInputs/HeatingDesignTemperature</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ManualJInputs/h:CoolingDesignTemperature) &lt;= 1'>Expected at most one ManualJInputs/CoolingDesignTemperature</sch:assert>
       <sch:assert role='ERROR' test='count(h:ManualJInputs/h:DailyTemperatureRange) &lt;= 1'>Expected at most one ManualJInputs/DailyTemperatureRange</sch:assert>
       <sch:assert role='ERROR' test='h:ManualJInputs/h:DailyTemperatureRange[text()="low" or text()="medium" or text()="high"] or not(h:ManualJInputs/h:DailyTemperatureRange)'>Expected ManualJInputs/DailyTemperatureRange to be 'low' or 'medium' or 'high'</sch:assert>
       <sch:assert role='ERROR' test='count(h:ManualJInputs/h:HumidityDifference) &lt;= 1'>Expected at most one ManualJInputs/HumidityDifference</sch:assert>
@@ -379,7 +378,7 @@
   <sch:pattern>
     <sch:title>[ManualJInfiltrationMethod=BlowerDoor]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:BuildingSummary/h:extension/h:HVACSizingControl/h:ManualJInputs/h:InfiltrationMethod="blower door"]'>
-      <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea | h:SpecificLeakageArea]) = 1'>Expected Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/AirLeakage | EffectiveLeakageArea | SpecificLeakageArea] if ManualJInputs/InfiltrationMethod="blower door"</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage | h:EffectiveLeakageArea | h:SpecificLeakageArea]) = 1'>Expected Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/AirLeakage | EffectiveLeakageArea | SpecificLeakageArea] if ManualJInputs/InfiltrationMethod="blower door"</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -545,7 +544,7 @@
 
   <sch:pattern>
     <sch:title>[AirInfiltrationMeasurement=SFAorMultifamily]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:BuildingSummary/h:BuildingConstruction/h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea | h:SpecificLeakageArea]'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:BuildingSummary/h:BuildingConstruction/h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage | h:EffectiveLeakageArea | h:SpecificLeakageArea]'>
       <sch:assert role='ERROR' test='h:TypeOfInfiltrationLeakage[text()="unit total" or text()="unit exterior only"]'>Expected TypeOfInfiltrationLeakage to be 'unit total' or 'unit exterior only' if ResidentialFacilityType is "single-family attached" or "apartment unit"</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:Aext) &lt;= 1'>Expected at most one extension/Aext</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:Aext) &gt; 0 or not(h:extension/h:Aext)'>Expected extension/Aext to be greater than 0</sch:assert>
@@ -555,7 +554,7 @@
   <sch:pattern>
     <sch:title>[AirInfiltrationMeasurement=ACHorCFM]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:UnitofMeasure[text()="ACH" or text()="CFM"]]'>
-      <sch:assert role='ERROR' test='count(h:HousePressure) = 1'>Expected HousePressure if UnitofMeasure=("ACH" or "CFM")</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HousePressure) = 1'>Expected HousePressure if UnitofMeasure="ACH" or "CFM"</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -570,7 +569,6 @@
     <sch:title>[VentedAttic=VentilationRate]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Attics/h:Attic[h:Vented="true"]/h:VentilationRate'>
       <sch:assert role='ERROR' test='h:UnitofMeasure[text()="SLA" or text()="ACHnatural"]'>Expected UnitofMeasure to be 'SLA' or 'ACHnatural'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Value) = 1'>Expected Value</sch:assert> <!-- Can remove this when https://github.com/hpxmlwg/hpxml/pull/467 is available -->
     </sch:rule>
   </sch:pattern>
 
@@ -578,7 +576,6 @@
     <sch:title>[VentedCrawl=VentilationRate]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Foundations/h:Foundation[h:FoundationType/h:Crawlspace[h:Vented="true"]]/h:VentilationRate'>
       <sch:assert role='ERROR' test='h:UnitofMeasure[text()="SLA"]'>Expected UnitofMeasure to be 'SLA'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Value) = 1'>Expected Value</sch:assert> <!-- Can remove this when https://github.com/hpxmlwg/hpxml/pull/467 is available -->
     </sch:rule>
   </sch:pattern>
 
@@ -594,7 +591,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof'>
       <sch:assert role='ERROR' test='h:InteriorAdjacentTo[text()="attic - vented" or text()="attic - unvented" or text()="conditioned space" or text()="garage"]'>Expected InteriorAdjacentTo to be 'attic - vented' or 'attic - unvented' or 'conditioned space' or 'garage'</sch:assert>
       <sch:assert role='ERROR' test='count(h:Area) = 1'>Expected Area</sch:assert>
-      <sch:assert role='ERROR' test='h:RoofType[text()="asphalt or fiberglass shingles" or text()="wood shingles or shakes" or text()="shingles" or text()="slate or tile shingles" or text()="metal surfacing" or text()="plastic/rubber/synthetic sheeting" or text()="expanded polystyrene sheathing" or text()="concrete" or text()="cool roof"] or not(h:RoofType)'>Expected RoofType to be 'asphalt or fiberglass shingles' or 'wood shingles or shakes' or 'shingles' or 'slate or tile shingles' or 'metal surfacing' or 'plastic/rubber/synthetic sheeting' or 'expanded polystyrene sheathing' or 'concrete' or 'cool roof'</sch:assert>
+      <sch:assert role='ERROR' test='h:RoofType[text()="asphalt or fiberglass shingles" or text()="wood shingles or shakes" or text()="shingles" or text()="slate or tile shingles" or text()="metal surfacing" or text()="plastic/rubber/synthetic sheeting" or text()="expanded polystyrene sheathing" or text()="concrete"] or not(h:RoofType)'>Expected RoofType to be 'asphalt or fiberglass shingles' or 'wood shingles or shakes' or 'shingles' or 'slate or tile shingles' or 'metal surfacing' or 'plastic/rubber/synthetic sheeting' or 'expanded polystyrene sheathing' or 'concrete'</sch:assert>
       <sch:assert role='ERROR' test='h:InteriorFinish/h:Type[text()="gypsum board" or text()="gypsum composite board" or text()="plaster" or text()="wood" or text()="not present"] or not(h:InteriorFinish/h:Type)'>Expected InteriorFinish/Type to be 'gypsum board' or 'gypsum composite board' or 'plaster' or 'wood' or 'not present'</sch:assert>
       <sch:assert role='ERROR' test='count(h:Pitch) = 1'>Expected Pitch</sch:assert>
       <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected Insulation/AssemblyEffectiveRValue</sch:assert>
@@ -716,7 +713,7 @@
       <sch:assert role='ERROR' test='count(h:AttachedToWall) = 1'>Expected AttachedToWall</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='h:ExteriorShading/h:Type[text()="external overhangs"] and count(h:Overhangs) &gt; 0'>Exterior shading type is 'external overhangs', but overhangs are explicitly defined; exterior shading type will be ignored.</sch:report>
-      <sch:report role='WARN' test='h:ExteriorShading/h:Type[text()="awnings"] and count(h:Overhangs) &gt; 0'>Exterior shading type is 'external overhangs', but overhangs are explicitly defined; exterior shading type will be ignored.</sch:report>
+      <sch:report role='WARN' test='h:ExteriorShading/h:Type[text()="awnings"] and count(h:Overhangs) &gt; 0'>Exterior shading type is 'awnings', but overhangs are explicitly defined; exterior shading type will be ignored.</sch:report>
       <sch:report role='WARN' test='h:ExteriorShading/h:Type[text()="building"] and count(../../../h:BuildingSummary/h:Site/h:extension/h:Neighbors/h:NeighborBuilding) &gt; 0'>Exterior shading type is 'building', but neighbor buildings are explicitly defined; exterior shading type will be ignored.</sch:report>
     </sch:rule>
   </sch:pattern>
@@ -854,11 +851,11 @@
   <sch:pattern>
     <sch:title>[HeatingSystemType=Furnace]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Furnace]'>
-      <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:AirDistributionType[text()="regular velocity" or text()="gravity"]) + count(../../h:HVACDistribution/h:DistributionSystemType/h:Other[text()="DSE"]) &gt;= 1'>Expected ../../HVACDistribution/DistributionSystemType/AirDistribution/AirDistributionType=("regular velocity" or "gravity") or ../../HVACDistribution/DistributionSystemType/Other="DSE"</sch:assert>
+      <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:AirDistributionType[text()="regular velocity" or text()="gravity"]) + count(../../h:HVACDistribution/h:DistributionSystemType/h:Other[text()="DSE"]) &gt;= 1'>Expected ../../HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType="regular velocity" or "gravity"] or ../../HVACDistribution/DistributionSystemType/Other="DSE"</sch:assert>
       <sch:assert role='ERROR' test='h:UnitLocation[text()="conditioned space" or text()="basement - unconditioned" or text()="basement - conditioned" or text()="attic - unvented" or text()="attic - vented" or text()="garage" or text()="crawlspace - unvented" or text()="crawlspace - vented" or text()="other exterior" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space" or text()="roof deck" or text()="unconditioned space" or text()="manufactured home belly"] or not(h:UnitLocation)'>Expected UnitLocation to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' or 'roof deck' or 'unconditioned space' or 'manufactured home belly'</sch:assert>
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 1'>Expected DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='h:HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]'>Expected HeatingSystemFuel to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE" or h:Units="Percent"]/h:Value) = 1'>Expected AnnualHeatingEfficiency[Units="AFUE" or Units="Percent"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE" or h:Units="Percent"]/h:Value) = 1'>Expected AnnualHeatingEfficiency[Units="AFUE"]/Value or AnnualHeatingEfficiency[Units="Percent"]/Value but not both</sch:assert>
       <sch:assert role='ERROR' test='number(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value) &lt;= 1 or not(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value)'>Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value) &lt;= 1 or not(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value)'>Expected AnnualHeatingEfficiency[Units="Percent"]/Value to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionHeatLoadServed) = 1 or count(../h:HeatPump/h:BackupSystem) &gt;= 1'>Expected FractionHeatLoadServed</sch:assert>
@@ -883,7 +880,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:WallFurnace]'>
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 0'>Expected no DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='h:HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]'>Expected HeatingSystemFuel to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE" or h:Units="Percent"]/h:Value) = 1'>Expected AnnualHeatingEfficiency[Units="AFUE" or Units="Percent"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE" or h:Units="Percent"]/h:Value) = 1'>Expected AnnualHeatingEfficiency[Units="AFUE"]/Value or AnnualHeatingEfficiency[Units="Percent"]/Value but not both</sch:assert>
       <sch:assert role='ERROR' test='number(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value) &lt;= 1 or not(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value)'>Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value) &lt;= 1 or not(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value)'>Expected AnnualHeatingEfficiency[Units="Percent"]/Value to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionHeatLoadServed) = 1 or count(../h:HeatPump/h:BackupSystem) &gt;= 1'>Expected FractionHeatLoadServed</sch:assert>
@@ -901,7 +898,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:FloorFurnace]'>
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 0'>Expected no DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='h:HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]'>Expected HeatingSystemFuel to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE" or h:Units="Percent"]/h:Value) = 1'>Expected AnnualHeatingEfficiency[Units="AFUE" or Units="Percent"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE" or h:Units="Percent"]/h:Value) = 1'>Expected AnnualHeatingEfficiency[Units="AFUE"]/Value or AnnualHeatingEfficiency[Units="Percent"]/Value but not both</sch:assert>
       <sch:assert role='ERROR' test='number(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value) &lt;= 1 or not(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value)'>Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value) &lt;= 1 or not(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value)'>Expected AnnualHeatingEfficiency[Units="Percent"]/Value to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionHeatLoadServed) = 1 or count(../h:HeatPump/h:BackupSystem) &gt;= 1'>Expected FractionHeatLoadServed</sch:assert>
@@ -917,11 +914,11 @@
   <sch:pattern>
     <sch:title>[HeatingSystemType=InUnitBoiler]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Boiler and (not(h:IsSharedSystem) or h:IsSharedSystem="false")]'>
-      <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:HydronicDistribution/h:HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling"]) + count(../../h:HVACDistribution/h:DistributionSystemType/h:Other[text()="DSE"]) &gt;= 1'>Expected ../../HVACDistribution/DistributionSystemType/HydronicDistribution/HydronicDistributionType=("radiator" or "baseboard" or "radiant floor" or "radiant ceiling") or ../../HVACDistribution/DistributionSystemType/Other="DSE"</sch:assert>
+      <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:HydronicDistribution/h:HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling"]) + count(../../h:HVACDistribution/h:DistributionSystemType/h:Other[text()="DSE"]) &gt;= 1'>Expected ../../HVACDistribution/DistributionSystemType/HydronicDistribution[HydronicDistributionType="radiator" or "baseboard" or "radiant floor" or "radiant ceiling"] or ../../HVACDistribution/DistributionSystemType/Other="DSE"</sch:assert>
       <sch:assert role='ERROR' test='h:UnitLocation[text()="conditioned space" or text()="basement - unconditioned" or text()="basement - conditioned" or text()="attic - unvented" or text()="attic - vented" or text()="garage" or text()="crawlspace - unvented" or text()="crawlspace - vented" or text()="other exterior" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space" or text()="roof deck" or text()="unconditioned space" or text()="manufactured home belly"] or not(h:UnitLocation)'>Expected UnitLocation to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' or 'roof deck' or 'unconditioned space' or 'manufactured home belly'</sch:assert>
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 1'>Expected DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='h:HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]'>Expected HeatingSystemFuel to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE" or h:Units="Percent"]/h:Value) = 1'>Expected AnnualHeatingEfficiency[Units="AFUE" or Units="Percent"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE" or h:Units="Percent"]/h:Value) = 1'>Expected AnnualHeatingEfficiency[Units="AFUE"]/Value or AnnualHeatingEfficiency[Units="Percent"]/Value but not both</sch:assert>
       <sch:assert role='ERROR' test='number(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value) &lt;= 1 or not(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value)'>Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value) &lt;= 1 or not(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value)'>Expected AnnualHeatingEfficiency[Units="Percent"]/Value to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionHeatLoadServed) = 1 or count(../h:HeatPump/h:BackupSystem) &gt;= 1'>Expected FractionHeatLoadServed</sch:assert>
@@ -935,14 +932,14 @@
   <sch:pattern>
     <sch:title>[HeatingSystemType=SharedBoiler]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Boiler and h:IsSharedSystem="true"]'>
-      <sch:assert role='ERROR' test='count(../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
-      <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:HydronicDistribution/h:HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling" or text()="water loop"]) + count(../../h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:AirDistributionType[text()="fan coil"]) &gt;= 1'>Expected ../../HVACDistribution/DistributionSystemType/HydronicDistribution/HydronicDistributionType=("radiator" or "baseboard" or "radiant floor" or "radiant ceiling" or "water loop") or ../../HVACDistribution/DistributionSystemType/AirDistribution/AirDistributionType="fan coil"</sch:assert>
+      <sch:assert role='ERROR' test='count(../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:HydronicDistribution/h:HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling" or text()="water loop"]) + count(../../h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:AirDistributionType[text()="fan coil"]) &gt;= 1'>Expected ../../HVACDistribution/DistributionSystemType/HydronicDistribution[HydronicDistributionType="radiator" or "baseboard" or "radiant floor" or "radiant ceiling" or "water loop"] or ../../HVACDistribution/DistributionSystemType/AirDistribution/AirDistributionType="fan coil"</sch:assert>
       <sch:assert role='ERROR' test='h:UnitLocation[text()="conditioned space" or text()="basement - unconditioned" or text()="basement - conditioned" or text()="attic - unvented" or text()="attic - vented" or text()="garage" or text()="crawlspace - unvented" or text()="crawlspace - vented" or text()="other exterior" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space" or text()="roof deck" or text()="unconditioned space" or text()="manufactured home belly"] or not(h:UnitLocation)'>Expected UnitLocation to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' or 'roof deck' or 'unconditioned space' or 'manufactured home belly'</sch:assert>
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 1'>Expected DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofUnitsServed) = 1'>Expected NumberofUnitsServed</sch:assert>
       <sch:assert role='ERROR' test='number(h:NumberofUnitsServed) &gt; 1 or not(h:NumberofUnitsServed)'>Expected NumberofUnitsServed to be greater than 1</sch:assert>
       <sch:assert role='ERROR' test='h:HeatingSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="wood" or text()="wood pellets"]'>Expected HeatingSystemFuel to be 'electricity' or 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'wood' or 'wood pellets'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE" or h:Units="Percent"]/h:Value) = 1'>Expected AnnualHeatingEfficiency[Units="AFUE" or Units="Percent"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AnnualHeatingEfficiency[h:Units="AFUE" or h:Units="Percent"]/h:Value) = 1'>Expected AnnualHeatingEfficiency[Units="AFUE"]/Value or AnnualHeatingEfficiency[Units="Percent"]/Value but not both</sch:assert>
       <sch:assert role='ERROR' test='number(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value) &lt;= 1 or not(h:AnnualHeatingEfficiency[h:Units="AFUE"]/h:Value)'>Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='number(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value) &lt;= 1 or not(h:AnnualHeatingEfficiency[h:Units="Percent"]/h:Value)'>Expected AnnualHeatingEfficiency[Units="Percent"]/Value to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionHeatLoadServed) = 1 or count(../h:HeatPump/h:BackupSystem) &gt;= 1'>Expected FractionHeatLoadServed</sch:assert>
@@ -1142,8 +1139,8 @@
   <sch:pattern>
     <sch:title>[CoolingSystemType=SharedChiller]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem[h:CoolingSystemType="chiller"]'>
-      <sch:assert role='ERROR' test='count(../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
-      <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:HydronicDistribution/h:HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling" or text()="water loop"]) + count(../../h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:AirDistributionType[text()="fan coil"]) &gt;= 1'>Expected ../../HVACDistribution/DistributionSystemType/HydronicDistribution/HydronicDistributionType=("radiator" or "baseboard" or "radiant floor" or "radiant ceiling" or "water loop") or ../../HVACDistribution/DistributionSystemType/AirDistribution/AirDistributionType="fan coil"</sch:assert>
+      <sch:assert role='ERROR' test='count(../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:HydronicDistribution/h:HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling" or text()="water loop"]) + count(../../h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:AirDistributionType[text()="fan coil"]) &gt;= 1'>Expected ../../HVACDistribution/DistributionSystemType/HydronicDistribution[HydronicDistributionType="radiator" or "baseboard" or "radiant floor" or "radiant ceiling" or "water loop"] or ../../HVACDistribution/DistributionSystemType/AirDistribution/AirDistributionType="fan coil"</sch:assert>
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 1'>Expected DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='h:IsSharedSystem[text()="true"]'>Expected IsSharedSystem to be 'true'</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofUnitsServed) = 1'>Expected NumberofUnitsServed</sch:assert>
@@ -1179,7 +1176,7 @@
   <sch:pattern>
     <sch:title>[CoolingSystemType=SharedCoolingTowerWLHP]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem[h:CoolingSystemType="cooling tower"]'>
-      <sch:assert role='ERROR' test='count(../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
       <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:HydronicDistribution/h:HydronicDistributionType[text()="water loop"]) &gt;= 1'>Expected ../../HVACDistribution/DistributionSystemType/HydronicDistribution/HydronicDistributionType="water loop"</sch:assert>
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 1'>Expected DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='h:IsSharedSystem[text()="true"]'>Expected IsSharedSystem to be 'true'</sch:assert>
@@ -1373,7 +1370,7 @@
   <sch:pattern>
     <sch:title>[HeatPumpType=GroundSourceWithSharedLoop]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:HeatPumpType="ground-to-air" and h:IsSharedSystem="true"]'>
-      <sch:assert role='ERROR' test='count(../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofUnitsServed) = 1'>Expected NumberofUnitsServed</sch:assert>
       <sch:assert role='ERROR' test='number(h:NumberofUnitsServed) &gt; 1 or not(h:NumberofUnitsServed)'>Expected NumberofUnitsServed to be greater than 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:SharedLoopWatts) = 1'>Expected extension/SharedLoopWatts</sch:assert>
@@ -1861,16 +1858,8 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[DuctLeakage=CFM]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:DuctLeakageMeasurement/h:DuctLeakage[h:Units="CFM25" or h:Units="CFM50"]'>
-      <sch:assert role='ERROR' test='count(h:Value) = 1'>Expected Value</sch:assert> <!-- Can remove this when https://github.com/hpxmlwg/hpxml/pull/467 is available -->
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
     <sch:title>[DuctLeakage=Percent]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:DuctLeakageMeasurement/h:DuctLeakage[h:Units="Percent"]'>
-      <sch:assert role='ERROR' test='count(h:Value) = 1'>Expected Value</sch:assert> <!-- Can remove this when https://github.com/hpxmlwg/hpxml/pull/467 is available -->
       <sch:assert role='ERROR' test='number(h:Value) &lt; 1 or not(h:Value)'>Expected Value to be less than 1</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -2215,7 +2204,7 @@
   <sch:pattern>
     <sch:title>[WaterHeatingSystem=Shared]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:IsSharedSystem="true"]'>
-      <sch:assert role='ERROR' test='count(../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:NumberofBedroomsServed) = 1'>Expected extension/NumberofBedroomsServed</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:NumberofBedroomsServed) &gt; number(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms) or not(h:extension/h:NumberofBedroomsServed) or not(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms)'>Expected extension/NumberofBedroomsServed to be greater than ../../../BuildingSummary/BuildingConstruction/NumberofBedrooms</sch:assert>
     </sch:rule>
@@ -2249,7 +2238,7 @@
   <sch:pattern>
     <sch:title>[HotWaterDistributionType=SharedRecirculation]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:extension/h:SharedRecirculation'>
-      <sch:assert role='ERROR' test='count(../../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
       <sch:assert role='ERROR' test='count(../../h:SystemType/h:Standard) = 1'>Expected ../../SystemType/Standard</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofBedroomsServed) = 1'>Expected NumberofBedroomsServed</sch:assert>
       <sch:assert role='ERROR' test='number(h:NumberofBedroomsServed) &gt; number(../../../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms) or not(h:NumberofBedroomsServed) or not(../../../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms)'>Expected NumberofBedroomsServed to be greater than ../../../../../BuildingSummary/BuildingConstruction/NumberofBedrooms</sch:assert>
@@ -2313,7 +2302,9 @@
       <sch:assert role='ERROR' test='h:Location[text()="ground" or text()="roof"] or not(h:Location)'>Expected Location to be 'ground' or 'roof'</sch:assert>
       <sch:assert role='ERROR' test='count(h:ArrayAzimuth) + count(h:ArrayOrientation) &gt;= 1'>Expected ArrayAzimuth or ArrayOrientation</sch:assert>
       <sch:assert role='ERROR' test='count(h:ArrayTilt) = 1'>Expected ArrayTilt</sch:assert>
-      <sch:assert role='ERROR' test='count(h:MaxPowerOutput) = 1'>Expected MaxPowerOutput</sch:assert>
+      <sch:assert role='ERROR' test='count(h:MaxPowerOutput) + count(h:CollectorArea) + count(h:NumberOfPanels) &gt;= 1'>Expected MaxPowerOutput or CollectorArea or NumberOfPanels</sch:assert>
+      <sch:assert role='ERROR' test='number(h:YearModulesManufactured) &gt;= 1970 or not(h:YearModulesManufactured)'>Expected YearModulesManufactured to be greater than or equal to 1970</sch:assert>
+      <sch:assert role='ERROR' test='number(h:YearInstalled) &gt;= 1970 or not(h:YearInstalled)'>Expected YearInstalled to be greater than or equal to 1970</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:MaxPowerOutput) &lt;= 500 and number(h:MaxPowerOutput) &gt; 0'>Max power output should typically be greater than or equal to 500 W.</sch:report>
     </sch:rule>
@@ -2322,7 +2313,7 @@
   <sch:pattern>
     <sch:title>[PVSystemType=Shared]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:Photovoltaics/h:PVSystem[h:IsSharedSystem="true"]'>
-      <sch:assert role='ERROR' test='count(../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:NumberofBedroomsServed) = 1'>Expected extension/NumberofBedroomsServed</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:NumberofBedroomsServed) &gt; number(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms) or not(h:extension/h:NumberofBedroomsServed) or not(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms)'>Expected extension/NumberofBedroomsServed to be greater than ../../../BuildingSummary/BuildingConstruction/NumberofBedrooms</sch:assert>
     </sch:rule>
@@ -2386,7 +2377,7 @@
   <sch:pattern>
     <sch:title>[BatteryType=Shared]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:Batteries/h:Battery[h:IsSharedSystem="true"]'>
-      <sch:assert role='ERROR' test='count(../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:NumberofBedroomsServed) = 1'>Expected extension/NumberofBedroomsServed</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:NumberofBedroomsServed) &gt; number(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms) or not(h:extension/h:NumberofBedroomsServed) or not(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms)'>Expected extension/NumberofBedroomsServed to be greater than ../../../BuildingSummary/BuildingConstruction/NumberofBedrooms</sch:assert>
     </sch:rule>
@@ -2418,7 +2409,7 @@
       <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected at most one extension/WeekdayScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected at most one extension/WeekendScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected at most one extension/MonthlyScheduleMultipliers</sch:assert>
-      <sch:assert role='ERROR' test='../../h:FuelEconomyCombined[h:Units="kWh/mile" or h:Units="mile/kWh" or h:Units="mpge"] or not(../../h:FuelEconomyCombined/h:Units)'>Expected ../../FuelEconomyCombined/Units to be 'kWh/mile' or 'mile/kWh' or 'mpge'</sch:assert>
+      <sch:assert role='ERROR' test='../../h:FuelEconomyCombined[h:Units="kWh/mile" or h:Units="mile/kWh" or h:Units="mpge"] or not(../../h:FuelEconomyCombined)'>Expected ../../FuelEconomyCombined/Units to be 'kWh/mile' or 'mile/kWh' or 'mpge'</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='count(../../../../../h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="electric vehicle charging"]]) &gt;= 1'>Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.</sch:report>
       <sch:report role='WARN' test='count(h:ConnectedCharger) = 0'>Electric vehicle specified with no charger provided; home EV charging will not be modeled.</sch:report>
@@ -2440,7 +2431,7 @@
   <sch:pattern>
     <sch:title>[GeneratorType=Shared]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:extension/h:Generators/h:Generator[h:IsSharedSystem="true"]'>
-      <sch:assert role='ERROR' test='count(../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofBedroomsServed) = 1'>Expected NumberofBedroomsServed</sch:assert>
       <sch:assert role='ERROR' test='number(h:NumberofBedroomsServed) &gt; number(../../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms) or not(h:NumberofBedroomsServed) or not(../../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms)'>Expected NumberofBedroomsServed to be greater than ../../../../BuildingSummary/BuildingConstruction/NumberofBedrooms</sch:assert>
     </sch:rule>
@@ -2481,7 +2472,7 @@
   <sch:pattern>
     <sch:title>[ClothesWasherType=Shared]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesWasher[h:IsSharedAppliance="true"]'>
-      <sch:assert role='ERROR' test='count(../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:AttachedToWaterHeatingSystem) + count(h:AttachedToHotWaterDistribution) = 1'>Expected AttachedToWaterHeatingSystem or AttachedToHotWaterDistribution but not both</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -2507,7 +2498,7 @@
   <sch:pattern>
     <sch:title>[ClothesDryerType=Shared]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer[h:IsSharedAppliance="true"]'>
-      <sch:assert role='ERROR' test='count(../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -2544,7 +2535,7 @@
   <sch:pattern>
     <sch:title>[DishwasherType=Shared]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Dishwasher[h:IsSharedAppliance="true"]'>
-      <sch:assert role='ERROR' test='count(../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")]</sch:assert>
+      <sch:assert role='ERROR' test='count(../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:AttachedToWaterHeatingSystem) + count(h:AttachedToHotWaterDistribution) = 1'>Expected AttachedToWaterHeatingSystem or AttachedToHotWaterDistribution but not both</sch:assert>
     </sch:rule>
   </sch:pattern>

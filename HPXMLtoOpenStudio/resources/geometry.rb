@@ -1502,6 +1502,7 @@ module Geometry
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_surface [HPXML::Wall or HPXML::Roof or HPXML::RimJoist or HPXML::FoundationWall or HPXML::Slab] any HPXML surface
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
   def self.set_subsurface_exterior(surface, spaces, model, hpxml_surface, hpxml_bldg, hpxml_header)

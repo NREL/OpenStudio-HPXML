@@ -172,17 +172,16 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-battery-capacities-ah' => ['Expected UsableCapacity to be less than NominalCapacity'],
                             'invalid-battery-capacities-kwh' => ['Expected UsableCapacity to be less than NominalCapacity'],
                             'invalid-calendar-year-low' => ['Expected CalendarYear to be greater than or equal to 1600'],
-                            'invalid-calendar-year-high' => ['Expected CalendarYear to be less than or equal to 9999'],
                             'invalid-clothes-dryer-cef' => ["Element 'CombinedEnergyFactor': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
                             'invalid-clothes-washer-imef' => ["Element 'IntegratedModifiedEnergyFactor': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
                             'invalid-cfis-addtl-runtime-mode' => ["Expected CFISControls/AdditionalRuntimeOperatingMode to be 'air handler fan'"],
                             'invalid-dishwasher-ler' => ["Element 'LabelElectricRate': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
                             'invalid-duct-area-fractions' => ['Expected sum(Ducts/FractionDuctArea) for DuctType="supply" to be 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution, id: "HVACDistribution1"]',
                                                               'Expected sum(Ducts/FractionDuctArea) for DuctType="return" to be 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution, id: "HVACDistribution1"]'],
-                            'invalid-facility-type' => ['Expected ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")] [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"], id: "WaterHeatingSystem1"]',
-                                                        'Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher[IsSharedAppliance="true"], id: "ClothesWasher1"]',
-                                                        'Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer[IsSharedAppliance="true"], id: "ClothesDryer1"]',
-                                                        'Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType=("single-family attached" or "apartment unit")] [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher[IsSharedAppliance="true"], id: "Dishwasher1"]',
+                            'invalid-facility-type' => ['Expected ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"] [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"], id: "WaterHeatingSystem1"]',
+                                                        'Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher[IsSharedAppliance="true"], id: "ClothesWasher1"]',
+                                                        'Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"] [context: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer[IsSharedAppliance="true"], id: "ClothesDryer1"]',
+                                                        'Expected ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType="single-family attached" or "apartment unit"] [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher[IsSharedAppliance="true"], id: "Dishwasher1"]',
                                                         'There are references to "other housing unit" but ResidentialFacilityType is not "single-family attached" or "apartment unit".',
                                                         'There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'invalid-foundation-wall-properties' => ['Expected DepthBelowGrade to be less than or equal to Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall[not(SystemIdentifier/@sameas and /HPXML/SoftwareInfo/extension/WholeSFAorMFBuildingSimulation[text()="true"])], id: "FoundationWall1"]',
@@ -288,6 +287,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'panel-without-load-type' => ['Expected LoadType'],
                             'panel-insufficient-voltage' => ["Expected ../../../ElectricPanel/Voltage to be '240' [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/BranchCircuits/BranchCircuit, id: \"BranchCircuit1\"]"],
                             'panel-zero-meter-based' => ['Expected extension/ElectricPanelBaselinePeakPower to be greater than 0 [context: /HPXML/Building/BuildingDetails/BuildingSummary, id: "MyBuilding"]'],
+                            'pv-year-modules-manufactured' => ['Expected YearModulesManufactured to be greater than or equal to 1970'],
+                            'pv-year-installed' => ['Expected YearInstalled to be greater than or equal to 1970'],
                             'refrigerator-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'refrigerator-schedule' => ['Expected not both schedule fractions/multipliers and schedule coefficients'],
                             'solar-fraction-one' => ['Expected SolarFraction to be less than or equal to 0.99 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem, id: "SolarThermalSystem1"]'],
@@ -657,9 +658,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'invalid-calendar-year-low'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml.header.sim_calendar_year = 1575
-      when 'invalid-calendar-year-high'
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml.header.sim_calendar_year = 20000
       when 'invalid-clothes-dryer-cef'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.clothes_dryers[0].combined_energy_factor = 0
@@ -934,6 +932,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
         hpxml.header.service_feeders_load_calculation_types = [HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased]
         hpxml_bldg.header.electric_panel_baseline_peak_power = 0
+      when 'pv-year-modules-manufactured'
+        hpxml, hpxml_bldg = _create_hpxml('base-pv.xml')
+        hpxml_bldg.pv_systems[0].year_modules_manufactured = 1900
+      when 'pv-year-installed'
+        hpxml, hpxml_bldg = _create_hpxml('base-pv.xml')
+        hpxml_bldg.pv_systems[0].year_installed = 1900
       when 'refrigerator-location'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.refrigerators[0].location = HPXML::LocationGarage

@@ -309,7 +309,7 @@ end
 # Register an info statement to the OpenStudio Runner about calling measures with arguments.
 #
 # @param measure_args [Hash] Map of provided measure arguments to values
-# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
+# @param measure_dir [String] Directory path of the measure
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @return [nil]
 def print_measure_call(measure_args, measure_dir, runner)

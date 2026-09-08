@@ -2553,6 +2553,9 @@
     "parent_hpxml": "sample_files/base-pv-battery.xml",
     "schedules_paths": "../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv"
   },
+  "sample_files/base-pv-collector-area.xml": {
+    "parent_hpxml": "sample_files/base-pv.xml"
+  },
   "sample_files/base-pv-generators.xml": {
     "parent_hpxml": "sample_files/base-pv.xml"
   },
@@ -2565,6 +2568,9 @@
     "schedules_paths": "../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv"
   },
   "sample_files/base-pv-inverters.xml": {
+    "parent_hpxml": "sample_files/base-pv.xml"
+  },
+  "sample_files/base-pv-number-of-panels.xml": {
     "parent_hpxml": "sample_files/base-pv.xml"
   },
   "sample_files/base-residents-0.xml": {

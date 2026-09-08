@@ -933,7 +933,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.roofs[0].radiant_barrier_grade = 3
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_roof_values(default_hpxml_bldg.roofs[0], HPXML::RoofTypeMetal, 0.77, HPXML::ColorDark, 0.88, true, 3, HPXML::InteriorFinishPlaster, 0.25, 123)
+    _test_default_roof_values(default_hpxml_bldg.roofs[0], HPXML::RoofTypeMetal, 0.77, HPXML::ColorDark, nil, 0.88, true, 3, HPXML::InteriorFinishPlaster, 0.25, 123)
 
     # Test defaults w/ RoofColor
     hpxml_bldg.roofs[0].roof_type = nil
@@ -946,22 +946,29 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.roofs[0].radiant_barrier_grade = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_roof_values(default_hpxml_bldg.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorLight, 0.90, true, 1, HPXML::InteriorFinishPlaster, 0.5, 45)
+    _test_default_roof_values(default_hpxml_bldg.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorLight, nil, 0.90, true, 1, HPXML::InteriorFinishPlaster, 0.5, 45)
+
+    # Test defaults w/ CoolRoof
+    hpxml_bldg.roofs[0].cool_roof = true
+    hpxml_bldg.roofs[0].roof_color = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_roof_values(default_hpxml_bldg.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorWhite, true, 0.90, true, 1, HPXML::InteriorFinishPlaster, 0.5, 45)
 
     # Test defaults w/ SolarAbsorptance
     hpxml_bldg.roofs[0].solar_absorptance = 0.99
-    hpxml_bldg.roofs[0].roof_color = nil
+    hpxml_bldg.roofs[0].cool_roof = nil
     hpxml_bldg.roofs[0].interior_finish_type = nil
     hpxml_bldg.roofs[0].radiant_barrier = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_roof_values(default_hpxml_bldg.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.99, HPXML::ColorDark, 0.90, false, nil, HPXML::InteriorFinishNotPresent, nil, 45)
+    _test_default_roof_values(default_hpxml_bldg.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.99, HPXML::ColorDark, nil, 0.90, false, nil, HPXML::InteriorFinishNotPresent, nil, 45)
 
     # Test defaults w/o RoofColor & SolarAbsorptance
     hpxml_bldg.roofs[0].solar_absorptance = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_roof_values(default_hpxml_bldg.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.85, HPXML::ColorMedium, 0.90, false, nil, HPXML::InteriorFinishNotPresent, nil, 45)
+    _test_default_roof_values(default_hpxml_bldg.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.85, HPXML::ColorMedium, nil, 0.90, false, nil, HPXML::InteriorFinishNotPresent, nil, 45)
 
     # Test defaults w/ conditioned space
     hpxml, hpxml_bldg = _create_hpxml('base-atticroof-cathedral.xml')
@@ -975,7 +982,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.roofs[0].azimuth = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_roof_values(default_hpxml_bldg.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorLight, 0.90, nil, nil, HPXML::InteriorFinishGypsumBoard, 0.5, 45)
+    _test_default_roof_values(default_hpxml_bldg.roofs[0], HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorLight, nil, 0.90, nil, nil, HPXML::InteriorFinishGypsumBoard, 0.5, 45)
   end
 
   def test_rim_joists
@@ -999,7 +1006,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.rim_joists[0].azimuth = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_rim_joist_values(default_hpxml_bldg.rim_joists[0], HPXML::SidingTypeWood, 0.95, HPXML::ColorDark, 0.90, 315)
+    _test_default_rim_joist_values(default_hpxml_bldg.rim_joists[0], HPXML::SidingTypeWood, 0.9, HPXML::ColorDark, 0.90, 315)
 
     # Test defaults w/ SolarAbsorptance
     hpxml_bldg.rim_joists[0].solar_absorptance = 0.99
@@ -1040,7 +1047,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.walls[0].azimuth = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_wall_values(default_hpxml_bldg.walls[0], HPXML::SidingTypeWood, 0.5, HPXML::ColorLight, 0.90, HPXML::InteriorFinishWood, 0.5, 180)
+    _test_default_wall_values(default_hpxml_bldg.walls[0], HPXML::SidingTypeWood, 0.55, HPXML::ColorLight, 0.90, HPXML::InteriorFinishWood, 0.5, 180)
 
     # Test defaults w/ SolarAbsorptance
     hpxml_bldg.walls[0].solar_absorptance = 0.99
@@ -1065,7 +1072,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.walls[1].interior_finish_thickness = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_wall_values(default_hpxml_bldg.walls[1], HPXML::SidingTypeWood, 0.5, HPXML::ColorLight, 0.90, HPXML::InteriorFinishNotPresent, nil, nil)
+    _test_default_wall_values(default_hpxml_bldg.walls[1], HPXML::SidingTypeWood, 0.55, HPXML::ColorLight, 0.90, HPXML::InteriorFinishNotPresent, nil, nil)
   end
 
   def test_foundation_walls
@@ -3868,17 +3875,19 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                               module_type: HPXML::PVModuleTypePremium,
                               array_azimuth: 123,
                               array_tilt: 0,
-                              max_power_output: 1000,
+                              max_power_output: 4000,
                               inverter_idref: 'Inverter')
     hpxml_bldg.inverters.add(id: 'Inverter',
                              inverter_efficiency: 0.90)
     pv = hpxml_bldg.pv_systems[0]
     inv = hpxml_bldg.inverters[0]
+    current_year = Date.today.year
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_pv_system_values(default_hpxml_bldg, 0.90, 0.20, true, HPXML::LocationGround, HPXML::PVTrackingType1Axis, HPXML::PVModuleTypePremium, 123)
+    _test_default_pv_system_values(default_hpxml_bldg, 4000, 0.90, 0.20, true, HPXML::LocationGround, HPXML::PVTrackingType1Axis,
+                                   HPXML::PVModuleTypePremium, 123, current_year)
 
-    # Test defaults w/o year modules manufactured
+    # Test defaults
     pv.is_shared_system = nil
     pv.system_losses_fraction = nil
     pv.location = nil
@@ -3889,14 +3898,42 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     inv.inverter_efficiency = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_pv_system_values(default_hpxml_bldg, 0.96, 0.14, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
+    _test_default_pv_system_values(default_hpxml_bldg, 4000, 0.96, 0.14, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed,
+                                   HPXML::PVModuleTypeStandard, 135, current_year)
+
+    # Test defaults w/ collector area
+    pv.max_power_output = nil
+    pv.collector_area = 200
+    pv.year_installed = 2026
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_pv_system_values(default_hpxml_bldg, 4970, 0.96, 0.14, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed,
+                                   HPXML::PVModuleTypeStandard, 135, current_year)
+
+    # Test defaults w/ number of panels
+    pv.collector_area = nil
+    pv.number_of_panels = 10
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_pv_system_values(default_hpxml_bldg, 4518, 0.96, 0.14, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed,
+                                   HPXML::PVModuleTypeStandard, 135, current_year)
+
+    # Test defaults w/ year installed
+    pv.max_power_output = 4000
+    pv.year_installed = current_year - 5
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_pv_system_values(default_hpxml_bldg, 4000, 0.96, 0.161, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed,
+                                   HPXML::PVModuleTypeStandard, 135, current_year - 5)
 
     # Test defaults w/ year modules manufactured and no inverter
-    pv.year_modules_manufactured = Date.today.year - 10
+    pv.year_installed = nil
+    pv.year_modules_manufactured = current_year - 10
     inv.delete
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_pv_system_values(default_hpxml_bldg, 0.96, 0.182, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
+    _test_default_pv_system_values(default_hpxml_bldg, 4000, 0.96, 0.182, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed,
+                                   HPXML::PVModuleTypeStandard, 135, current_year - 10)
   end
 
   def test_electric_panels
@@ -5557,11 +5594,16 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(sla, foundation.vented_crawlspace_sla, 0.001)
   end
 
-  def _test_default_roof_values(roof, roof_type, solar_absorptance, roof_color, emittance, radiant_barrier,
+  def _test_default_roof_values(roof, roof_type, solar_absorptance, roof_color, cool_roof, emittance, radiant_barrier,
                                 radiant_barrier_grade, int_finish_type, int_finish_thickness, azimuth)
     assert_equal(roof_type, roof.roof_type)
     assert_equal(solar_absorptance, roof.solar_absorptance)
     assert_equal(roof_color, roof.roof_color)
+    if cool_roof.nil?
+      assert_nil(roof.cool_roof)
+    else
+      assert_equal(cool_roof, roof.cool_roof)
+    end
     assert_equal(emittance, roof.emittance)
     if not radiant_barrier.nil?
       assert_equal(radiant_barrier, roof.radiant_barrier)
@@ -6485,21 +6527,30 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(azimuth, solar_thermal_system.collector_azimuth)
   end
 
-  def _test_default_pv_system_values(hpxml_bldg, interver_efficiency, system_loss_frac, is_shared_system, location, tracking, module_type, azimuth)
+  def _test_default_pv_system_values(hpxml_bldg, max_power_output, interver_efficiency, system_loss_frac,
+                                     is_shared_system, location, tracking, module_type, azimuth, pv_year)
     hpxml_bldg.pv_systems.each do |pv|
+      assert_in_epsilon(max_power_output, pv.max_power_output, 0.01)
       assert_equal(is_shared_system, pv.is_shared_system)
       assert_in_epsilon(system_loss_frac, pv.system_losses_fraction, 0.01)
       assert_equal(location, pv.location)
       assert_equal(tracking, pv.tracking)
       assert_equal(module_type, pv.module_type)
       assert_equal(azimuth, pv.array_azimuth)
+      if not pv.year_modules_manufactured.nil?
+        assert_equal(pv_year, pv.year_modules_manufactured)
+      end
+      if not pv.year_installed.nil?
+        assert_equal(pv_year, pv.year_installed)
+      end
     end
     hpxml_bldg.inverters.each do |inv|
       assert_equal(interver_efficiency, inv.inverter_efficiency)
     end
   end
 
-  def _test_default_electric_panel_values(electric_panel, voltage, max_current_rating, headroom_spaces, rated_total_spaces, occupied_spaces)
+  def _test_default_electric_panel_values(electric_panel, voltage, max_current_rating, headroom_spaces,
+                                          rated_total_spaces, occupied_spaces)
     if voltage.nil?
       assert_nil(electric_panel.voltage)
     else

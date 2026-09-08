@@ -454,16 +454,16 @@ module HVACSizing
                   cool_temp += 130.0 * roof.net_area
                 when HPXML::ColorMedium, HPXML::ColorMediumLight, HPXML::ColorLight
                   cool_temp += 120.0 * roof.net_area
-                when HPXML::ColorReflective
+                when HPXML::ColorWhite, HPXML::ColorReflective
                   cool_temp += 95.0 * roof.net_area
                 end
-              when HPXML::RoofTypeClayTile, HPXML::RoofTypeConcrete, HPXML::RoofTypeCool
+              when HPXML::RoofTypeClayTile, HPXML::RoofTypeConcrete
                 case roof.roof_color
                 when HPXML::ColorDark, HPXML::ColorMediumDark
                   cool_temp += 110.0 * roof.net_area
                 when HPXML::ColorMedium, HPXML::ColorMediumLight, HPXML::ColorLight
                   cool_temp += 105.0 * roof.net_area
-                when HPXML::ColorReflective
+                when HPXML::ColorWhite, HPXML::ColorReflective
                   cool_temp += 95.0 * roof.net_area
                 end
               else
@@ -486,16 +486,16 @@ module HVACSizing
                   cool_temp += 120.0 * roof.net_area
                 when HPXML::ColorMedium, HPXML::ColorMediumLight, HPXML::ColorLight
                   cool_temp += 110.0 * roof.net_area
-                when HPXML::ColorReflective
+                when HPXML::ColorWhite, HPXML::ColorReflective
                   cool_temp += 95.0 * roof.net_area
                 end
-              when HPXML::RoofTypeClayTile, HPXML::RoofTypeConcrete, HPXML::RoofTypeCool
+              when HPXML::RoofTypeClayTile, HPXML::RoofTypeConcrete
                 case roof.roof_color
                 when HPXML::ColorDark, HPXML::ColorMediumDark
                   cool_temp += 105.0 * roof.net_area
                 when HPXML::ColorMedium, HPXML::ColorMediumLight, HPXML::ColorLight
                   cool_temp += 100.0 * roof.net_area
-                when HPXML::ColorReflective
+                when HPXML::ColorWhite, HPXML::ColorReflective
                   cool_temp += 95.0 * roof.net_area
                 end
               else
@@ -1185,16 +1185,16 @@ module HVACSizing
       # Base CLTD color adjustment based on notes in MJ8 Figure A12-16
       case roof.roof_color
       when HPXML::ColorDark, HPXML::ColorMediumDark
-        if [HPXML::RoofTypeClayTile, HPXML::RoofTypeWoodShingles, HPXML::RoofTypeConcrete, HPXML::RoofTypeCool].include? roof.roof_type
+        if [HPXML::RoofTypeClayTile, HPXML::RoofTypeWoodShingles, HPXML::RoofTypeConcrete].include? roof.roof_type
           cltd *= 0.83
         end
       when HPXML::ColorMedium, HPXML::ColorMediumLight, HPXML::ColorLight
-        if [HPXML::RoofTypeClayTile, HPXML::RoofTypeConcrete, HPXML::RoofTypeCool].include? roof.roof_type
+        if [HPXML::RoofTypeClayTile, HPXML::RoofTypeConcrete].include? roof.roof_type
           cltd *= 0.65
         else
           cltd *= 0.83
         end
-      when HPXML::ColorReflective
+      when HPXML::ColorWhite, HPXML::ColorReflective
         if [HPXML::RoofTypeAsphaltShingles, HPXML::RoofTypeWoodShingles, HPXML::RoofTypeShingles].include? roof.roof_type
           cltd *= 0.83
         else
@@ -1702,7 +1702,7 @@ module HVACSizing
 
     # Heating Loads
     if get_hvac_heating_type(hvac_heating) == HPXML::HVACTypeHeatPumpWaterLoopToAir
-      # Size to meet original fraction load served (not adjusted value from HVAC.apply_shared_heating_systems()
+      # Size to meet original fraction load served (not adjusted value from Defaults.convert_shared_systems_to_in_unit_systems()
       # This ensures, e.g., that an appropriate heating airflow is used for duct losses.
       frac_zone_heat_load_served /= (1.0 / hvac_heating.heating_efficiency_cop)
     end
@@ -1740,8 +1740,8 @@ module HVACSizing
 
   # Transfers the design load totals from the HVAC loads object to the HVAC sizings object.
   #
-  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
-  # @param zone_loads [DesignLoadValues] Object with design loads for the current HPXML::Zone
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for the current HVAC system
+  # @param hvac_loads [DesignLoadValues] Object with design loads for the current HPXML HVAC system
   # @return [nil]
   def self.apply_hvac_loads_to_hvac_sizings(hvac_sizings, hvac_loads)
     # Note: We subtract the blower heat below because we want to calculate a net capacity,
@@ -2623,7 +2623,7 @@ module HVACSizing
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param clg_ap [HPXML::AdditionalProperties] AdditionalProperties object for the HVAC cooling system/heat pump
-  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for the current HVAC system
   # @param manualj_humidity_setpoint [Double] Manual J input relative humidity setpoint (frac)
   # @param total_cool_cap_adj_factor [Double] Heat pump's cooling capacity at the design temperature as a fraction of the nominal cooling capacity (frac)
   # @param undersize_limit [Double] Undersize fraction (frac)
@@ -2729,7 +2729,7 @@ module HVACSizing
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for the current HVAC system
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
@@ -3001,7 +3001,7 @@ module HVACSizing
   # capacity due to HVAC installation quality. This is done to prevent unmet hours.
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
-  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for the current HVAC system
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -3158,7 +3158,7 @@ module HVACSizing
   # Applies sizing factors (multipliers) and/or sizing limits (absolute values) to the autosized HVAC capacities.
   # The sizing factors/limits are optional inputs in the HPXML file.
   #
-  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for the current HVAC system
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @return [nil]
@@ -3200,7 +3200,7 @@ module HVACSizing
 
   # Finalize Capacity Calculations
   #
-  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for the current HVAC system
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -3258,7 +3258,7 @@ module HVACSizing
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param geothermal_loop [HPXML::GeothermalLoop] The HPXML geothermal loop of interest
-  # @param geothermal_loop_values [GeothermalLoopValues] Object with properties for a given geothermal loop
+  # @param geothermal_loop_values [GeothermalLoopValues] Object with properties for the current geothermal loop
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_geothermal_loop(mj, runner, weather, geothermal_loop, geothermal_loop_values, hpxml_bldg)
@@ -3617,7 +3617,7 @@ module HVACSizing
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for the current HVAC system
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_heating [HPXML::HeatPump] The HPXML heat pump of interest
   # @param total_cool_cap_adj_factor [Double] Heat pump's cooling capacity at the design temperature as a fraction of the nominal cooling capacity (frac)
@@ -3625,6 +3625,7 @@ module HVACSizing
   # @param oversize_limit [Double] Oversize fraction (frac)
   # @param oversize_delta [Double] Oversize delta (Btu/hr)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hpxml_header [HPXML::Header] HPXML Header object
   # @return [nil]
   def self.calculate_ashp_capacities(mj, runner, hvac_sizings, weather, hvac_heating, total_cool_cap_adj_factor, hvac_system,
                                      oversize_limit, oversize_delta, hpxml_bldg, hpxml_header)
@@ -3882,6 +3883,7 @@ module HVACSizing
   # Calculates the ground source heat pump's heating capacities at the design conditions as a fraction of the nominal heating capacity.
   #
   # @param htg_ap [HPXML::AdditionalProperties] AdditionalProperties object for the HVAC system
+  # @param hpxml_header [HPXML::Header] HPXML Header object
   # @param db_temp [Double] Indoor design drybulb temperature (F)
   # @param w_temp [Double] Temperature of water entering indoor coil (F)
   # @param hvac_heating_speed [Integer] Array index of the nominal speed
@@ -5206,7 +5208,7 @@ module HVACSizing
   #
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
-  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for the current HVAC system
   # @return [nil]
   def self.assign_to_hpxml_system(hvac_heating, hvac_cooling, hvac_sizings)
     if not hvac_heating.nil?
@@ -5327,7 +5329,7 @@ module HVACSizing
   # These values will end up in the in.xml file, among other outputs.
   #
   # @param geothermal_loop [HPXML::GeothermalLoop] The HPXML geothermal loop of interest
-  # @param geothermal_loop_values [GeothermalLoopValues] Object with properties for a given geothermal loop
+  # @param geothermal_loop_values [GeothermalLoopValues] Object with properties for the current geothermal loop
   # @return [nil]
   def self.apply_to_hpxml_geothermal_loop(geothermal_loop, geothermal_loop_values)
     gl_ap = geothermal_loop.additional_properties
@@ -5766,6 +5768,15 @@ class DetailedOutputValues
                 :Cool_Load_Sens, # [Double] Total sensible cooling load (Btu/hr)
                 :Cool_Load_Lat)  # [Double] Total latent cooling load (Btu/hr)
 
+  # Initialize the DetailedOutputValues object.
+  #
+  # @param heat_load [Double] Total sensible heating load (Btu/hr)
+  # @param cool_load_sens [Double] Total sensible cooling load (Btu/hr)
+  # @param cool_load_lat [Double] Total latent cooling load (Btu/hr)
+  # @param area [Double] Surface area (ft2)
+  # @param length [Double] Slab length (ft)
+  # @param heat_htm [Double] Heating Heat Transfer Multiplier (HTM) (Btu/hr-ft2)
+  # @param cool_htm [Double] Cooling Heat Transfer Multiplier (HTM) (Btu/hr-ft2)
   def initialize(heat_load:, cool_load_sens:, cool_load_lat:, area: nil, length: nil, heat_htm: nil, cool_htm: nil)
     @Heat_Load = heat_load.round
     @Cool_Load_Sens = cool_load_sens.round

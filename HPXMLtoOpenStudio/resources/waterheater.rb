@@ -716,14 +716,10 @@ module Waterheater
     setpoint_manager.setName(obj_name + ' setpoint mgr')
     setpoint_manager.setControlVariable('Temperature')
 
-    pump = OpenStudio::Model::PumpConstantSpeed.new(model)
-    pump.setName(obj_name + ' pump')
-    pump.setRatedPumpHead(90000)
-    pump.setRatedPowerConsumption(pump_power)
-    pump.setMotorEfficiency(0.3)
-    pump.setFractionofMotorInefficienciestoFluidStream(0.2)
-    pump.setPumpControlType(EPlus::PumpControlTypeIntermittent)
-    pump.setRatedFlowRate(UnitConversions.convert(coll_flow, 'cfm', 'm^3/s'))
+    pump = Model.add_pump_constant_speed(model,
+                                         name: "#{obj_name} pump",
+                                         rated_power: pump_power,
+                                         rated_flow_rate: UnitConversions.convert(coll_flow, 'cfm', 'm^3/s'))
     pump.addToNode(plant_loop.supplyInletNode)
     pump.additionalProperties.setFeature('HPXML_ID', solar_thermal_system.water_heating_system.id) # Used by reporting measure
     pump.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeSolarHotWater) # Used by reporting measure
@@ -1694,7 +1690,10 @@ module Waterheater
     # Get output vars/meters associated with the water heater object
     dhw_vars = Outputs.get_object_outputs_for_hpxml_system(model, sys_id, [EUT::HotWater])
 
-    # Converts the [ft, eut] key to an ems-friendly name
+    # Converts the fuel type/end use type key to an ems-friendly name
+    #
+    # @param key [[FT::XXX, EUT::XXX]] The key to convert
+    # @return [String] The ems-friendly name for the key
     def self.key_name(key)
       return Model.ems_friendly_name(key.join('_')).downcase
     end

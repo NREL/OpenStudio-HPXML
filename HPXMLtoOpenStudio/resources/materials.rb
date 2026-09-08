@@ -66,6 +66,7 @@ class Material
   #
   # @param mat1 [Material] The first material to combine
   # @param mat2 [Material] The second material to combine
+  # @param new_name [String] The new name for the combined material
   # @return [Material] The combined material object
   def self.combine(mat1, mat2, new_name)
     rvalue = mat2.thick_in / mat2.k_in + mat1.thick_in / mat1.k_in
@@ -181,7 +182,7 @@ class Material
 
   # Creates a material for the combined layer of, e.g., carpet and bare floor.
   #
-  # @param floorFraction [Double] Fraction of the floor that is covered (i.e., not bare)
+  # @param floor_fraction [Double] Fraction of the floor that is covered (i.e., not bare)
   # @param rvalue [Double] Thermal resistance (hr-ft2-F/Btu)
   # @return [Material] The material object
   def self.CoveringBare(floor_fraction = 0.8, rvalue = 2.08)
@@ -333,18 +334,11 @@ class Material
 
   # Creates a material for a radiant batter (in an attic).
   #
-  # @param install_grade [Integer] Installation grade (1-3)
+  # @param install_grade [Integer] Installation grade as defined by RESNET (1-3)
   # @param is_attic_floor [Boolean] True if the radiant barrier is on the attic floor (as opposed to roof of the attic)
   # @return [Material] The material object
-  def self.RadiantBarrier(grade, is_attic_floor = false)
-    # FUTURE: Merge w/ Constructions.get_gap_factor
-    if grade == 1
-      gap_frac = 0.0
-    elsif grade == 2
-      gap_frac = 0.02
-    elsif grade == 3
-      gap_frac = 0.05
-    end
+  def self.RadiantBarrier(install_grade, is_attic_floor = false)
+    gap_frac = Constructions.get_install_grade_gap_fraction(install_grade, true)
     if is_attic_floor
       # Assume reduced effectiveness due to accumulation of dust per https://web.ornl.gov/sci/buildings/tools/radiant/rb2/
       rb_emittance = 0.5
@@ -377,7 +371,7 @@ class Material
     case roof_type
     when HPXML::RoofTypeMetal
       mat_roof = new(name: roof_type, thick_in: 0.02, k_in: 346.9, rho: 487.0, cp: 0.11)
-    when HPXML::RoofTypeAsphaltShingles, HPXML::RoofTypeWoodShingles, HPXML::RoofTypeShingles, HPXML::RoofTypeCool
+    when HPXML::RoofTypeAsphaltShingles, HPXML::RoofTypeWoodShingles, HPXML::RoofTypeShingles
       mat_roof = new(name: roof_type, thick_in: 0.25, k_in: 1.128, rho: 70.0, cp: 0.35)
     when HPXML::RoofTypeConcrete
       mat_roof = new(name: roof_type, thick_in: 0.75, k_in: 7.63, rho: 131.1, cp: 0.199)

@@ -87,11 +87,6 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
       [{ assembly_r: 0.1, layer_names: ['concrete + osb', 'roof stud and cavity', 'gypsum board'] },
        { assembly_r: 5.0, layer_names: ['concrete + osb', 'roof stud and cavity', 'gypsum board'] },
        { assembly_r: 20.0, layer_names: ['concrete + osb', 'roof rigid ins', 'roof stud and cavity', 'gypsum board'] }],
-      # Cool
-      [{ assembly_r: 0.1, layer_names: ['cool roof + osb', 'roof stud and cavity', 'plaster'] },
-       { assembly_r: 5.0, layer_names: ['cool roof + osb', 'roof stud and cavity', 'plaster'] },
-       { assembly_r: 20.0, layer_names: ['cool roof + osb', 'roof rigid ins', 'roof stud and cavity', 'plaster'] }],
-
     ]
 
     hpxml, hpxml_bldg = _create_hpxml('base-enclosure-rooftypes.xml')

@@ -86,17 +86,17 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
   command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly ALL#{building_id_str}#{skip_validation_str}"
   success = system(command)
 
-  if unit_multiplier > 1
-    # Clean up
-    File.delete(xml)
-    xml.gsub!('-10x.xml', '.xml')
-  end
-
   rundir = File.join(rundir, 'run')
 
   # Check results
   print "Simulation failed: #{xml}.\n" unless success
   assert_equal(true, success)
+
+  if unit_multiplier > 1
+    # Clean up
+    File.delete(xml)
+    xml.gsub!('-10x.xml', '.xml')
+  end
 
   # Check for output files
   annual_csv_path = File.join(rundir, 'results_annual.csv')

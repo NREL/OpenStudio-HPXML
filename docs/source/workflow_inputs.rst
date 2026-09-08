@@ -25,7 +25,7 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``BeginDayOfMonth``                   integer            >= 1, <= 31       No        1                            Run period start date
   ``EndMonth``                          integer            >= 1, <= 12       No        12 (December)                Run period end date
   ``EndDayOfMonth``                     integer            >= 1, <= 31       No        31                           Run period end date
-  ``CalendarYear``                      integer            > 1600 [#]_       No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
+  ``CalendarYear``                      integer            >= 1600 [#]_      No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
   ``AdvancedResearchFeatures``          element                              No        <none>                       Features used for advanced research modeling
   ====================================  ========  =======  ================  ========  ===========================  =====================================
 
@@ -245,7 +245,7 @@ For each scenario, PV compensation information can be optionally entered in ``/H
   Element                                                        Type      Units    Constraints  Required  Default         Notes
   =============================================================  ========  =======  ===========  ========  ==============  ==============================
   ``CompensationType[NetMetering | FeedInTariff]``               element                         No        NetMetering     PV compensation type
-  ``MonthlyGridConnectionFee[Units="$/kW" or Units="$"]/Value``  double                          No        0               PV monthly grid connection fee
+  ``MonthlyGridConnectionFee[Units="$/kW" or "$"]/Value``        double                          No        0               PV monthly grid connection fee
   =============================================================  ========  =======  ===========  ========  ==============  ==============================
 
 **Net-Metering**
@@ -291,13 +291,15 @@ If not entered, the simulation will not include unavailable periods.
   ``ColumnName``                        string                            Yes                         Column name associated with unavailable_periods.csv below
   ``BeginMonth``                        integer            >= 1, <= 12    Yes                         Begin month
   ``BeginDayOfMonth``                   integer            >= 1, <= 31    Yes                         Begin day
-  ``BeginHourOfDay``                    integer            >= 0, <= 23    No        0                 Begin hour
+  ``BeginHourOfDay``                    integer            >= 0, <= 23    No        0                 Begin hour [#]_
   ``EndMonth``                          integer            >= 1, <= 12    Yes                         End month
   ``EndDayOfMonth``                     integer            >= 1, <= 31    Yes                         End day
-  ``EndHourOfDay``                      integer            >= 1, <= 24    No        24                End hour
+  ``EndHourOfDay``                      integer            >= 1, <= 24    No        24                End hour [#]_
   ``NaturalVentilation``                string             See [#]_       No        regular schedule  Natural ventilation availability
   ====================================  ========  =======  =============  ========  ================  ===========
 
+  .. [#] The hour when the unavailable period begins (i.e., hour 0 = 12am, hour 23 = 11pm).
+  .. [#] The hour when the unavailable period ends (i.e., hour 1 = 1am, hour 24 = 12am midnight of next day).
   .. [#] NaturalVentilation choices are "regular schedule", "always available", or "always unavailable".
 
 See the table below to understand which components are affected by an unavailable period with a given ``ColumnName``.
@@ -1257,7 +1259,8 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``Area``                                double             ft2               > 0                       Yes                                        Gross area (including skylights)
   ``Azimuth`` or ``Orientation``          integer or string  deg or direction  >= 0, <= 359 or See [#]_  No         See [#]_                        Direction (clockwise from North)
   ``RoofType``                            string                               See [#]_                  No         asphalt or fiberglass shingles  Roof type
-  ``RoofColor`` or ``SolarAbsorptance``   string or double                     See [#]_ or >= 0, <= 1    No         medium                          Roof color or solar absorptance of outermost material [#]_
+  ``CoolRoof``                            boolean                                                        No                                         Only used to default roof color
+  ``RoofColor`` or ``SolarAbsorptance``   string or double                     See [#]_ or >= 0, <= 1    No         medium (or white if cool roof)  Roof color or solar absorptance of outermost material [#]_
   ``Emittance``                           double                               >= 0, <= 1                No         0.90                            Emittance of outermost material
   ``InteriorFinish/Type``                 string                               See [#]_                  No         See [#]_                        Interior finish material
   ``InteriorFinish/Thickness``            double             in                >= 0                      No         0.5                             Interior finish thickness
@@ -1275,27 +1278,25 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If neither Azimuth nor Orientation provided, and it's a *pitched* roof, modeled as four surfaces of equal area facing every direction.
          Azimuth/Orientation is irrelevant for *flat* roofs.
-  .. [#] RoofType choices are "asphalt or fiberglass shingles", "wood shingles or shakes", "shingles", "slate or tile shingles", "metal surfacing", "plastic/rubber/synthetic sheeting", "expanded polystyrene sheathing", "concrete", or "cool roof".
-  .. [#] RoofColor choices are "dark", "medium dark", "medium", "medium light", "light", or "reflective".
+  .. [#] RoofType choices are "asphalt or fiberglass shingles", "wood shingles or shakes", "shingles", "slate or tile shingles", "metal surfacing", "plastic/rubber/synthetic sheeting", "expanded polystyrene sheathing", or "concrete".
+  .. [#] RoofColor choices are "dark", "medium dark", "medium", "medium light", "light", "white", or "reflective".
   .. [#] If SolarAbsorptance not provided, defaults based on RoofType and RoofColor:
 
-         \- **asphalt or fiberglass shingles**: dark=0.92, medium dark=0.89, medium=0.85, medium light=0.8, light=0.75, reflective=0.50
+         \- **asphalt or fiberglass shingles**: dark=0.92, medium dark=0.89, medium=0.85, medium light=0.80, light=0.75, white=0.75, reflective=0.25
 
-         \- **wood shingles or shakes**: dark=0.92, medium dark=0.89, medium=0.85, medium light=0.8, light=0.75, reflective=0.50
+         \- **wood shingles or shakes**: dark=0.92, medium dark=0.89, medium=0.85, medium light=0.80, light=0.75, white=0.75, reflective=0.25
 
-         \- **shingles**: dark=0.92, medium dark=0.89, medium=0.85, medium light=0.8, light=0.75, reflective=0.50
+         \- **shingles**: dark=0.92, medium dark=0.89, medium=0.85, medium light=0.80, light=0.75, white=0.75, reflective=0.25
 
-         \- **slate or tile shingles**: dark=0.90, medium dark=0.83, medium=0.75, medium light=0.67, light=0.60, reflective=0.30
+         \- **slate or tile shingles**: dark=0.85, medium dark=0.80, medium=0.75, medium light=0.65, light=0.40, white=0.30, reflective=0.25
 
-         \- **metal surfacing**: dark=0.90, medium dark=0.83, medium=0.75, medium light=0.67, light=0.60, reflective=0.30
+         \- **metal surfacing**: dark=0.90, medium dark=0.80, medium=0.70, medium light=0.60, light=0.50, white=0.35, reflective=0.25
 
-         \- **plastic/rubber/synthetic sheeting**: dark=0.90, medium dark=0.83, medium=0.75, medium light=0.67, light=0.60, reflective=0.30
+         \- **plastic/rubber/synthetic sheeting**: dark=0.90, medium dark=0.78, medium=0.65, medium light=0.53, light=0.40, white=0.30, reflective=0.25
 
-         \- **expanded polystyrene sheathing**: dark=0.92, medium dark=0.89, medium=0.85, medium light=0.8, light=0.75, reflective=0.50
+         \- **expanded polystyrene sheathing**: dark=0.92, medium dark=0.89, medium=0.85, medium light=0.80, light=0.75, white=0.75, reflective=0.25
 
-         \- **concrete**: dark=0.90, medium dark=0.83, medium=0.75, medium light=0.7, light=0.65, reflective=0.50
-
-         \- **cool roof**: 0.30
+         \- **concrete**: dark=0.85, medium dark=0.80, medium=0.75, medium light=0.65, light=0.40, white=0.30, reflective=0.25
 
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "not present".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space, otherwise "not present".
@@ -1336,23 +1337,12 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   .. [#] If neither Azimuth nor Orientation provided, and it's an *exterior* rim joist, modeled as four surfaces of equal area facing every direction.
          Azimuth/Orientation is irrelevant for *interior* rim joists.
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", "stone veneer", "aluminum siding", "masonite siding", "composite shingle siding", "asbestos siding", "synthetic stucco", or "not present".
-  .. [#] Color choices are "dark", "medium dark", "medium", "medium light", "light", or "reflective".
-  .. [#] If SolarAbsorptance not provided, defaults based on Color:
-
-         \- **dark**: 0.95
-
-         \- **medium dark**: 0.85
-
-         \- **medium**: 0.70
-
-         \- **medium light**: 0.60
-
-         \- **light**: 0.50
-
-         \- **reflective**: 0.30
-
+  .. [#] Color choices are "dark", "medium dark", "medium", "medium light", "light", "white", or "reflective".
+  .. [#] If SolarAbsorptance not provided, defaults the same as :ref:`hpxml_walls`.
   .. [#] AssemblyEffectiveRValue includes all material layers and interior/exterior air films.
          It should also include the effects of insulation gaps (installation grading) and/or compressed insulation in cavities per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
+
+.. _hpxml_walls:
 
 HPXML Walls
 ***********
@@ -1391,21 +1381,8 @@ Each wall surface is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Wa
   .. [#] If neither Azimuth nor Orientation provided, and it's an *exterior* wall, modeled as four surfaces of equal area facing every direction.
          Azimuth/Orientation is irrelevant for *interior* walls (e.g., between conditioned space and garage).
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", "stone veneer", "aluminum siding", "masonite siding", "composite shingle siding", "asbestos siding", "synthetic stucco", or "not present".
-  .. [#] Color choices are "dark", "medium dark", "medium", "medium light", "light", or "reflective".
-  .. [#] If SolarAbsorptance not provided, defaults based on Color:
-
-         \- **dark**: 0.95
-
-         \- **medium dark**: 0.85
-
-         \- **medium**: 0.70
-
-         \- **medium light**: 0.60
-
-         \- **light**: 0.50
-
-         \- **reflective**: 0.30
-
+  .. [#] Color choices are "dark", "medium dark", "medium", "medium light", "light", "white", or "reflective".
+  .. [#] If SolarAbsorptance not provided, defaults based on Color: dark=0.90, medium dark=0.80, medium=0.70, medium light=0.63, light=0.55, white=0.35, reflective=0.25.
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "not present".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space or basement - conditioned, otherwise "not present".
   .. [#] RadiantBarrier intended for attic gable walls. Model assumes an emittance of 0.05.
@@ -2183,7 +2160,7 @@ Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   ``HeatingSystemType/Furnace/extension/PilotLightBtuh``              double   Btu/hr     >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                               string              See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                                 double   Btu/hr     >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="AFUE" or Units="Percent"]/Value``  double   frac       > 0, <= 1        Yes                       Rated heating efficiency
+  ``AnnualHeatingEfficiency[Units="AFUE" or "Percent"]/Value``        double   frac       > 0, <= 1        Yes                       Rated heating efficiency
   ``FractionHeatLoadServed``                                          double   frac       >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanMotorType``                                          string              See [#]_         No        See [#]_        Blower fan model type
   ``extension/FanPowerWattsPerCFM``                                   double   W/cfm      >= 0 [#]_        No        See [#]_        Blower fan efficiency at maximum fan speed
@@ -2233,7 +2210,7 @@ Each wall furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
   ``HeatingSystemType/WallFurnace/extension/PilotLightBtuh``          double   Btu/hr  >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                               string           See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                                 double   Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="AFUE" or Units="Percent"]/Value``  double   frac    > 0, <= 1        Yes                       Rated heating efficiency
+  ``AnnualHeatingEfficiency[Units="AFUE" or "Percent"]/Value``        double   frac    > 0, <= 1        Yes                       Rated heating efficiency
   ``FractionHeatLoadServed``                                          double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                                         double   W       >= 0             No        0               Fan power
   ``extension/HeatingAutosizingFactor``                               double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
@@ -2265,7 +2242,7 @@ Each floor furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVA
   ``HeatingSystemType/FloorFurnace/extension/PilotLightBtuh``         double   Btu/hr  >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                               string           See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                                 double   Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="AFUE" or Units="Percent"]/Value``  double   frac    > 0, <= 1        Yes                       Rated heating efficiency
+  ``AnnualHeatingEfficiency[Units="AFUE" or "Percent"]/Value``        double   frac    > 0, <= 1        Yes                       Rated heating efficiency
   ``FractionHeatLoadServed``                                          double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                                         double   W       >= 0             No        0               Fan power
   ``extension/HeatingAutosizingFactor``                               double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
@@ -2299,7 +2276,7 @@ Each in-unit boiler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HV
   ``HeatingSystemType/Boiler/extension/PilotLightBtuh``               double   Btu/hr     >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                               string              See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                                 double   Btu/hr     >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="AFUE" or Units="Percent"]/Value``  double   frac       > 0, <= 1        Yes                       Rated heating efficiency
+  ``AnnualHeatingEfficiency[Units="AFUE" or "Percent"]/Value``        double   frac       > 0, <= 1        Yes                       Rated heating efficiency
   ``FractionHeatLoadServed``                                          double   frac       >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``ElectricAuxiliaryEnergy``                                         double   kWh/yr     >= 0             No        See [#]_        Electric auxiliary energy
   ``extension/HeatingAutosizingFactor``                               double   frac       > 0              No        1.0             Heating autosizing capacity multiplier
@@ -2348,7 +2325,7 @@ Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Bu
   ``HeatingSystemType/Boiler/PilotLight``                             boolean                                No        false               Presence of standing pilot light (older systems)
   ``HeatingSystemType/Boiler/extension/PilotLightBtuh``               double   Btu/hr       >= 0             No        500                 Pilot light burn rate
   ``HeatingSystemFuel``                                               string                See [#]_         Yes                           Fuel type
-  ``AnnualHeatingEfficiency[Units="AFUE" or Units="Percent"]/Value``  double   frac         > 0, <= 1        Yes                           Rated heating efficiency
+  ``AnnualHeatingEfficiency[Units="AFUE" or "Percent"]/Value``        double   frac         > 0, <= 1        Yes                           Rated heating efficiency
   ``FractionHeatLoadServed``                                          double   frac         >= 0, <= 1 [#]_  See [#]_                      Fraction of heating load served
   ``ElectricAuxiliaryEnergy`` or ``extension/SharedLoopWatts``        double   kWh/yr or W  >= 0             No        See [#]_            Electric auxiliary energy or shared loop power
   ``ElectricAuxiliaryEnergy`` or ``extension/FanCoilWatts``           double   kWh/yr or W  >= 0             No [#]_                       Electric auxiliary energy or fan coil power
@@ -2505,8 +2482,8 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
   ``CoolingCapacity``                                               double   Btu/hr       >= 0                     No        autosized [#]_  Cooling output capacity at 95F
   ``CompressorType``                                                string                See [#]_                 Yes                       Type of compressor
   ``FractionCoolLoadServed``                                        double   frac         >= 0, <= 1 [#]_          Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER2" or Units="SEER"]/Value``  double   Btu/Wh       > 0                      Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value``    double   Btu/Wh       > 0 [#]_                 No        See [#]_        Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="SEER2" or "SEER"]/Value``        double   Btu/Wh       > 0                      Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER2" or "EER"]/Value``          double   Btu/Wh       > 0 [#]_                 No        See [#]_        Rated cooling efficiency [#]_
   ``CoolingDetailedPerformanceData``                                element                                        No        <none>          Cooling detailed performance data [#]_
   ``extension/FanMotorType``                                        string                See [#]_                 No        See [#]_        Blower fan model type
   ``extension/FanPowerWattsPerCFM``                                 double   W/cfm        >= 0 [#]_                No        See [#]_        Blower fan efficiency at maximum fan speed
@@ -2567,7 +2544,7 @@ Each room air conditioner is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``CoolingSystemFuel``                                           string          electricity           Yes                       Fuel type
   ``CoolingCapacity``                                             double  Btu/hr  >= 0                  No        autosized [#]_  Cooling output capacity
   ``FractionCoolLoadServed``                                      double  frac    >= 0, <= 1 [#]_       Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="CEER" or Units="EER"]/Value``  double  Btu/Wh  > 0                   Yes                       Rated cooling efficiency
+  ``AnnualCoolingEfficiency[Units="CEER" or "EER"]/Value``        double  Btu/Wh  > 0                   Yes                       Rated cooling efficiency
   ``IntegratedHeatingSystemFuel``                                 string          See [#]_              No        <none>          Fuel type of integrated heater
   ``extension/CrankcaseHeaterPowerWatts``                         double  W       >= 0                  No        0.0             Crankcase heater power
   ``extension/CoolingAutosizingFactor``                           double  frac    > 0                   No        1.0             Cooling autosizing capacity multiplier
@@ -2613,7 +2590,7 @@ Each packaged terminal air conditioner (PTAC) is entered as a ``/HPXML/Building/
   ``CoolingSystemFuel``                                           string          electricity                        Yes                       Fuel type
   ``CoolingCapacity``                                             double  Btu/hr  >= 0                               No        autosized [#]_  Cooling output capacity
   ``FractionCoolLoadServed``                                      double  frac    >= 0, <= 1 [#]_                    Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="CEER" or Units="EER"]/Value``  double  Btu/Wh  > 0                                Yes                       Rated cooling efficiency
+  ``AnnualCoolingEfficiency[Units="CEER" or "EER"]/Value``        double  Btu/Wh  > 0                                Yes                       Rated cooling efficiency
   ``IntegratedHeatingSystemFuel``                                 string          See [#]_                           No        <none>          Fuel type of integrated heater
   ``extension/CrankcaseHeaterPowerWatts``                         double  W       >= 0                               No        0.0             Crankcase heater power
   ``extension/CoolingAutosizingFactor``                           double  frac    > 0                                No        1.0             Cooling autosizing capacity multiplier
@@ -2688,8 +2665,8 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   ``CoolingCapacity``                                               double    Btu/hr  >= 0                     No        autosized [#]_  Cooling output capacity at 95F
   ``CompressorType``                                                string            variable speed           Yes                       Type of compressor
   ``FractionCoolLoadServed``                                        double    frac    >= 0, <= 1 [#]_          Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER2" or Units="SEER"]/Value``  double    Btu/Wh  > 0                      Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value``    double    Btu/Wh  > 0 [#]_                 No        See [#]_        Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="SEER2" or "SEER"]/Value``        double    Btu/Wh  > 0                      Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER2" or "EER"]/Value``          double    Btu/Wh  > 0 [#]_                 No        See [#]_        Rated cooling efficiency [#]_
   ``CoolingDetailedPerformanceData``                                element                                    No        <none>          Cooling detailed performance data [#]_
   ``extension/FanMotorType``                                        string            See [#]_                 No        BPM             Blower fan model type
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0 [#]_                No        See [#]_        Blower fan efficiency at maximum fan speed
@@ -2838,9 +2815,9 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``BackupType``                                                      string                   See [#]_                         No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                                          double   frac            >= 0, <= 1 [#]_                  Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                          double   frac            >= 0, <= 1 [#]_                  Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER2" or Units="SEER"]/Value``    double   Btu/Wh          > 0                              Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value``      double   Btu/Wh          > 0 [#]_                         No        See [#]_        Rated cooling efficiency [#]_
-  ``AnnualHeatingEfficiency[Units="HSPF2" or Units="HSPF"]/Value``    double   Btu/Wh          > 0                              Yes                       Rated heating efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="SEER2" or "SEER"]/Value``          double   Btu/Wh          > 0                              Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER2" or "EER"]/Value``            double   Btu/Wh          > 0 [#]_                         No        See [#]_        Rated cooling efficiency [#]_
+  ``AnnualHeatingEfficiency[Units="HSPF2" or "HSPF"]/Value``          double   Btu/Wh          > 0                              Yes                       Rated heating efficiency [#]_
   ``CoolingDetailedPerformanceData``                                  element                                                   No        <none>          Cooling detailed performance data [#]_
   ``HeatingDetailedPerformanceData``                                  element                                                   No        <none>          Heating detailed performance data [#]_
   ``extension/FanMotorType``                                          string                   See [#]_                         No        See [#]_        Blower fan model type
@@ -2936,9 +2913,9 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
   ``BackupType``                                                      string                    See [#]_                         No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                                          double    frac            >= 0, <= 1 [#]_                  Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                          double    frac            >= 0, <= 1 [#]_                  Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER2" or Units="SEER"]/Value``    double    Btu/Wh          > 0                              Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value``      double    Btu/Wh          > 0 [#]_                         No        See [#]_        Rated cooling efficiency [#]_
-  ``AnnualHeatingEfficiency[Units="HSPF2" or Units="HSPF"]/Value``    double    Btu/Wh          > 0                              Yes                       Rated heating efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="SEER2" or "SEER"]/Value``          double    Btu/Wh          > 0                              Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER2" or "EER"]/Value``            double    Btu/Wh          > 0 [#]_                         No        See [#]_        Rated cooling efficiency [#]_
+  ``AnnualHeatingEfficiency[Units="HSPF2" or "HSPF"]/Value``          double    Btu/Wh          > 0                              Yes                       Rated heating efficiency [#]_
   ``CoolingDetailedPerformanceData``                                  element                                                    No        <none>          Cooling detailed performance data [#]_
   ``HeatingDetailedPerformanceData``                                  element                                                    No        <none>          Heating detailed performance data [#]_
   ``extension/FanMotorType``                                          string                    See [#]_                         No        BPM             Blower fan model type
@@ -3028,7 +3005,7 @@ Each packaged terminal heat pump is entered as a ``/HPXML/Building/BuildingDetai
   ``BackupType``                                                      string                    See [#]_                         No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                                          double    frac            >= 0, <= 1 [#]_                  Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                          double    frac            >= 0, <= 1 [#]_                  Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="CEER" or Units="EER"]/Value``      double    Btu/Wh          > 0                              Yes                       Rated cooling efficiency
+  ``AnnualCoolingEfficiency[Units="CEER" or "EER"]/Value``            double    Btu/Wh          > 0                              Yes                       Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                      double    W/W             > 0                              Yes                       Rated heating efficiency
   ``extension/CrankcaseHeaterPowerWatts``                             double    W               >= 0                             No        0.0             Crankcase heater power
   ``extension/BackupHeatingActiveDuringDefrost``                      boolean                                                    No        false           Whether integrated backup heat is used during defrost [#]_
@@ -3080,7 +3057,7 @@ Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/B
   ``BackupType``                                                      string                    See [#]_                                 No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                                          double    frac            >= 0, <= 1 [#]_                          Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                          double    frac            >= 0, <= 1 [#]_                          Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="CEER" or Units="EER"]/Value``      double    Btu/Wh          > 0                                      Yes                       Rated cooling efficiency
+  ``AnnualCoolingEfficiency[Units="CEER" or "EER"]/Value``            double    Btu/Wh          > 0                                      Yes                       Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                      double    W/W             > 0                                      Yes                       Rated heating efficiency
   ``extension/CrankcaseHeaterPowerWatts``                             double    W               >= 0                                     No        0.0             Crankcase heater power
   ``extension/BackupHeatingActiveDuringDefrost``                      boolean                                                            No        false           Whether integrated backup heat is used during defrost [#]_
@@ -3275,7 +3252,7 @@ If a backup type of "integrated" is provided, additional information is entered 
   Element                                                                        Type      Units   Constraints  Required  Default         Notes
   =============================================================================  ========  ======  ===========  ========  ==============  ==========================================
   ``BackupSystemFuel``                                                           string            See [#]_     Yes                       Integrated backup heating fuel type
-  ``BackupAnnualHeatingEfficiency[Units="Percent" or Units="AFUE"]/Value``       double    frac    > 0, <= 1    Yes                       Integrated backup heating efficiency
+  ``BackupAnnualHeatingEfficiency[Units="Percent" or "AFUE"]/Value``             double    frac    > 0, <= 1    Yes                       Integrated backup heating efficiency
   ``BackupHeatingCapacity``                                                      double    Btu/hr  >= 0         No        autosized [#]_  Integrated backup heating output capacity
   ``extension/BackupHeatingAutosizingFactor``                                    double    frac    > 0          No        1.0             Backup Heating autosizing capacity multiplier
   ``extension/BackupHeatingAutosizingLimit``                                     double    Btu/hr  > 0          No        <none>          Backup Heating autosizing capacity limit
@@ -4158,7 +4135,7 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
 
          \- **IECC zones 1-3**: "garage", "conditioned space"
 
-         \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
+         \- **IECC zones 4-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
 
   .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
@@ -4217,7 +4194,7 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
 
          \- **IECC zones 1-3**: "garage", "conditioned space"
 
-         \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
+         \- **IECC zones 4-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
 
   .. [#] If PerformanceAdjustment not provided, defaults to 0.94 (UEF) or 0.92 (EF) based on `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
@@ -4270,7 +4247,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
 
          \- **IECC zones 1-3**: "garage", "conditioned space"
 
-         \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
+         \- **IECC zones 4-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
 
   .. [#] If TankVolume not provided, defaults as follows:
 
@@ -4338,7 +4315,7 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
 
          \- **IECC zones 1-3**: "garage", "conditioned space"
 
-         \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
+         \- **IECC zones 4-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
 
   .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
@@ -4381,7 +4358,7 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
 
          \- **IECC zones 1-3**: "garage", "conditioned space"
 
-         \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
+         \- **IECC zones 4-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
 
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
@@ -4710,52 +4687,46 @@ If not entered, the simulation will not include photovoltaics.
 
 Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nlr.gov/>`_.
 
-  =======================================================  =================  ================  ========================  ========  =========  ============================================
-  Element                                                  Type               Units             Constraints               Required  Default    Notes
-  =======================================================  =================  ================  ========================  ========  =========  ============================================
-  ``SystemIdentifier``                                     id                                                             Yes                  Unique identifier
-  ``IsSharedSystem``                                       boolean                                                        No        false      Whether it serves multiple dwelling units
-  ``Location``                                             string                               See [#]_                  No        roof       Mounting location
-  ``ModuleType``                                           string                               See [#]_                  No        standard   Type of module
-  ``Tracking``                                             string                               See [#]_                  No        fixed      Type of tracking
-  ``ArrayAzimuth`` or ``ArrayOrientation``                 integer or string  deg or direction  >= 0, <= 359 or See [#]_  Yes                  Direction panels face (clockwise from North)
-  ``ArrayTilt``                                            double             deg               >= 0, <= 90               Yes                  Tilt relative to horizontal
-  ``MaxPowerOutput``                                       double             W                 >= 0                      Yes                  Peak power
-  ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #         >= 0, <= 1 or > 1600      No        0.14 [#]_  System losses [#]_
-  ``AttachedToInverter``                                   idref                                See [#]_                  See [#]_             ID of attached inverter
-  ``extension/NumberofBedroomsServed``                     integer                              > NumberofBedrooms        See [#]_             Number of bedrooms served
-  =======================================================  =================  ================  ========================  ========  =========  ============================================
+  =============================================================  ===========================  ================  ========================  ========  ===========  ============================================
+  Element                                                        Type                         Units             Constraints               Required  Default      Notes
+  =============================================================  ===========================  ================  ========================  ========  ===========  ============================================
+  ``SystemIdentifier``                                           id                                                                       Yes                    Unique identifier
+  ``IsSharedSystem``                                             boolean                                                                  No        false        Whether it serves multiple dwelling units
+  ``Location``                                                   string                                         See [#]_                  No        roof         Mounting location
+  ``ModuleType``                                                 string                                         See [#]_                  No        standard     Type of module
+  ``Tracking``                                                   string                                         See [#]_                  No        fixed        Type of tracking
+  ``ArrayAzimuth`` or ``ArrayOrientation``                       integer or string            deg or direction  >= 0, <= 359 or See [#]_  Yes                    Direction panels face (clockwise from North)
+  ``ArrayTilt``                                                  double                       deg               >= 0, <= 90               Yes                    Tilt relative to horizontal
+  ``MaxPowerOutput`` or ``CollectorArea`` or ``NumberOfPanels``  double or double or integer  W or ft2 or #     >= 0 or > 0 or > 0        Yes                    Quantity of PV (power, area and/or number) [#]_
+  ``SystemLossesFraction``                                       double                       frac              >= 0, <= 1                No        See [#]_     System losses including degradation due to age [#]_
+  ``YearModulesManufactured`` or ``YearInstalled``               integer                      #                 >= 1970                   No        CurrentYear  Year for age-based degradation
+  ``AttachedToInverter``                                         idref                                          See [#]_                  See [#]_               ID of attached inverter
+  ``extension/NumberofBedroomsServed``                           integer                                        > NumberofBedrooms        See [#]_               Number of bedrooms served
+  =============================================================  ===========================  ================  ========================  ========  ===========  ============================================
 
   .. [#] Location choices are "ground" or "roof" mounted.
   .. [#] ModuleType choices are "standard", "premium", or "thin film".
   .. [#] Tracking choices are "fixed", "1-axis", "1-axis backtracked", or "2-axis".
   .. [#] ArrayOrientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
-  .. [#] SystemLossesFraction default is derived from the `PVWatts documentation <https://docs.nlr.gov/docs/fy14osti/62641.pdf>`_, which breaks down the losses as follows.
-         Note that the total loss (14%) is not the sum of the individual losses but is calculated by multiplying the reduction due to each loss.
+  .. [#] If MaxPowerOutput not provided, defaults to:
 
-         \- **Soiling**: 2%
+         MaxPowerOutput = (13.3 * PVYear - 26494) * NumberOfPanels
 
-         \- **Shading**: 3%
+         where:
 
-         \- **Snow**: 0%
+         PVYear is YearModulesManufactured or YearInstalled
 
-         \- **Mismatch**: 2%
+         NumberOfPanels defaults to CollectorArea / 17.6 (rounded) if not provided.
 
-         \- **Wiring**: 2%
+  .. [#] If SystemLossesFraction not provided, defaults to:
 
-         \- **Connections**: 0.5%
+         SystemLossesFraction = 1.0 - (1.0 - BaseSystemLossesFraction) * 0.995^(CurrentYear - PVYear)
 
-         \- **Light-induced degradation**: 1.5%
+         where:
 
-         \- **Nameplate rating**: 1%
+         PVYear is YearModulesManufactured or YearInstalled
 
-         \- **Age**: 0%
-
-         \- **Availability**: 3%
-
-         If YearModulesManufactured provided but not SystemLossesFraction, calculated as:
-
-         SystemLossesFraction = 1.0 - (1.0 - 0.14) * (1.0 - (1.0 - 0.995^(CurrentYear - YearModulesManufactured))).
+         BaseSystemLossesFraction is 14% based on the `PVWatts defaults in Table 6 <https://docs.nlr.gov/docs/fy14osti/62641.pdf>`_.
 
   .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
   .. [#] AttachedToInverter must reference an ``Inverter``.
@@ -4976,8 +4947,8 @@ If not entered, the simulation will not include batteries.
   ``IsSharedSystem``                                    boolean                                      No        false     Whether it serves multiple dwelling units
   ``Location``                                          string              See [#]_                 No        See [#]_  Location
   ``BatteryType``                                       string              See [#]_                 Yes                 Battery type
-  ``NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double   kWh or Ah  >= 0                     No        See [#]_  Nominal (total) capacity
-  ``UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double   kWh or Ah  >= 0, < NominalCapacity  No        See [#]_  Usable capacity
+  ``NominalCapacity[Units="kWh" or "Ah"]/Value``        double   kWh or Ah  >= 0                     No        See [#]_  Nominal (total) capacity
+  ``UsableCapacity[Units="kWh" or "Ah"]/Value``         double   kWh or Ah  >= 0, < NominalCapacity  No        See [#]_  Usable capacity
   ``RatedPowerOutput``                                  double   W          >= 0                     No        See [#]_  Power output under non-peak conditions
   ``NominalVoltage``                                    double   V          >= 0                     No        50        Nominal voltage
   ``RoundTripEfficiency``                               double   frac       > 0, <= 1                No        0.925     Round trip efficiency
@@ -5021,8 +4992,8 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   ===============================================================================================  ======  =========  =======================  ========  =============  =======================================================
   ``SystemIdentifier``                                                                             id                                          Yes                      Unique identifier
   ``VehicleType/BatteryElectricVehicle/Battery/BatteryType``                                       string                                      No        Li-ion [#]_    EV battery type
-  ``VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double  kWh or Ah  >= 0                     No        See [#]_       Nominal (total) capacity
-  ``VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double  kWh or Ah  >= 0, < NominalCapacity  No        See [#]_       Usable capacity
+  ``VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh" or "Ah"]/Value``        double  kWh or Ah  >= 0                     No        See [#]_       Nominal (total) capacity
+  ``VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh" or "Ah"]/Value``         double  kWh or Ah  >= 0, < NominalCapacity  No        See [#]_       Usable capacity
   ``VehicleType/BatteryElectricVehicle/Battery/NominalVoltage``                                    double  V          >= 0                     No                       Nominal voltage
   ``VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage``       double  frac       >= 0                     No        See [#]_       Fraction of EV charging energy provided by home charger
   ``VehicleType/BatteryElectricVehicle/ConnectedCharger``                                          idref              See [#]_                 No                       ID of connected EV charger [#]_
@@ -5032,7 +5003,7 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers``                      array                                       No        See [#]_       12 comma-separated monthly multipliers
   ``MilesDrivenPerYear``                                                                           double  miles      >= 0                     No        See [#]_       Number of miles driven per year
   ``HoursDrivenPerWeek``                                                                           double  hours      >= 0                     No        See [#]_       Number of hours driven per week
-  ``FuelEconomyCombined[Units="kWh/mile" or Units="mile/kWh" or Units="mpge"]/Value``              double             > 0                      No        See [#]_       The vehicle combined city and highway fuel economy
+  ``FuelEconomyCombined[Units="kWh/mile" or "mile/kWh" or "mpge"]/Value``                          double             > 0                      No        See [#]_       The vehicle combined city and highway fuel economy
   ===============================================================================================  ======  =========  =======================  ========  =============  =======================================================
 
   .. [#] Only the "Li-ion" battery type is supported.
@@ -5589,7 +5560,7 @@ If not entered, the simulation will not include a pool heater.
   ======================================================  =======  ==================  ===========  ========  ========  ======================================
   ``SystemIdentifier``                                    id                                        Yes                 Unique identifier
   ``Type``                                                string                       See [#]_     Yes                 Pool heater type
-  ``Load[Units="kWh/year" or Units="therm/year"]/Value``  double   kWh/yr or therm/yr  >= 0         No        See [#]_  Pool heater energy use
+  ``Load[Units="kWh/year" or "therm/year"]/Value``        double   kWh/yr or therm/yr  >= 0         No        See [#]_  Pool heater energy use
   ``extension/UsageMultiplier``                           double                       >= 0         No        1.0       Multiplier on pool heater energy use
   ``extension/WeekdayScheduleFractions``                  array                                     No        See [#]_  24 comma-separated weekday fractions
   ``extension/WeekendScheduleFractions``                  array                                     No                  24 comma-separated weekend fractions
@@ -5668,7 +5639,7 @@ If not entered, the simulation will not include a permanent spa heater.
   ======================================================  =======  ==================  ===========  ========  ========  =======================================
   ``SystemIdentifier``                                    id                                        Yes                 Unique identifier
   ``Type``                                                string                       See [#]_     Yes                 Permanent spa heater type
-  ``Load[Units="kWh/year" or Units="therm/year"]/Value``  double   kWh/yr or therm/yr  >= 0         No        See [#]_  Permanent spa heater energy use
+  ``Load[Units="kWh/year" or "therm/year"]/Value``        double   kWh/yr or therm/yr  >= 0         No        See [#]_  Permanent spa heater energy use
   ``extension/UsageMultiplier``                           double                       >= 0         No        1.0       Multiplier on permanent spa heater energy use
   ``extension/WeekdayScheduleFractions``                  array                                     No        See [#]_  24 comma-separated weekday fractions
   ``extension/WeekendScheduleFractions``                  array                                     No                  24 comma-separated weekend fractions
