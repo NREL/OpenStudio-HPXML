@@ -72,19 +72,19 @@ def create_hpxmls
     model = OpenStudio::Model::Model.new
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
-    num_apply_measures = 1
-    if hpxml_path.include?('whole-building-common-spaces')
-      num_apply_measures = 8
-    elsif hpxml_path.include?('whole-building')
-      num_apply_measures = 6
-    elsif hpxml_path.include?('multiple-buildings')
-      num_apply_measures = 2
+    num_dwelling_units = 1
+    if hpxml_path.include? 'mf-whole-building-common-spaces'
+      num_dwelling_units = 8
+    elsif hpxml_path.include? 'mf-whole-building'
+      num_dwelling_units = 6
+    elsif hpxml_path.include? 'multiple-buildings'
+      num_dwelling_units = 2
     end
 
-    for i in 1..num_apply_measures
+    for i in 1..num_dwelling_units
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
-      if hpxml_path.include?('whole-building-common-spaces')
-        suffix = "_#{i}" if i > 1
+      suffix = "_#{i}" if i > 1
+      if hpxml_path.include? 'mf-whole-building-common-spaces'
         build_residential_hpxml['schedules_paths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv")
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'Basement, Unconditioned' : 'Above Apartment')
         build_residential_hpxml['geometry_attic_type'] = (i >= 7 ? 'Attic, Vented, Gable' : 'Below Apartment')
@@ -93,8 +93,7 @@ def create_hpxmls
         # Partially conditioned basement + one unconditioned hallway each floor + unconditioned attic
         build_residential_hpxml['hvac_heating_system'] = ([1, 4, 6].include?(i) ? 'Electric Resistance' : 'None')
         build_residential_hpxml['hvac_cooling_system'] = ([1, 4, 6].include?(i) ? 'Room AC, CEER 8.4' : 'None')
-      elsif hpxml_path.include?('whole-building')
-        suffix = "_#{i}" if i > 1
+      elsif hpxml_path.include? 'mf-whole-building'
         build_residential_hpxml['schedules_paths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'Basement, Unconditioned' : 'Above Apartment')
         build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'Attic, Vented, Gable' : 'Below Apartment')
@@ -103,8 +102,7 @@ def create_hpxmls
           build_residential_hpxml['hvac_heating_system'] = ([1, 3, 5].include?(i) ? 'Electric Resistance' : 'None')
           build_residential_hpxml['hvac_cooling_system'] = ([1, 3, 5].include?(i) ? 'Room AC, CEER 8.4' : 'None')
         end
-      elsif hpxml_path.include?('multiple-buildings')
-        suffix = "_#{i}" if i > 1
+      elsif hpxml_path.include? 'multiple-buildings'
         if i > 1
           build_residential_hpxml['enclosure_window'] = 'Triple, Low-E, Insulated, Gas, High Gain'
         end
@@ -1799,7 +1797,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.heat_pumps[0].number_of_units_served = 6
       hpxml_bldg.heat_pumps[0].pump_watts_per_ton = 0.0
     end
-    if !hpxml_file.include? 'eae'
+    if !hpxml_file.include?('eae') && !hpxml_file.include?('mf-whole-building')
       if hpxml_file.include? 'shared-boiler'
         hpxml_bldg.heating_systems[0].shared_loop_watts = 600
       end

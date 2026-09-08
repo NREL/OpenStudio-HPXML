@@ -1702,7 +1702,7 @@ module HVACSizing
 
     # Heating Loads
     if get_hvac_heating_type(hvac_heating) == HPXML::HVACTypeHeatPumpWaterLoopToAir
-      # Size to meet original fraction load served (not adjusted value from HVAC.apply_shared_heating_systems()
+      # Size to meet original fraction load served (not adjusted value from Defaults.convert_shared_systems_to_in_unit_systems()
       # This ensures, e.g., that an appropriate heating airflow is used for duct losses.
       frac_zone_heat_load_served /= (1.0 / hvac_heating.heating_efficiency_cop)
     end

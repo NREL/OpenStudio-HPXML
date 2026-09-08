@@ -27,6 +27,7 @@ __Bugfixes__
 - Fixes heat gain from occupants; heat gains from appliances, lighting, etc. are unaffected.
 - Fixes specific heat for drywall (0.2 -> 0.26 Btu/lb-F).
 - Fixes order-dependent effective below-grade depth when collapsing similar foundation walls.
+- Fixes default water heater location hierarchy for locations where the IECC climate zone cannot be determined.
 
 ## OpenStudio-HPXML v1.12.0
 
