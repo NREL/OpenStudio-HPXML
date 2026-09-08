@@ -77,6 +77,9 @@
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>1696.7</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <SolarAbsorptance>0.8</SolarAbsorptance>
             <Emittance>0.75</Emittance>
             <Pitch>2.0</Pitch>
@@ -90,6 +93,9 @@
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
             <Area>484.0</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <SolarAbsorptance>0.8</SolarAbsorptance>
             <Emittance>0.75</Emittance>
             <Pitch>2.0</Pitch>

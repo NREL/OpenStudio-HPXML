@@ -91,6 +91,9 @@
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <Area>1627.38</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <RoofColor>medium</RoofColor>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
@@ -103,6 +106,9 @@
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
             <Area>553.35</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <Pitch>6.0</Pitch>
             <Insulation>
               <SystemIdentifier id='Roof2Insulation'/>
