@@ -2087,6 +2087,7 @@
       <sch:assert role='ERROR' test='number(h:HotWaterTemperature) &gt;= 105 or not(h:HotWaterTemperature)'>Expected HotWaterTemperature to be greater than or equal to 105 deg-F</sch:assert>
       <sch:assert role='ERROR' test='number(h:MixingValveSetpoint) &gt;= 105 or not(h:MixingValveSetpoint)'>Expected MixingValveSetpoint to be greater than or equal to 105 deg-F</sch:assert>
       <sch:assert role='ERROR' test='number(h:MixingValveSetpoint) &lt;= number(h:HotWaterTemperature) or not(h:MixingValveSetpoint) or not(h:HotWaterTemperature)'>Expected MixingValveSetpoint to be less than or equal to HotWaterTemperature</sch:assert>
+      <sch:assert role='ERROR' test='not(h:HasMixingValve="false" and h:MixingValveSetpoint)'>Expected no MixingValveSetpoint when HasMixingValve=false</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -2139,6 +2140,7 @@
       <sch:assert role='ERROR' test='number(h:UniformEnergyFactor) &gt;= 1.45 or not(h:UniformEnergyFactor)'>Expected UniformEnergyFactor to be greater than or equal to 1.45</sch:assert>
       <sch:assert role='ERROR' test='number(h:EnergyFactor) &gt;= 1.45 or not(h:EnergyFactor)'>Expected EnergyFactor to be greater than or equal to 1.45</sch:assert>
       <sch:assert role='ERROR' test='h:HPWHOperatingMode[text()="hybrid/auto" or text()="heat pump only"] or not(h:HPWHOperatingMode)'>Expected HPWHOperatingMode to be 'hybrid/auto' or 'heat pump only'</sch:assert>
+      <sch:assert role='ERROR' test='h:HPWHVoltage[text()="240V" or text()="120V" or text()="120V dedicated circuit" or text()="120V shared circuit"] or not(h:HPWHVoltage)'>Expected HPWHVoltage to be '240V' or '120V' or '120V dedicated circuit' or '120V shared circuit'</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HPWHInConfinedSpaceWithoutMitigation) &lt;= 1'>Expected at most one extension/HPWHInConfinedSpaceWithoutMitigation</sch:assert>
       <sch:assert role='ERROR' test='h:extension/h:HPWHInConfinedSpaceWithoutMitigation[text()="true" or text()="false"] or not(h:extension/h:HPWHInConfinedSpaceWithoutMitigation)'>Expected extension/HPWHInConfinedSpaceWithoutMitigation to be 'true' or 'false'</sch:assert>
       <!-- Moved/deprecated extension/OperatingMode input; see https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1289 -->
@@ -2150,7 +2152,7 @@
     <sch:title>[WaterHeatingSystemType=HPWHon120vDedicatedCircuit]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="heat pump water heater" and h:HPWHVoltage="120V dedicated circuit"]'>
       <!-- Warnings -->
-      <sch:report role='WARN' test='number(h:BackupHeatingCapacity) &gt; 6824'>BackupHeatingCapacity should typically be less than 6824 Btu/hr for a HPWH on a 120V dedicated circuit.</sch:report>
+      <sch:report role='WARN' test='number(h:BackupHeatingCapacity) &gt; 6824'>BackupHeatingCapacity should typically be less than or equal to 6824 Btu/hr for an HPWH on a 120V dedicated circuit.</sch:report>
     </sch:rule>
   </sch:pattern>
 
@@ -2158,7 +2160,7 @@
     <sch:title>[WaterHeatingSystemType=HPWHon120vSharedCircuit]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="heat pump water heater" and (h:HPWHVoltage="120V shared circuit" or h:HPWHVoltage="120V")]'>
       <!-- Warnings -->
-      <sch:report role='WARN' test='number(h:BackupHeatingCapacity) &gt; 3412'>BackupHeatingCapacity should typically be less than 3412 Btu/hr for a HPWH on a 120V shared circuit.</sch:report>
+      <sch:report role='WARN' test='number(h:BackupHeatingCapacity) &gt; 3412'>BackupHeatingCapacity should typically be less than or equal to 3412 Btu/hr for an HPWH on a 120V shared circuit.</sch:report>
     </sch:rule>
   </sch:pattern>
 

@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxml_to_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>fda491c7-4372-48f4-a347-560fa91cbb42</version_id>
-  <version_modified>2026-09-08T21:03:33Z</version_modified>
+  <version_id>fefff7eb-a28c-4a31-984d-6882d0585fd2</version_id>
+  <version_modified>2026-09-08T22:44:54Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLToOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -367,7 +367,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>50600632</checksum>
+      <checksum>5582737B</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
@@ -397,7 +397,7 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B82C98B5</checksum>
+      <checksum>8592042E</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -421,7 +421,7 @@
       <filename>hpxml_schematron/EPvalidator.sch</filename>
       <filetype>sch</filetype>
       <usage_type>resource</usage_type>
-      <checksum>99717919</checksum>
+      <checksum>21A8F8E5</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -751,7 +751,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>738727F5</checksum>
+      <checksum>B7B56582</checksum>
     </file>
     <file>
       <filename>test_electric_panel.rb</filename>
@@ -829,7 +829,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3124DCB9</checksum>
+      <checksum>5045BA89</checksum>
     </file>
     <file>
       <filename>test_vehicle.rb</filename>

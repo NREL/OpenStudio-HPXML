@@ -74,8 +74,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'cooking-range-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'dehumidifier-fraction-served' => ['Expected sum(FractionDehumidificationLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
                             'dhw-frac-load-served' => ['Expected sum(FractionDHWLoadServed) to be 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
+                            'dhw-hpwh-voltage' => ["Expected HPWHVoltage to be '240V' or '120V' or '120V dedicated circuit' or '120V shared circuit'"],
                             'dhw-invalid-ef-tank' => ['Expected EnergyFactor to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"], id: "WaterHeatingSystem1"]'],
                             'dhw-invalid-uef-tank-heat-pump' => ['Expected UniformEnergyFactor to be greater than or equal to 1.45 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="heat pump water heater"], id: "WaterHeatingSystem1"]'],
+                            'dhw-mixing-valve-consistency' => ['Expected no MixingValveSetpoint when HasMixingValve=false'],
                             'dhw-mixing-valve-setpoint-high' => ['Expected MixingValveSetpoint to be less than or equal to HotWaterTemperature'],
                             'dhw-mixing-valve-setpoint-low' => ['Expected MixingValveSetpoint to be greater than or equal to 105 deg-F'],
                             'dhw-setpoint-low' => ['Expected HotWaterTemperature to be greater than or equal to 105 deg-F'],
@@ -324,6 +326,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'dhw-frac-load-served'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-multiple.xml')
         hpxml_bldg.water_heating_systems[0].fraction_dhw_load_served = 0.35
+      when 'dhw-hpwh-voltage'
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml')
+        hpxml_bldg.water_heating_systems[0].hpwh_voltage = 'other'
       when 'dhw-invalid-ef-tank'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-gas-ef.xml')
         hpxml_bldg.water_heating_systems[0].energy_factor = 1.0
@@ -331,6 +336,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'dhw-invalid-uef-tank-heat-pump'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml')
         hpxml_bldg.water_heating_systems[0].uniform_energy_factor = 1.4
+      when 'dhw-mixing-valve-consistency'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.water_heating_systems[0].has_mixing_valve = false
+        hpxml_bldg.water_heating_systems[0].mixing_valve_setpoint = 125
       when 'dhw-mixing-valve-setpoint-high'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.water_heating_systems[0].temperature = 130
@@ -1030,8 +1039,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'heat-pump-defrost-backup' => ['BackupHeatingActiveDuringDefrost does not apply when system has separate backup heating'],
                               'heat-pump-low-backup-switchover-temp' => ['BackupHeatingSwitchoverTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.'],
                               'heat-pump-low-backup-lockout-temp' => ['BackupHeatingLockoutTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.'],
-                              'hpwh-120-dedicated-circuit-backup-capacity' => ['BackupHeatingCapacity should typically be less than 6824 Btu/hr for a HPWH on a 120V dedicated circuit.'],
-                              'hpwh-120-shared-circuit-backup-capacity' => ['BackupHeatingCapacity should typically be less than 3412 Btu/hr for a HPWH on a 120V shared circuit.'],
+                              'hpwh-120-dedicated-circuit-backup-capacity' => ['BackupHeatingCapacity should typically be less than or equal to 6824 Btu/hr for an HPWH on a 120V dedicated circuit.'],
+                              'hpwh-120-shared-circuit-backup-capacity' => ['BackupHeatingCapacity should typically be less than or equal to 3412 Btu/hr for an HPWH on a 120V shared circuit.'],
                               'hvac-dse-low' => ['Heating DSE should typically be greater than or equal to 0.5.',
                                                  'Cooling DSE should typically be greater than or equal to 0.5.'],
                               'hvac-capacities-low' => ['Heating capacity should typically be greater than or equal to 1000 Btu/hr.',

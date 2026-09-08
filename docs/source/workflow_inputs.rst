@@ -4121,7 +4121,7 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
   ``RecoveryEfficiency``                         double             frac           > 0, <= 1 [#]_                  No        See [#]_  Recovery efficiency
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double             F-ft2-hr/Btu   >= 0                            No        0         R-value of additional tank insulation wrap
   ``HotWaterTemperature``                        double             F              >= 105                          No        125       Water heater setpoint [#]_
-  ``HasMixingValve``                             boolean                                                           No        See [#]_  Presence of a water heater mixing value?
+  ``HasMixingValve``                             boolean                                                           No        See [#]_  Presence of a water heater mixing valve?
   ``MixingValveSetpoint``                        double             F              >= 105, <= HotWaterTemperature  No        See [#]_  Temperature setpoint for the mixing valve
   ``UsesDesuperheater``                          boolean                                                           No        false     Presence of desuperheater? [#]_
   ``extension/TankModelType``                    string                            See [#]_                        No        mixed     Tank model type
@@ -4181,7 +4181,7 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
   ``FractionDHWLoadServed``                    double   frac          >= 0, <= 1 [#]_                 Yes                     Fraction of hot water load served [#]_
   ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1                             Yes                     EnergyGuide label rated efficiency
   ``HotWaterTemperature``                      double   F             >= 105                          No            125       Water heater setpoint [#]_
-  ``HasMixingValve``                           boolean                                                No            See [#]_  Presence of a water heater mixing value?
+  ``HasMixingValve``                           boolean                                                No            See [#]_  Presence of a water heater mixing valve?
   ``MixingValveSetpoint``                      double   F             >= 105, <= HotWaterTemperature  No            See [#]_  Temperature setpoint for the mixing valve
   ``UsesDesuperheater``                        boolean                                                No            false     Presence of desuperheater? [#]_
   ``extension/NumberofBedroomsServed``         integer                > NumberofBedrooms              See [#]_                Number of bedrooms served directly or indirectly
@@ -4233,7 +4233,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``UsageBin`` or ``FirstHourRating``                  string or double  str or gal/hr  See [#]_ or > 0                 No        See [#]_        EnergyGuide label usage bin/first hour rating
   ``WaterHeaterInsulation/Jacket/JacketRValue``        double            F-ft2-hr/Btu   >= 0                            No        0               R-value of additional tank insulation wrap
   ``HotWaterTemperature``                              double            F              >= 105                          No        125             Water heater setpoint [#]_
-  ``HasMixingValve``                                   boolean                                                          No        See [#]_        Presence of a water heater mixing value?
+  ``HasMixingValve``                                   boolean                                                          No        See [#]_        Presence of a water heater mixing valve?
   ``MixingValveSetpoint``                              double            F              >= 105, <= HotWaterTemperature  No        See [#]_        Temperature setpoint for the mixing valve
   ``UsesDesuperheater``                                boolean                                                          No        false           Presence of desuperheater? [#]_
   ``extension/NumberofBedroomsServed``                 integer                          > NumberofBedrooms              See [#]_                  Number of bedrooms served directly or indirectly
@@ -4303,7 +4303,7 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0                                    No            0         R-value of additional storage tank insulation wrap
   ``StandbyLoss[Units="F/hr"]/Value``            double   F/hr          > 0                                     No            See [#]_  Storage tank standby losses
   ``HotWaterTemperature``                        double   F             >= 105                                  No            125       Water heater setpoint [#]_
-  ``HasMixingValve``                             boolean                                                        No            See [#]_  Presence of a water heater mixing value?
+  ``HasMixingValve``                             boolean                                                        No            See [#]_  Presence of a water heater mixing valve?
   ``MixingValveSetpoint``                        double   F             >= 105, <= HotWaterTemperature          No            See [#]_  Temperature setpoint for the mixing valve
   ``RelatedHVACSystem``                          idref                  See [#]_                                Yes                     ID of boiler
   ``extension/NumberofBedroomsServed``           integer                > NumberofBedrooms                      See [#]_                Number of bedrooms served directly or indirectly
@@ -4346,7 +4346,7 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
   ``IsSharedSystem``                    boolean                                                  No            false     Whether it serves multiple dwelling units or shared laundry room
   ``FractionDHWLoadServed``             double   frac   >= 0, <= 1 [#]_                          Yes                     Fraction of hot water load served [#]_
   ``HotWaterTemperature``               double   F      >= 105                                   No            125       Water heater setpoint [#]_
-  ``HasMixingValve``                    boolean                                                  No            See [#]_  Presence of a water heater mixing value?
+  ``HasMixingValve``                    boolean                                                  No            See [#]_  Presence of a water heater mixing valve?
   ``MixingValveSetpoint``               double   F      >= 105, <= HotWaterTemperature           No            See [#]_  Temperature setpoint for the mixing valve
   ``RelatedHVACSystem``                 idref           See [#]_                                 Yes                     ID of boiler
   ``extension/NumberofBedroomsServed``  integer         > NumberofBedrooms                       See [#]_                Number of bedrooms served directly or indirectly
@@ -4804,7 +4804,7 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
 
          \- ``HeatPump[HeatPumpFuel="electricity"]``: 240
 
-         \- ``WaterHeatingSystem[FuelType="electricity"]``: 240, or 120 if a heat pump water heater with HPWHVoltage=120V
+         \- ``WaterHeatingSystem[FuelType="electricity"]``: 240, or 120 for a heat pump water heater with any 120V ``HPWHVoltage`` option
 
          \- ``ClothesDryer[FuelType="electricity"]``: 240
 

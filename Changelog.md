@@ -8,7 +8,7 @@ __Features__
 - **Breaking change**: For heat pump water heaters, ``HeatingCapacity`` is now *input* rather than *output* capacity, similar to other water heater types.
 - Water heater updates:
   - Allows modeling 120V HPWHs (including dedicated vs shared circuits) using `WaterHeatingSystem/HPWHVoltage`.
-  - Allows modeling water heaters with a mixing valve using `HasMixingValve` and `MixingValveSetpoint`.
+  - Allows modeling water heaters with a mixing valve using `HasMixingValve` and `MixingValveSetpoint`; assumes a mixing valve when water heater setpoint > 140F.
 - PV systems:
   - Allows `CollectorArea` or `NumberOfPanels` instead of `MaxPowerOutput`.
   - Allows `YearInstalled` instead of `YearModulesManufactured` for age-based degradation.

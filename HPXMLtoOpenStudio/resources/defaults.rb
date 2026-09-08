@@ -3304,6 +3304,15 @@ module Defaults
         water_heating_system.temperature_isdefaulted = true
       end
 
+      if not water_heating_system.temperature.nil?
+        min_setpoint = water_heating_system.temperature
+        max_setpoint = water_heating_system.temperature
+      elsif schedules_file_includes_water_heater_setpoint_temp
+        sf = schedules_file.schedules[SchedulesFile::Columns[:WaterHeaterSetpoint].name]
+        min_setpoint = sf.min
+        max_setpoint = sf.max
+      end
+
       if water_heating_system.performance_adjustment.nil?
         water_heating_system.performance_adjustment = get_water_heater_performance_adjustment(water_heating_system)
         water_heating_system.performance_adjustment_isdefaulted = true
@@ -3405,7 +3414,7 @@ module Defaults
       if water_heating_system.has_mixing_valve.nil?
         if not water_heating_system.mixing_valve_setpoint.nil?
           water_heating_system.has_mixing_valve = true
-        elsif water_heating_system.temperature.to_f > 140
+        elsif max_setpoint > 140
           # Assuming 140F because most water heaters have that as the maximum setpoint, so anything above that
           # would be a special case where the scalding risk goes up dramatically.
           water_heating_system.has_mixing_valve = true
@@ -3416,7 +3425,7 @@ module Defaults
       end
 
       if water_heating_system.has_mixing_valve && water_heating_system.mixing_valve_setpoint.nil?
-        water_heating_system.mixing_valve_setpoint = [125.0, water_heating_system.temperature.to_f].min
+        water_heating_system.mixing_valve_setpoint = [125.0, min_setpoint].min
         water_heating_system.mixing_valve_setpoint_isdefaulted = true
       end
 

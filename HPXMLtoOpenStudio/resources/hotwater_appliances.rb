@@ -381,7 +381,7 @@ module HotWaterAndAppliances
       non_solar_fraction = 1.0 - Waterheater.get_water_heater_solar_fraction(water_heating_system, hpxml_bldg)
 
       # Create water temperature schedule for appliances; only needed
-      # when there's a mixing value.
+      # when there's a mixing valve.
       appliances_temp_schedule = nil
       if water_heating_system.has_mixing_valve
         appliances_temp_schedule = Model.add_schedule_constant(

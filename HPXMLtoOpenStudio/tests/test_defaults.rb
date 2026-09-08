@@ -3501,76 +3501,73 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   def test_storage_water_heaters
     # Test inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-sfa-unit.xml')
-    hpxml_bldg.water_heating_systems.each do |wh|
-      wh.is_shared_system = true
-      wh.number_of_bedrooms_served = 6
-      wh.heating_capacity = 15000.0
-      wh.tank_volume = 44.0
-      wh.recovery_efficiency = 0.95
-      wh.location = HPXML::LocationConditionedSpace
-      wh.temperature = 111
-      wh.uniform_energy_factor = 0.90
-      wh.tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
-      wh.first_hour_rating = nil
-      wh.usage_bin = nil
-      wh.has_mixing_valve = true
-      wh.mixing_valve_setpoint = 108
-    end
+    hpxml_bldg.water_heating_systems[0].is_shared_system = true
+    hpxml_bldg.water_heating_systems[0].number_of_bedrooms_served = 6
+    hpxml_bldg.water_heating_systems[0].heating_capacity = 15000.0
+    hpxml_bldg.water_heating_systems[0].tank_volume = 44.0
+    hpxml_bldg.water_heating_systems[0].recovery_efficiency = 0.95
+    hpxml_bldg.water_heating_systems[0].location = HPXML::LocationConditionedSpace
+    hpxml_bldg.water_heating_systems[0].temperature = 111
+    hpxml_bldg.water_heating_systems[0].uniform_energy_factor = 0.90
+    hpxml_bldg.water_heating_systems[0].tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
+    hpxml_bldg.water_heating_systems[0].first_hour_rating = nil
+    hpxml_bldg.water_heating_systems[0].usage_bin = nil
+    hpxml_bldg.water_heating_systems[0].has_mixing_valve = true
+    hpxml_bldg.water_heating_systems[0].mixing_valve_setpoint = 108
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_storage_water_heater_values(default_hpxml_bldg,
                                               [true, 15000.0, 44.0, 0.95, HPXML::LocationConditionedSpace, 111, 0.90, HPXML::WaterHeaterTankModelTypeStratified, true, 108])
 
     # Test inputs not overridden by defaults w/ Usage Bin
-    hpxml_bldg.water_heating_systems.each do |wh|
-      wh.usage_bin = HPXML::WaterHeaterUsageBinVerySmall
-      wh.first_hour_rating = nil
-    end
+    hpxml_bldg.water_heating_systems[0].usage_bin = HPXML::WaterHeaterUsageBinVerySmall
+    hpxml_bldg.water_heating_systems[0].first_hour_rating = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     assert_nil(default_hpxml_bldg.water_heating_systems[0].first_hour_rating)
     assert_equal(HPXML::WaterHeaterUsageBinVerySmall, default_hpxml_bldg.water_heating_systems[0].usage_bin)
 
     # Test inputs not overridden by defaults w/ FHR
-    hpxml_bldg.water_heating_systems.each do |wh|
-      wh.first_hour_rating = 40
-      wh.usage_bin = nil
-    end
+    hpxml_bldg.water_heating_systems[0].first_hour_rating = 40
+    hpxml_bldg.water_heating_systems[0].usage_bin = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     assert_equal(40, default_hpxml_bldg.water_heating_systems[0].first_hour_rating)
     assert_equal(HPXML::WaterHeaterUsageBinLow, default_hpxml_bldg.water_heating_systems[0].usage_bin)
 
     # Test defaults w/ 3-bedroom house & electric storage water heater
-    hpxml_bldg.water_heating_systems.each do |wh|
-      wh.is_shared_system = nil
-      wh.heating_capacity = nil
-      wh.tank_volume = nil
-      wh.recovery_efficiency = nil
-      wh.location = nil
-      wh.temperature = nil
-      wh.tank_model_type = nil
-      wh.first_hour_rating = nil
-      wh.usage_bin = nil
-      wh.mixing_valve_setpoint = nil
-    end
+    hpxml_bldg.water_heating_systems[0].is_shared_system = nil
+    hpxml_bldg.water_heating_systems[0].heating_capacity = nil
+    hpxml_bldg.water_heating_systems[0].tank_volume = nil
+    hpxml_bldg.water_heating_systems[0].recovery_efficiency = nil
+    hpxml_bldg.water_heating_systems[0].location = nil
+    hpxml_bldg.water_heating_systems[0].temperature = nil
+    hpxml_bldg.water_heating_systems[0].tank_model_type = nil
+    hpxml_bldg.water_heating_systems[0].first_hour_rating = nil
+    hpxml_bldg.water_heating_systems[0].usage_bin = nil
+    hpxml_bldg.water_heating_systems[0].mixing_valve_setpoint = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_storage_water_heater_values(default_hpxml_bldg,
                                               [false, 18766.7, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.9, HPXML::WaterHeaterTankModelTypeMixed, true, 125])
 
+    # Test defaults w/ detailed hot water schedule
+    hpxml_bldg.header.schedules_filepaths = [File.join(File.dirname(__FILE__), '..', 'resources', 'schedule_files', 'water-heater-setpoints.csv')]
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_storage_water_heater_values(default_hpxml_bldg,
+                                              [false, 18766.7, 50.0, 0.98, HPXML::LocationBasementConditioned, nil, 0.9, HPXML::WaterHeaterTankModelTypeMixed, true, 120])
+
     # Test defaults w/ 5-bedroom house & electric storage water heater
     hpxml, hpxml_bldg = _create_hpxml('base-enclosure-beds-5.xml')
-    hpxml_bldg.water_heating_systems.each do |wh|
-      wh.is_shared_system = nil
-      wh.heating_capacity = nil
-      wh.tank_volume = nil
-      wh.recovery_efficiency = nil
-      wh.location = nil
-      wh.temperature = nil
-      wh.tank_model_type = nil
-      wh.has_mixing_valve = nil
-    end
+    hpxml_bldg.water_heating_systems[0].is_shared_system = nil
+    hpxml_bldg.water_heating_systems[0].heating_capacity = nil
+    hpxml_bldg.water_heating_systems[0].tank_volume = nil
+    hpxml_bldg.water_heating_systems[0].recovery_efficiency = nil
+    hpxml_bldg.water_heating_systems[0].location = nil
+    hpxml_bldg.water_heating_systems[0].temperature = nil
+    hpxml_bldg.water_heating_systems[0].tank_model_type = nil
+    hpxml_bldg.water_heating_systems[0].has_mixing_valve = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_storage_water_heater_values(default_hpxml_bldg,
