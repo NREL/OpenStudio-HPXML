@@ -375,11 +375,6 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.water_heating_systems.count { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump && wh.location == HPXML::LocationOtherExterior } > 0 }
       next if message.include? 'Water heater tank set point temperature is greater than or equal to the cut-in temperature of the heat pump water heater.'
     end
-    # WHs w/ mixing valves
-    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.water_heating_systems.count { |wh| wh.has_mixing_valve } > 0 }
-      next if message.include? 'Target water temperature is greater than the hot water temperature'
-      next if message.include? 'Target water temperature should be less than or equal to the hot water temperature'
-    end
     # Stratified tank WHs
     if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.water_heating_systems.count { |wh| wh.tank_model_type == HPXML::WaterHeaterTankModelTypeStratified } > 0 }
       next if message.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
