@@ -152,8 +152,8 @@ class HPXMLToOpenStudio < OpenStudio::Measure::ModelMeasure
         end
       end
 
-      # Merge unit models into final model
       if hpxml.buildings.size > 1
+        # Merge unit models into final model
         Model.merge_unit_models(model, hpxml_osm_map)
       end
 

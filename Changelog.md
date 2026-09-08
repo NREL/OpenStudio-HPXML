@@ -16,8 +16,9 @@ __Features__
 - Adds min/max value warnings for clothes washer and dishwasher label inputs (e.g., `LabelElectricRate` and `LabelGasRate`).
 
 __Bugfixes__
-- **Breaking change**: Prevent possible error if HPWH in confined space with very small containment volume; minimum allowed volume now 32 ft3.
-- **Breaking change**: HPWH `EnergyFactor`/`UniformEnergyFactor` must now be >= 1.45 (previously > 1).
+- **Breaking change**: Prevent possible error if heat pump water heater in confined space with very small containment volume; minimum allowed volume now 32 ft3.
+- **Breaking change**: Heat pump water heater `EnergyFactor`/`UniformEnergyFactor` must now be >= 1.45 (previously > 1).
+- Fixes heat pump water heater modeled COP (derived from EF/UEF).
 - Fixes possibility of MaxLoad heat pump sizing methodology producing autosized capacities that were too large.
 - Fixes ERV supply outlet enthalpy calculation used to calculate latent effectiveness.
 - Runs EnergyPlus without an intermediate shell when using run_simulation.rb or meta_measure.rb.
@@ -26,6 +27,7 @@ __Bugfixes__
 - Fixes heat gain from occupants; heat gains from appliances, lighting, etc. are unaffected.
 - Fixes specific heat for drywall (0.2 -> 0.26 Btu/lb-F).
 - Fixes order-dependent effective below-grade depth when collapsing similar foundation walls.
+- Fixes default water heater location hierarchy for locations where the IECC climate zone cannot be determined.
 
 ## OpenStudio-HPXML v1.12.0
 

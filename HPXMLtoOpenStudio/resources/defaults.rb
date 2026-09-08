@@ -70,7 +70,7 @@ module Defaults
     apply_doors(hpxml_bldg)
     apply_partition_wall_mass(hpxml_bldg)
     apply_furniture_mass(hpxml_bldg)
-    apply_hvac(runner, hpxml_bldg, weather, convert_shared_systems, unit_num, hpxml.header)
+    apply_hvac(runner, hpxml.header, hpxml_bldg, weather, convert_shared_systems, unit_num)
     apply_hvac_control(hpxml_bldg, schedules_file, eri_version)
     apply_hvac_distribution(hpxml_bldg)
     apply_infiltration(hpxml_bldg, unit_num)
@@ -1904,15 +1904,15 @@ module Defaults
   # HPXML::CoolingSystem, and HPXML::HeatPump objects
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param convert_shared_systems [Boolean] Whether to convert shared systems to equivalent in-unit systems per ANSI/RESNET/ICC 301
   # @param unit_num [Integer] Dwelling unit number
-  # @param hpxml_header [HPXML::Header] HPXML Header object
   # @return [nil]
-  def self.apply_hvac(runner, hpxml_bldg, weather, convert_shared_systems, unit_num, hpxml_header)
+  def self.apply_hvac(runner, hpxml_header, hpxml_bldg, weather, convert_shared_systems, unit_num)
     if convert_shared_systems
-      apply_shared_systems(hpxml_bldg)
+      convert_shared_systems_to_in_unit_systems(hpxml_bldg)
     end
 
     # Convert negative values (e.g., -1) to nil as appropriate
@@ -2445,9 +2445,9 @@ module Defaults
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
-  def self.apply_shared_systems(hpxml_bldg)
-    converted_clg = apply_shared_cooling_systems(hpxml_bldg)
-    converted_htg = apply_shared_heating_systems(hpxml_bldg)
+  def self.convert_shared_systems_to_in_unit_systems(hpxml_bldg)
+    converted_clg = convert_shared_cooling_systems_to_in_unit_systems(hpxml_bldg)
+    converted_htg = convert_shared_heating_systems_to_in_unit_systems(hpxml_bldg)
     return unless (converted_clg || converted_htg)
 
     # Remove WLHP if not serving heating nor cooling
@@ -2477,13 +2477,13 @@ module Defaults
   # Converts shared cooling systems to equivalent in-unit systems per ANSI/RESNET/ICC 301.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Boolean] True if any shared systems were converted
-  def self.apply_shared_cooling_systems(hpxml_bldg)
-    converted = false
+  # @return [Boolean] Whether a shared cooling system was converted to an in-unit system
+  def self.convert_shared_cooling_systems_to_in_unit_systems(hpxml_bldg)
+    applied = false
     hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless cooling_system.is_shared_system
 
-      converted = true
+      applied = true
       wlhp = nil
       distribution_system = cooling_system.distribution_system
       distribution_type = distribution_system.distribution_system_type
@@ -2597,19 +2597,19 @@ module Defaults
       end
     end
 
-    return converted
+    return applied
   end
 
   # Converts shared heating systems to equivalent in-unit systems per ANSI/RESNET/ICC 301.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Boolean] True if any shared systems were converted
-  def self.apply_shared_heating_systems(hpxml_bldg)
-    converted = false
+  # @return [Boolean] Whether a shared heating system was converted to an in-unit system
+  def self.convert_shared_heating_systems_to_in_unit_systems(hpxml_bldg)
+    applied = false
     hpxml_bldg.heating_systems.each do |heating_system|
       next unless heating_system.is_shared_system
 
-      converted = true
+      applied = true
       distribution_system = heating_system.distribution_system
       hydronic_type = distribution_system.hydronic_type
 
@@ -2634,7 +2634,7 @@ module Defaults
       heating_system.heating_capacity = nil # Autosize the equipment
     end
 
-    return converted
+    return applied
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::CoolingPerformanceDataPoint
@@ -2876,8 +2876,9 @@ module Defaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_hvac_distribution(hpxml_bldg)
-    ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
+    # Air distribution
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+    ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
 
     hpxml_bldg.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
@@ -4981,7 +4982,7 @@ module Defaults
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param weather [WeatherFile] Weather object containing EPW information
-  # @param hpxml_header [HPXML::Header] HPXML Header object
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [Array<Hash, Hash>] Maps of HPXML::Zones => DesignLoadValues object, HPXML::Spaces => DesignLoadValues object
   def self.apply_hvac_sizing(runner, hpxml_bldg, weather, hpxml_header)
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
@@ -6096,7 +6097,7 @@ module Defaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param iecc_zone [String] IECC climate zone
   # @return [String] Water heater location (HPXML::LocationXXX)
-  def self.get_water_heater_location(hpxml_bldg, iecc_zone = nil)
+  def self.get_water_heater_location(hpxml_bldg, iecc_zone)
     # ANSI/RESNET/ICC 301-2022C
     case iecc_zone
     when '1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C'
@@ -6111,8 +6112,8 @@ module Defaults
         fail "Unexpected IECC zone: #{iecc_zone}."
       end
 
-      location_hierarchy = [HPXML::LocationBasementConditioned,
-                            HPXML::LocationBasementUnconditioned,
+      location_hierarchy = [HPXML::LocationBasementUnconditioned,
+                            HPXML::LocationBasementConditioned,
                             HPXML::LocationConditionedSpace]
     end
     location_hierarchy.each do |location|
@@ -6269,21 +6270,25 @@ module Defaults
   def self.get_water_heater_heat_pump_cop(water_heating_system)
     # Based on simulations of the UEF test procedure at varying COPs
     if not water_heating_system.energy_factor.nil?
-      uef = (0.60522 + water_heating_system.energy_factor) / 1.2101
-      cop = 1.174536058 * uef
-    elsif not water_heating_system.uniform_energy_factor.nil?
+      # Based on RESNET-EF-Calculator-2017.xlsx
+      uef = (0.6052 + water_heating_system.energy_factor) / 1.2101
+      usage_bin = HPXML::WaterHeaterUsageBinMedium
+    else
       uef = water_heating_system.uniform_energy_factor
-      case water_heating_system.usage_bin
-      when HPXML::WaterHeaterUsageBinVerySmall
-        fail 'It is unlikely that a heat pump water heater falls into the very small bin of the First Hour Rating (FHR) test. Double check input.'
-      when HPXML::WaterHeaterUsageBinLow
-        cop = 1.0005 * uef - 0.0789
-      when HPXML::WaterHeaterUsageBinMedium
-        cop = 1.0909 * uef - 0.0868
-      when HPXML::WaterHeaterUsageBinHigh
-        cop = 1.1022 * uef - 0.0877
-      end
+      usage_bin = water_heating_system.usage_bin
     end
+
+    case usage_bin
+    when HPXML::WaterHeaterUsageBinVerySmall
+      fail 'It is unlikely that a heat pump water heater falls into the very small bin of the First Hour Rating (FHR) test. Double check input.'
+    when HPXML::WaterHeaterUsageBinLow
+      cop = 0.9995 * uef + 0.0789
+    when HPXML::WaterHeaterUsageBinMedium
+      cop = 0.9166 * uef + 0.0796
+    when HPXML::WaterHeaterUsageBinHigh
+      cop = 0.9073 * uef + 0.0796
+    end
+
     return cop
   end
 
