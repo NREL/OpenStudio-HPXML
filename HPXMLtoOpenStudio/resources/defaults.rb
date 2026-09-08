@@ -6314,8 +6314,13 @@ module Defaults
       fail 'It is unlikely that a heat pump water heater falls into the very small bin of the First Hour Rating (FHR) test. Double check input.'
     end
 
-    # Based on simulations of the UEF test procedure at varying COPs
-    # FIXME: Add link to zip file with simulations
+    # Based on simulations of the UEF test procedure at varying COPs.
+    # Simulations can be downloaded from:
+    # - https://github.com/user-attachments/files/31976520/main.zip
+    # - https://github.com/user-attachments/files/31976523/240v.zip
+    # - https://github.com/user-attachments/files/31976537/120v_dedicated.zip
+    # - https://github.com/user-attachments/files/31976539/120v_shared.zip
+    # Unzip everything into the same top directory.
     if water_heating_system.hpwh_voltage == HPXML::HPWHVoltage240
       case usage_bin
       when HPXML::WaterHeaterUsageBinLow
