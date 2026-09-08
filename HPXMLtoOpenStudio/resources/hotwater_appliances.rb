@@ -328,8 +328,6 @@ module HotWaterAndAppliances
     if hpxml_bldg.hot_water_distributions.size > 0
       hot_water_distribution = hpxml_bldg.hot_water_distributions[0]
 
-      t_mix = 105.0 # F, Temperature of mixed water at fixtures
-
       # Set mains water temperature
       swmt = model.getSiteWaterMainsTemperature
       swmt.setCalculationMethod('Correlation')
@@ -345,9 +343,11 @@ module HotWaterAndAppliances
         swmt.setTemperatureOffset(temp_offset_c)
       end
 
-      mw_temp_schedule = Model.add_schedule_constant(
+      # Create water temperature schedule for fixtures
+      t_mix = 105.0 # F, Temperature of mixed water at fixtures
+      fixtures_temp_schedule = Model.add_schedule_constant(
         model,
-        name: 'mixed water temperature schedule',
+        name: 'fixtures water temperature schedule',
         value: UnitConversions.convert(t_mix, 'F', 'C'),
         limits: EPlus::ScheduleTypeLimitsTemperature
       )
@@ -380,9 +380,11 @@ module HotWaterAndAppliances
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       non_solar_fraction = 1.0 - Waterheater.get_water_heater_solar_fraction(water_heating_system, hpxml_bldg)
 
-      hw_temp_schedule = nil
+      # Create water temperature schedule for appliances; only needed
+      # when there's a mixing value.
+      appliances_temp_schedule = nil
       if water_heating_system.has_mixing_valve
-        hw_temp_schedule = Model.add_schedule_constant(
+        appliances_temp_schedule = Model.add_schedule_constant(
           model,
           name: 'hot water temperature schedule',
           value: UnitConversions.convert(water_heating_system.mixing_valve_setpoint, 'F', 'C'),
@@ -414,7 +416,7 @@ module HotWaterAndAppliances
           peak_flow_rate: unit_multiplier * fx_peak_flow * gpd_frac * non_solar_fraction,
           flow_rate_schedule: fixtures_schedule,
           water_use_connections: water_use_connections[water_heating_system.id],
-          target_temperature_schedule: mw_temp_schedule
+          target_temperature_schedule: fixtures_temp_schedule
         )
         fx_wue.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
 
@@ -426,7 +428,7 @@ module HotWaterAndAppliances
           peak_flow_rate: unit_multiplier * dist_water_peak_flow * gpd_frac * non_solar_fraction,
           flow_rate_schedule: fixtures_schedule,
           water_use_connections: water_use_connections[water_heating_system.id],
-          target_temperature_schedule: mw_temp_schedule
+          target_temperature_schedule: fixtures_temp_schedule
         )
         dist_wue.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
 
@@ -499,7 +501,7 @@ module HotWaterAndAppliances
             peak_flow_rate: unit_multiplier * cw_peak_flow * gpd_frac * non_solar_fraction,
             flow_rate_schedule: water_cw_schedule,
             water_use_connections: water_use_connections[water_heating_system.id],
-            target_temperature_schedule: hw_temp_schedule
+            target_temperature_schedule: appliances_temp_schedule
           )
           cw_wue.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
         end
@@ -536,7 +538,7 @@ module HotWaterAndAppliances
         peak_flow_rate: unit_multiplier * dw_peak_flow * gpd_frac * non_solar_fraction,
         flow_rate_schedule: water_dw_schedule,
         water_use_connections: water_use_connections[water_heating_system.id],
-        target_temperature_schedule: hw_temp_schedule
+        target_temperature_schedule: appliances_temp_schedule
       )
       dw_wue.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
     end

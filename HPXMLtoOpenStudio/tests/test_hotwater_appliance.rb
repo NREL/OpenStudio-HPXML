@@ -262,9 +262,9 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
       assert_in_delta(0.0, model.getSiteWaterMainsTemperature.temperatureOffset, 0.01)
 
       # target temperatures
-      mw_temp = 105 # deg-F
-      assert_in_delta(mw_temp, get_wu_target_temp(model, Constants::ObjectTypeFixtures), 0.01)
-      assert_in_delta(mw_temp, get_wu_target_temp(model, Constants::ObjectTypeDistributionWaste), 0.01)
+      fixtures_temp = 105 # deg-F
+      assert_in_delta(fixtures_temp, get_wu_target_temp(model, Constants::ObjectTypeFixtures), 0.01)
+      assert_in_delta(fixtures_temp, get_wu_target_temp(model, Constants::ObjectTypeDistributionWaste), 0.01)
       assert_nil(get_wu_target_temp(model, Constants::ObjectTypeDishwasher))
       assert_nil(get_wu_target_temp(model, Constants::ObjectTypeClothesWasher))
     end
@@ -560,12 +560,12 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # target temperatures
-    mw_temp = 105 # deg-F
-    hw_temp = hpxml_bldg.water_heating_systems[0].mixing_valve_setpoint
-    assert_in_delta(mw_temp, get_wu_target_temp(model, Constants::ObjectTypeFixtures), 0.01)
-    assert_in_delta(mw_temp, get_wu_target_temp(model, Constants::ObjectTypeDistributionWaste), 0.01)
-    assert_in_delta(hw_temp, get_wu_target_temp(model, Constants::ObjectTypeDishwasher), 0.01)
-    assert_in_delta(hw_temp, get_wu_target_temp(model, Constants::ObjectTypeClothesWasher), 0.01)
+    fixtures_temp = 105 # deg-F
+    appliances_temp = hpxml_bldg.water_heating_systems[0].mixing_valve_setpoint
+    assert_in_delta(fixtures_temp, get_wu_target_temp(model, Constants::ObjectTypeFixtures), 0.01)
+    assert_in_delta(fixtures_temp, get_wu_target_temp(model, Constants::ObjectTypeDistributionWaste), 0.01)
+    assert_in_delta(appliances_temp, get_wu_target_temp(model, Constants::ObjectTypeDishwasher), 0.01)
+    assert_in_delta(appliances_temp, get_wu_target_temp(model, Constants::ObjectTypeClothesWasher), 0.01)
   end
 
   def test_appliances_none
