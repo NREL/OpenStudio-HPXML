@@ -956,7 +956,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     u = 0.926
     ther_eff = 1.0
-    cop = 3.731
+    cop = 3.29
     tank_height = 1.3343
     cap = 500.0 * cop # W
     backup_cap = 4500.0 # W
@@ -994,7 +994,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     u = 0.92
     ther_eff = 1.0
-    cop = 3.60
+    cop = 2.89
     tank_height = 1.5975
     cap = 500.0 * cop # W
     backup_cap = 4500.0 # W
@@ -1032,7 +1032,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     u = 0.926
     ther_eff = 1.0
-    cop = 3.731
+    cop = 3.29
     tank_height = 1.3343
     cap = UnitConversions.convert(water_heating_system.heating_capacity, 'Btu/hr', 'W') * cop # W
     backup_cap = UnitConversions.convert(water_heating_system.backup_heating_capacity, 'Btu/hr', 'W') # W
@@ -1059,16 +1059,16 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
 
   def test_tank_heat_pump_containment_volume_adjustment
     # Volumes are based on RESNET spreadsheet: https://github.com/user-attachments/files/23135608/ConstrainedHPWH_04xlsx.xlsx,
-    # Replaced the COP in the spreadsheet to 3.73135, and the expected COPs as a function of CV are calculated as below:
+    # Replaced the COP in the spreadsheet, and the expected COPs as a function of CV are calculated as below:
     expected_cops = {
-      3000 => 3.720,
-      1500 => 3.720,
-      960 => 3.647,
-      707 => 3.518,
-      453 => 3.191,
-      200 => 2.367,
-      83.5 => 1.642,
-      32 => 1.286 # COP floor set per https://github.com/NatLabRockies/OpenStudio-HPXML/pull/2223
+      3000 => 3.28,
+      1500 => 3.28,
+      960 => 3.22,
+      707 => 3.11,
+      453 => 2.83,
+      200 => 2.14,
+      83.5 => 1.53,
+      32 => 1.30 # COP floor set per https://github.com/NatLabRockies/OpenStudio-HPXML/pull/2223
     }
     args_hash = {}
     args_hash['hpxml_path'] = @tmp_hpxml_path
@@ -1172,7 +1172,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     u =  0.1081
     ther_eff = 1.0
-    cop = 3.73
+    cop = 3.29
     tank_height = 2.3495
     cap = 500.0 * cop # W
     backup_cap = 4500.0 # W
@@ -1241,7 +1241,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     fuel = EPlus.fuel_type(water_heating_system.fuel_type)
     u = 0.925
     ther_eff = 1.0
-    cop = 3.60
+    cop = 2.89
     tank_height = 1.5975
     cap = 500.0 * cop # W
     backup_cap = 4500.0 # W

@@ -6270,21 +6270,25 @@ module Defaults
   def self.get_water_heater_heat_pump_cop(water_heating_system)
     # Based on simulations of the UEF test procedure at varying COPs
     if not water_heating_system.energy_factor.nil?
-      uef = (0.60522 + water_heating_system.energy_factor) / 1.2101
-      cop = 1.174536058 * uef
-    elsif not water_heating_system.uniform_energy_factor.nil?
+      # Based on RESNET-EF-Calculator-2017.xlsx
+      uef = (0.6052 + water_heating_system.energy_factor) / 1.2101
+      usage_bin = HPXML::WaterHeaterUsageBinMedium
+    else
       uef = water_heating_system.uniform_energy_factor
-      case water_heating_system.usage_bin
-      when HPXML::WaterHeaterUsageBinVerySmall
-        fail 'It is unlikely that a heat pump water heater falls into the very small bin of the First Hour Rating (FHR) test. Double check input.'
-      when HPXML::WaterHeaterUsageBinLow
-        cop = 1.0005 * uef - 0.0789
-      when HPXML::WaterHeaterUsageBinMedium
-        cop = 1.0909 * uef - 0.0868
-      when HPXML::WaterHeaterUsageBinHigh
-        cop = 1.1022 * uef - 0.0877
-      end
+      usage_bin = water_heating_system.usage_bin
     end
+
+    case usage_bin
+    when HPXML::WaterHeaterUsageBinVerySmall
+      fail 'It is unlikely that a heat pump water heater falls into the very small bin of the First Hour Rating (FHR) test. Double check input.'
+    when HPXML::WaterHeaterUsageBinLow
+      cop = 0.9995 * uef + 0.0789
+    when HPXML::WaterHeaterUsageBinMedium
+      cop = 0.9166 * uef + 0.0796
+    when HPXML::WaterHeaterUsageBinHigh
+      cop = 0.9073 * uef + 0.0796
+    end
+
     return cop
   end
 
