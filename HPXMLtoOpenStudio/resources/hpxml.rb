@@ -223,6 +223,10 @@ class HPXML < Object
   HeatPumpSizingACCA = 'ACCA'
   HeatPumpSizingHERS = 'HERS'
   HeatPumpSizingMaxLoad = 'MaxLoad'
+  HPWHVoltage240 = '240V'
+  HPWHVoltage120 = '120V'
+  HPWHVoltage120Dedicated = '120V dedicated circuit'
+  HPWHVoltage120Shared = '120V shared circuit'
   HVACCompressorTypeSingleStage = 'single stage'
   HVACCompressorTypeTwoStage = 'two stage'
   HVACCompressorTypeVariableSpeed = 'variable speed'
@@ -8599,6 +8603,7 @@ class HPXML < Object
              :energy_factor,                          # [Double] EnergyFactor (frac)
              :uniform_energy_factor,                  # [Double] UniformEnergyFactor (frac)
              :hpwh_operating_mode,                    # [String] HPWHOperatingMode (HPXML::WaterHeaterHPWHOperatingModeXXX)
+             :hpwh_voltage,                           # [String] HPWHVoltage (HPXML::HPWHVoltageXXX)
              :hpwh_ducting_supply,                    # [String] HPWHDucting/SupplyAirSource (HPXML::LocationXXX)
              :hpwh_ducting_exhaust,                   # [String] HPWHDucting/ExhaustAirTermination (HPXML::LocationXXX)
              :first_hour_rating,                      # [Double] FirstHourRating (gal/hr)
@@ -8608,6 +8613,8 @@ class HPXML < Object
              :standby_loss_units,                     # [String] StandbyLoss/Units (HPXML::UnitsXXX)
              :standby_loss_value,                     # [Double] StandbyLoss/Value
              :temperature,                            # [Double] HotWaterTemperature (F)
+             :has_mixing_valve,                       # [Boolean] HasMixingValve
+             :mixing_valve_setpoint,                  # [Double] MixingValveSetpoint (F)
              :uses_desuperheater,                     # [Boolean] UsesDesuperheater
              :related_hvac_idref,                     # [String] RelatedHVACSystem/@idref
              :tank_model_type,                        # [String] extension/TankModelType (HPXML::WaterHeaterTankModelTypeXXX)
@@ -8702,6 +8709,7 @@ class HPXML < Object
       XMLHelper.add_element(water_heating_system, 'EnergyFactor', @energy_factor, :float, @energy_factor_isdefaulted) unless @energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'UniformEnergyFactor', @uniform_energy_factor, :float) unless @uniform_energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'HPWHOperatingMode', @hpwh_operating_mode, :string, @hpwh_operating_mode_isdefaulted) unless @hpwh_operating_mode.nil?
+      XMLHelper.add_element(water_heating_system, 'HPWHVoltage', @hpwh_voltage, :string, @hpwh_voltage_isdefaulted) unless @hpwh_voltage.nil?
       if (not @hpwh_ducting_exhaust.nil?) || (not @hpwh_ducting_supply.nil?)
         hpwh_ducting = XMLHelper.add_element(water_heating_system, 'HPWHDucting')
         XMLHelper.add_element(hpwh_ducting, 'SupplyAirSource', @hpwh_ducting_supply, :string, @hpwh_ducting_supply_isdefaulted) unless @hpwh_ducting_supply.nil?
@@ -8721,6 +8729,8 @@ class HPXML < Object
         XMLHelper.add_element(standby_loss, 'Value', @standby_loss_value, :float, @standby_loss_value_isdefaulted)
       end
       XMLHelper.add_element(water_heating_system, 'HotWaterTemperature', @temperature, :float, @temperature_isdefaulted) unless @temperature.nil?
+      XMLHelper.add_element(water_heating_system, 'HasMixingValve', @has_mixing_valve, :boolean, @has_mixing_valve_isdefaulted) unless @has_mixing_valve.nil?
+      XMLHelper.add_element(water_heating_system, 'MixingValveSetpoint', @mixing_valve_setpoint, :float, @mixing_valve_setpoint_isdefaulted) unless @mixing_valve_setpoint.nil?
       XMLHelper.add_element(water_heating_system, 'UsesDesuperheater', @uses_desuperheater, :boolean) unless @uses_desuperheater.nil?
       if not @related_hvac_idref.nil?
         related_hvac_idref_el = XMLHelper.add_element(water_heating_system, 'RelatedHVACSystem')
@@ -8757,6 +8767,7 @@ class HPXML < Object
       @energy_factor = XMLHelper.get_value(water_heating_system, 'EnergyFactor', :float)
       @uniform_energy_factor = XMLHelper.get_value(water_heating_system, 'UniformEnergyFactor', :float)
       @hpwh_operating_mode = XMLHelper.get_value(water_heating_system, 'HPWHOperatingMode', :string)
+      @hpwh_voltage = XMLHelper.get_value(water_heating_system, 'HPWHVoltage', :string)
       @hpwh_ducting_supply = XMLHelper.get_value(water_heating_system, 'HPWHDucting/SupplyAirSource', :string)
       @hpwh_ducting_exhaust = XMLHelper.get_value(water_heating_system, 'HPWHDucting/ExhaustAirTermination', :string)
       @first_hour_rating = XMLHelper.get_value(water_heating_system, 'FirstHourRating', :float)
@@ -8766,6 +8777,8 @@ class HPXML < Object
       @standby_loss_units = XMLHelper.get_value(water_heating_system, 'StandbyLoss/Units', :string)
       @standby_loss_value = XMLHelper.get_value(water_heating_system, 'StandbyLoss/Value', :float)
       @temperature = XMLHelper.get_value(water_heating_system, 'HotWaterTemperature', :float)
+      @has_mixing_valve = XMLHelper.get_value(water_heating_system, 'HasMixingValve', :boolean)
+      @mixing_valve_setpoint = XMLHelper.get_value(water_heating_system, 'MixingValveSetpoint', :float)
       @uses_desuperheater = XMLHelper.get_value(water_heating_system, 'UsesDesuperheater', :boolean)
       @related_hvac_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'RelatedHVACSystem'))
       @tank_model_type = XMLHelper.get_value(water_heating_system, 'extension/TankModelType', :string)

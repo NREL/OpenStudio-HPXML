@@ -159,6 +159,21 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     return gpd
   end
 
+  def get_wu_target_temp(model, name)
+    target_temps = []
+    model.getWaterUseEquipments.each do |wue|
+      next unless wue.waterUseEquipmentDefinition.endUseSubcategory.start_with? name
+      next unless wue.waterUseEquipmentDefinition.targetTemperatureSchedule.is_initialized
+
+      target_temps << UnitConversions.convert(wue.waterUseEquipmentDefinition.targetTemperatureSchedule.get.to_ScheduleConstant.get.value, 'C', 'F')
+    end
+    if target_temps.empty?
+      return
+    else
+      return target_temps.sum(0.0) / target_temps.size
+    end
+  end
+
   def test_base
     hpxml_names = ['base.xml',
                    'base-misc-usage-multiplier.xml', # Test w/ usage multipliers
@@ -245,6 +260,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
       assert_in_delta(23.15, model.getSiteWaterMainsTemperature.maximumDifferenceInMonthlyAverageOutdoorAirTemperatures.get, 0.01)
       assert_in_delta(1.0, model.getSiteWaterMainsTemperature.temperatureMultiplier, 0.01)
       assert_in_delta(0.0, model.getSiteWaterMainsTemperature.temperatureOffset, 0.01)
+
+      # target temperatures
+      fixtures_temp = 105 # deg-F
+      assert_in_delta(fixtures_temp, get_wu_target_temp(model, Constants::ObjectTypeFixtures), 0.01)
+      assert_in_delta(fixtures_temp, get_wu_target_temp(model, Constants::ObjectTypeDistributionWaste), 0.01)
+      assert_nil(get_wu_target_temp(model, Constants::ObjectTypeDishwasher))
+      assert_nil(get_wu_target_temp(model, Constants::ObjectTypeClothesWasher))
     end
   end
 
@@ -530,6 +552,20 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     hot_water_distribution = hpxml_bldg.hot_water_distributions[0]
     pump_kwh_yr = 1.46 * hot_water_distribution.recirculation_pump_power
     assert_in_delta(pump_kwh_yr, get_ee_kwh_per_year(model, Constants::ObjectTypeHotWaterRecircPump), 0.1)
+  end
+
+  def test_dhw_mixing_valve
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-dhw-setpoint-temperature-mixing-valve.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # target temperatures
+    fixtures_temp = 105 # deg-F
+    appliances_temp = hpxml_bldg.water_heating_systems[0].mixing_valve_setpoint
+    assert_in_delta(fixtures_temp, get_wu_target_temp(model, Constants::ObjectTypeFixtures), 0.01)
+    assert_in_delta(fixtures_temp, get_wu_target_temp(model, Constants::ObjectTypeDistributionWaste), 0.01)
+    assert_in_delta(appliances_temp, get_wu_target_temp(model, Constants::ObjectTypeDishwasher), 0.01)
+    assert_in_delta(appliances_temp, get_wu_target_temp(model, Constants::ObjectTypeClothesWasher), 0.01)
   end
 
   def test_appliances_none

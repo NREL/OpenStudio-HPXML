@@ -722,7 +722,7 @@ The column names available in the schedule CSV files are:
   ``cooling_setpoint``              F        Thermostat cooling setpoint schedule.                                                          No
   ``hvac_maximum_power_ratio``      frac     Variable speed system maximum power ratio schedule. [#]_                                       No
   ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                                No
-  ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.               No
+  ``water_heater_operating_mode``   0/1      240V heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.          No
   ``battery``                       -1 to 1  Battery availability schedule. Positive for charging, negative for discharging.                No
   ``electric_vehicle``              -1 to 1  Electric vehicle schedule. Positive for charging, negative for discharging. [#]_               Yes
   ================================  =======  =============================================================================================  ===============================
@@ -4105,26 +4105,28 @@ Conventional Storage
 
 Each conventional storage water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  =============================================  =================  =============  ====================  ========  ========  =============================================
-  Element                                        Type               Units          Constraints           Required  Default   Notes
-  =============================================  =================  =============  ====================  ========  ========  =============================================
-  ``SystemIdentifier``                           id                                                      Yes                 Unique identifier
-  ``FuelType``                                   string                            See [#]_              Yes                 Fuel type
-  ``WaterHeaterType``                            string                            storage water heater  Yes                 Type of water heater
-  ``Location``                                   string                            See [#]_              No        See [#]_  Water heater location
-  ``IsSharedSystem``                             boolean                                                 No        false     Whether it serves multiple dwelling units or shared laundry room
-  ``TankVolume``                                 double             gal            > 0                   No        See [#]_  Nominal tank volume
-  ``FractionDHWLoadServed``                      double             frac           >= 0, <= 1 [#]_       Yes                 Fraction of hot water load served [#]_
-  ``HeatingCapacity``                            double             Btu/hr         > 0                   No        See [#]_  Heating input capacity
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double             frac           < 1                   Yes                 EnergyGuide label rated efficiency
-  ``UsageBin`` or ``FirstHourRating``            string or double   str or gal/hr  See [#]_ or > 0       No        See [#]_  EnergyGuide label usage bin/first hour rating
-  ``RecoveryEfficiency``                         double             frac           > 0, <= 1 [#]_        No        See [#]_  Recovery efficiency
-  ``WaterHeaterInsulation/Jacket/JacketRValue``  double             F-ft2-hr/Btu   >= 0                  No        0         R-value of additional tank insulation wrap
-  ``HotWaterTemperature``                        double             F              > 0                   No        125       Water heater setpoint [#]_
-  ``UsesDesuperheater``                          boolean                                                 No        false     Presence of desuperheater? [#]_
-  ``extension/TankModelType``                    string                            See [#]_              No        mixed     Tank model type
-  ``extension/NumberofBedroomsServed``           integer                           > NumberofBedrooms    See [#]_            Number of bedrooms served directly or indirectly
-  =============================================  =================  =============  ====================  ========  ========  =============================================
+  =============================================  =================  =============  ==============================  ========  ========  =============================================
+  Element                                        Type               Units          Constraints                     Required  Default   Notes
+  =============================================  =================  =============  ==============================  ========  ========  =============================================
+  ``SystemIdentifier``                           id                                                                Yes                 Unique identifier
+  ``FuelType``                                   string                            See [#]_                        Yes                 Fuel type
+  ``WaterHeaterType``                            string                            storage water heater            Yes                 Type of water heater
+  ``Location``                                   string                            See [#]_                        No        See [#]_  Water heater location
+  ``IsSharedSystem``                             boolean                                                           No        false     Whether it serves multiple dwelling units or shared laundry room
+  ``TankVolume``                                 double             gal            > 0                             No        See [#]_  Nominal tank volume
+  ``FractionDHWLoadServed``                      double             frac           >= 0, <= 1 [#]_                 Yes                 Fraction of hot water load served [#]_
+  ``HeatingCapacity``                            double             Btu/hr         > 0                             No        See [#]_  Heating input capacity
+  ``UniformEnergyFactor`` or ``EnergyFactor``    double             frac           < 1                             Yes                 EnergyGuide label rated efficiency
+  ``UsageBin`` or ``FirstHourRating``            string or double   str or gal/hr  See [#]_ or > 0                 No        See [#]_  EnergyGuide label usage bin/first hour rating
+  ``RecoveryEfficiency``                         double             frac           > 0, <= 1 [#]_                  No        See [#]_  Recovery efficiency
+  ``WaterHeaterInsulation/Jacket/JacketRValue``  double             F-ft2-hr/Btu   >= 0                            No        0         R-value of additional tank insulation wrap
+  ``HotWaterTemperature``                        double             F              >= 105                          No        125       Water heater setpoint [#]_
+  ``HasMixingValve``                             boolean                                                           No        See [#]_  Presence of a water heater mixing valve?
+  ``MixingValveSetpoint``                        double             F              >= 105, <= HotWaterTemperature  No        See [#]_  Temperature setpoint for the mixing valve
+  ``UsesDesuperheater``                          boolean                                                           No        false     Presence of desuperheater? [#]_
+  ``extension/TankModelType``                    string                            See [#]_                        No        mixed     Tank model type
+  ``extension/NumberofBedroomsServed``           integer                           > NumberofBedrooms              See [#]_            Number of bedrooms served directly or indirectly
+  =============================================  =================  =============  ==============================  ========  ========  =============================================
 
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
@@ -4152,6 +4154,8 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
          \- **Non-electric, EnergyFactor >= 0.75**: 0.561 * EnergyFactor + 0.439
 
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
+  .. [#] If HasMixingValve not provided, defaults to true if HotWaterTemperature is greater than 140F, otherwise false.
+  .. [#] If MixingValveSetpoint not provided and HasMixingValve=true, defaults to the lesser of 125 deg-F and HotWaterTemperature.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
   .. [#] TankModelType choices are "mixed" or "stratified". Only currently allowed if FuelType is "electricity".
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
@@ -4165,21 +4169,23 @@ Tankless
 
 Each instantaneous tankless water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  ===========================================  =======  ============  ==========================  ============  ========  ==========================================================
-  Element                                      Type     Units         Constraints                 Required      Default   Notes
-  ===========================================  =======  ============  ==========================  ============  ========  ==========================================================
-  ``SystemIdentifier``                         id                                                 Yes                     Unique identifier
-  ``FuelType``                                 string                 See [#]_                    Yes                     Fuel type
-  ``WaterHeaterType``                          string                 instantaneous water heater  Yes                     Type of water heater
-  ``Location``                                 string                 See [#]_                    No            See [#]_  Water heater location
-  ``IsSharedSystem``                           boolean                                            No            false     Whether it serves multiple dwelling units or shared laundry room
-  ``PerformanceAdjustment``                    double   frac          >= 0, <= 1                  No            See [#]_  Multiplier on efficiency, typically to account for cycling
-  ``FractionDHWLoadServed``                    double   frac          >= 0, <= 1 [#]_             Yes                     Fraction of hot water load served [#]_
-  ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1                         Yes                     EnergyGuide label rated efficiency
-  ``HotWaterTemperature``                      double   F             > 0                         No            125       Water heater setpoint [#]_
-  ``UsesDesuperheater``                        boolean                                            No            false     Presence of desuperheater? [#]_
-  ``extension/NumberofBedroomsServed``         integer                > NumberofBedrooms          See [#]_                Number of bedrooms served directly or indirectly
-  ===========================================  =======  ============  ==========================  ============  ========  ==========================================================
+  ===========================================  =======  ============  ==============================  ============  ========  ==========================================================
+  Element                                      Type     Units         Constraints                     Required      Default   Notes
+  ===========================================  =======  ============  ==============================  ============  ========  ==========================================================
+  ``SystemIdentifier``                         id                                                     Yes                     Unique identifier
+  ``FuelType``                                 string                 See [#]_                        Yes                     Fuel type
+  ``WaterHeaterType``                          string                 instantaneous water heater      Yes                     Type of water heater
+  ``Location``                                 string                 See [#]_                        No            See [#]_  Water heater location
+  ``IsSharedSystem``                           boolean                                                No            false     Whether it serves multiple dwelling units or shared laundry room
+  ``PerformanceAdjustment``                    double   frac          >= 0, <= 1                      No            See [#]_  Multiplier on efficiency, typically to account for cycling
+  ``FractionDHWLoadServed``                    double   frac          >= 0, <= 1 [#]_                 Yes                     Fraction of hot water load served [#]_
+  ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1                             Yes                     EnergyGuide label rated efficiency
+  ``HotWaterTemperature``                      double   F             >= 105                          No            125       Water heater setpoint [#]_
+  ``HasMixingValve``                           boolean                                                No            See [#]_  Presence of a water heater mixing valve?
+  ``MixingValveSetpoint``                      double   F             >= 105, <= HotWaterTemperature  No            See [#]_  Temperature setpoint for the mixing valve
+  ``UsesDesuperheater``                        boolean                                                No            false     Presence of desuperheater? [#]_
+  ``extension/NumberofBedroomsServed``         integer                > NumberofBedrooms              See [#]_                Number of bedrooms served directly or indirectly
+  ===========================================  =======  ============  ==============================  ============  ========  ==========================================================
 
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
@@ -4195,6 +4201,8 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
+  .. [#] If HasMixingValve not provided, defaults to true if HotWaterTemperature is greater than 140F, otherwise false.
+  .. [#] If MixingValveSetpoint not provided and HasMixingValve=true, defaults to the lesser of 125 deg-F and HotWaterTemperature.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
@@ -4204,31 +4212,34 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
 Heat Pump
 ~~~~~~~~~
 
-Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
+Each heat pump water heater (HPWH) is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  ===================================================  ================  =============  ======================  ========  ==============  =============================================
-  Element                                              Type              Units          Constraints             Required  Default         Notes
-  ===================================================  ================  =============  ======================  ========  ==============  =============================================
-  ``SystemIdentifier``                                 id                                                       Yes                       Unique identifier
-  ``FuelType``                                         string                           electricity             Yes                       Fuel type
-  ``WaterHeaterType``                                  string                           heat pump water heater  Yes                       Type of water heater
-  ``Location``                                         string                           See [#]_                No        See [#]_        Water heater location
-  ``IsSharedSystem``                                   boolean                                                  No        false           Whether it serves multiple dwelling units or shared laundry room
-  ``TankVolume``                                       double            gal            > 0                     No        See [#]_        Nominal tank volume
-  ``FractionDHWLoadServed``                            double            frac           >= 0, <= 1 [#]_         Yes                       Fraction of hot water load served [#]_
-  ``HeatingCapacity``                                  double            Btu/hr         > 0                     No        See [#]_        Heating input capacity
-  ``BackupHeatingCapacity``                            double            Btu/hr         >= 0                    No        15355 (4.5 kW)  Heating capacity of the electric resistance backup
-  ``UniformEnergyFactor`` or ``EnergyFactor``          double            frac           >= 1.45, <= 5           Yes                       EnergyGuide label rated efficiency
-  ``HPWHDucting/ExhaustAirTermination``                string                           See [#]_                No        <none>          The location where HPWH exhaust air is ducted to
-  ``HPWHOperatingMode``                                string                           See [#]_                No        hybrid/auto     Operating mode [#]_
-  ``UsageBin`` or ``FirstHourRating``                  string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_        EnergyGuide label usage bin/first hour rating
-  ``WaterHeaterInsulation/Jacket/JacketRValue``        double            F-ft2-hr/Btu   >= 0                    No        0               R-value of additional tank insulation wrap
-  ``HotWaterTemperature``                              double            F              > 0                     No        125             Water heater setpoint [#]_
-  ``UsesDesuperheater``                                boolean                                                  No        false           Presence of desuperheater? [#]_
-  ``extension/NumberofBedroomsServed``                 integer                          > NumberofBedrooms      See [#]_                  Number of bedrooms served directly or indirectly
-  ``extension/HPWHInConfinedSpaceWithoutMitigation``   boolean                                                  No        false           Whether HPWH is installed in confined space without mitigation [#]_
-  ``extension/HPWHContainmentVolume``                  double            ft3            >= 32                   See [#]_                  Containment volume of the space where HPWH is installed
-  ===================================================  ================  =============  ======================  ========  ==============  =============================================
+  ===================================================  ================  =============  ==============================  ========  ==============  =============================================
+  Element                                              Type              Units          Constraints                     Required  Default         Notes
+  ===================================================  ================  =============  ==============================  ========  ==============  =============================================
+  ``SystemIdentifier``                                 id                                                               Yes                       Unique identifier
+  ``FuelType``                                         string                           electricity                     Yes                       Fuel type
+  ``WaterHeaterType``                                  string                           heat pump water heater          Yes                       Type of water heater
+  ``Location``                                         string                           See [#]_                        No        See [#]_        Water heater location
+  ``IsSharedSystem``                                   boolean                                                          No        false           Whether it serves multiple dwelling units or shared laundry room
+  ``TankVolume``                                       double            gal            > 0                             No        See [#]_        Nominal tank volume
+  ``FractionDHWLoadServed``                            double            frac           >= 0, <= 1 [#]_                 Yes                       Fraction of hot water load served [#]_
+  ``HeatingCapacity``                                  double            Btu/hr         > 0                             No        See [#]_        Heating input capacity
+  ``BackupHeatingCapacity``                            double            Btu/hr         >= 0                            No        See [#]_        Heating capacity of the electric resistance backup
+  ``UniformEnergyFactor`` or ``EnergyFactor``          double            frac           >= 1.45, <= 5                   Yes                       EnergyGuide label rated efficiency
+  ``HPWHOperatingMode``                                string                           See [#]_                        No        See [#]_        HPWH operating mode [#]_
+  ``HPWHVoltage``                                      string                           See [#]_                        No        240V            HPWH voltage
+  ``HPWHDucting/ExhaustAirTermination``                string                           See [#]_                        No        <none>          The location where HPWH exhaust air is ducted to
+  ``UsageBin`` or ``FirstHourRating``                  string or double  str or gal/hr  See [#]_ or > 0                 No        See [#]_        EnergyGuide label usage bin/first hour rating
+  ``WaterHeaterInsulation/Jacket/JacketRValue``        double            F-ft2-hr/Btu   >= 0                            No        0               R-value of additional tank insulation wrap
+  ``HotWaterTemperature``                              double            F              >= 105                          No        125             Water heater setpoint [#]_
+  ``HasMixingValve``                                   boolean                                                          No        See [#]_        Presence of a water heater mixing valve?
+  ``MixingValveSetpoint``                              double            F              >= 105, <= HotWaterTemperature  No        See [#]_        Temperature setpoint for the mixing valve
+  ``UsesDesuperheater``                                boolean                                                          No        false           Presence of desuperheater? [#]_
+  ``extension/NumberofBedroomsServed``                 integer                          > NumberofBedrooms              See [#]_                  Number of bedrooms served directly or indirectly
+  ``extension/HPWHInConfinedSpaceWithoutMitigation``   boolean                                                          No        false           Whether HPWH is installed in confined space without mitigation [#]_
+  ``extension/HPWHContainmentVolume``                  double            ft3            >= 32                           See [#]_                  Containment volume of the space where HPWH is installed
+  ===================================================  ================  =============  ==============================  ========  ==============  =============================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxml_locations` for descriptions.
@@ -4247,16 +4258,24 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
-  .. [#] If HeatingCapacity not provided, defaults to 1706 Btu/hr (0.5 kW).
+  .. [#] If HeatingCapacity not provided, defaults to 1706 Btu/hr (0.5 kW) for 240V HPWHs and 1443 Btu/hr (0.423 kW) for 120V HPWHs.
+  .. [#] If BackupHeatingCapacity not provided, defaults to 15355 Btu/hr (4.5 kW) for 240V HPWHs and 0 (no backup elements) for 120V HPWHs.
+  .. [#] HPWHOperatingMode choices are "hybrid/auto" or "heat pump only"; "hybrid/auto" is not allowed for 120V HPWHs.
+  .. [#] If HPWHOperatingMode not provided, defaults to "hybrid/auto" for 240V HPWHs, otherwise "heat pump only".
+  .. [#] When "hybrid/auto" is used, the HPWH will prioritize using the heat pump and will resort to electric resistance backup if heat pump capacity is not sufficient to meet demand.
+         When "heat pump only", the HPWH will not run the electric resistance to meet demand.
+         In both cases, electric resistance may also operate if the ambient temperature is outside the minimum/maximum compressor operating temperatures.
+         Note that the operating mode for 240V systems can alternatively be defined using :ref:`schedules_detailed`.
+  .. [#] HPWHVoltage choices are "240V", "120V", "120V dedicated circuit", or "120V shared circuit".
   .. [#] OpenStudio-HPXML currently only supports ExhaustAirTermination="outside" for heat pump water heaters located in conditioned space.
          Any other combination of ExhaustAirTermination value and water heater location will be ignored w/ a warning.
-  .. [#] HPWHOperatingMode choices are "hybrid/auto" or "heat pump only".
-  .. [#] The heat pump water heater operating mode can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] UsageBin choices are "very small", "low", "medium", or "high".
   .. [#] UsageBin/FirstHourRating are only used for water heaters that use UniformEnergyFactor.
          If neither UsageBin nor FirstHourRating provided, UsageBin defaults to "medium".
          If FirstHourRating provided and UsageBin not provided, UsageBin is determined based on the FirstHourRating value.
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
+  .. [#] If HasMixingValve not provided, defaults to true if HotWaterTemperature is greater than 140F, otherwise false.
+  .. [#] If MixingValveSetpoint not provided and HasMixingValve=true, defaults to the lesser of 125 deg-F and HotWaterTemperature.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
@@ -4287,7 +4306,9 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
   ``FractionDHWLoadServed``                      double   frac          >= 0, <= 1 [#]_                         Yes                     Fraction of hot water load served [#]_
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0                                    No            0         R-value of additional storage tank insulation wrap
   ``StandbyLoss[Units="F/hr"]/Value``            double   F/hr          > 0                                     No            See [#]_  Storage tank standby losses
-  ``HotWaterTemperature``                        double   F             > 0                                     No            125       Water heater setpoint [#]_
+  ``HotWaterTemperature``                        double   F             >= 105                                  No            125       Water heater setpoint [#]_
+  ``HasMixingValve``                             boolean                                                        No            See [#]_  Presence of a water heater mixing valve?
+  ``MixingValveSetpoint``                        double   F             >= 105, <= HotWaterTemperature          No            See [#]_  Temperature setpoint for the mixing valve
   ``RelatedHVACSystem``                          idref                  See [#]_                                Yes                     ID of boiler
   ``extension/NumberofBedroomsServed``           integer                > NumberofBedrooms                      See [#]_                Number of bedrooms served directly or indirectly
   =============================================  =======  ============  ======================================  ============  ========  ==================================================
@@ -4306,6 +4327,8 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] If StandbyLoss not provided, defaults based on a regression analysis of `AHRI Directory of Certified Product Performance <https://www.ahridirectory.org>`_.
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
+  .. [#] If HasMixingValve not provided, defaults to true if HotWaterTemperature is greater than 140F, otherwise false.
+  .. [#] If MixingValveSetpoint not provided and HasMixingValve=true, defaults to the lesser of 125 deg-F and HotWaterTemperature.
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
@@ -4326,7 +4349,9 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
   ``Location``                          string          See [#]_                                 No            See [#]_  Water heater location
   ``IsSharedSystem``                    boolean                                                  No            false     Whether it serves multiple dwelling units or shared laundry room
   ``FractionDHWLoadServed``             double   frac   >= 0, <= 1 [#]_                          Yes                     Fraction of hot water load served [#]_
-  ``HotWaterTemperature``               double   F      > 0                                      No            125       Water heater setpoint [#]_
+  ``HotWaterTemperature``               double   F      >= 105                                   No            125       Water heater setpoint [#]_
+  ``HasMixingValve``                    boolean                                                  No            See [#]_  Presence of a water heater mixing valve?
+  ``MixingValveSetpoint``               double   F      >= 105, <= HotWaterTemperature           No            See [#]_  Temperature setpoint for the mixing valve
   ``RelatedHVACSystem``                 idref           See [#]_                                 Yes                     ID of boiler
   ``extension/NumberofBedroomsServed``  integer         > NumberofBedrooms                       See [#]_                Number of bedrooms served directly or indirectly
   ====================================  =======  =====  =======================================  ============  ========  ==================================================
@@ -4343,6 +4368,8 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
+  .. [#] If HasMixingValve not provided, defaults to true if HotWaterTemperature is greater than 140F, otherwise false.
+  .. [#] If MixingValveSetpoint not provided and HasMixingValve=true, defaults to the lesser of 125 deg-F and HotWaterTemperature.
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
@@ -4781,7 +4808,7 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
 
          \- ``HeatPump[HeatPumpFuel="electricity"]``: 240
 
-         \- ``WaterHeatingSystem[FuelType="electricity"]``: 240
+         \- ``WaterHeatingSystem[FuelType="electricity"]``: 240, or 120 for a heat pump water heater with any 120V ``HPWHVoltage`` option
 
          \- ``ClothesDryer[FuelType="electricity"]``: 240
 

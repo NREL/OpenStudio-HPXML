@@ -6,6 +6,9 @@ __Features__
   - `Roof/RoofColor` now has an additional option of "white".
 - **Breaking change**: Conditioned crawlspaces are no longer allowed; use unvented crawlspace instead.
 - **Breaking change**: For heat pump water heaters, ``HeatingCapacity`` is now *input* rather than *output* capacity, similar to other water heater types.
+- Water heater updates:
+  - Allows modeling 120V HPWHs (including dedicated vs shared circuits) using `WaterHeatingSystem/HPWHVoltage`.
+  - Allows modeling water heaters with a mixing valve using `HasMixingValve` and `MixingValveSetpoint`; assumes a mixing valve when water heater setpoint > 140F.
 - PV systems:
   - Allows `CollectorArea` or `NumberOfPanels` instead of `MaxPowerOutput`.
   - Allows `YearInstalled` instead of `YearModulesManufactured` for age-based degradation.
@@ -18,6 +21,7 @@ __Features__
 __Bugfixes__
 - **Breaking change**: Prevent possible error if heat pump water heater in confined space with very small containment volume; minimum allowed volume now 32 ft3.
 - **Breaking change**: Heat pump water heater `EnergyFactor`/`UniformEnergyFactor` must now be >= 1.45 (previously > 1).
+- **Breaking change**: Water heater `HotWaterTemperature` must now be >= 105F (previously > 0F).
 - Fixes heat pump water heater modeled COP (derived from EF/UEF).
 - Fixes possibility of MaxLoad heat pump sizing methodology producing autosized capacities that were too large.
 - Fixes ERV supply outlet enthalpy calculation used to calculate latent effectiveness.

@@ -974,6 +974,15 @@
     "parent_hpxml": "sample_files/base.xml",
     "dhw_water_heater": "Electricity, Heat Pump, UEF 3.50"
   },
+  "sample_files/base-dhw-tank-heat-pump-120v.xml": {
+    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml"
+  },
+    "sample_files/base-dhw-tank-heat-pump-120v-backup-capacity.xml": {
+    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-outside.xml"
+  },
+  "sample_files/base-dhw-tank-heat-pump-120v-dedicated-circuit.xml": {
+    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml"
+  },
   "sample_files/base-dhw-tank-heat-pump-confined-space.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml"
   },
@@ -1062,6 +1071,9 @@
   "sample_files/base-dhw-setpoint-temperature.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "dhw_water_heater": "Detailed Example: Electricity, Tank, UEF 0.94, 135F"
+  },
+  "sample_files/base-dhw-setpoint-temperature-mixing-valve.xml": {
+    "parent_hpxml": "sample_files/base-dhw-setpoint-temperature.xml"
   },
   "sample_files/base-detailed-electric-panel.xml": {
     "parent_hpxml": "sample_files/base.xml",

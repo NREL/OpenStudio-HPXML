@@ -194,8 +194,13 @@ module Waterheater
     end
 
     airflow_rate = 200.0 # cfm, average value measured across a few different units
-    min_temp = 42.0 # F
-    max_temp = 120.0 # F
+    if water_heating_system.hpwh_voltage == HPXML::HPWHVoltage240
+      min_temp = 42.0 # F
+      max_temp = 120.0 # F
+    else # 120V
+      min_temp = 37.0 # F, from spec sheet
+      max_temp = 145.0 # F, from spec sheet
+    end
 
     # Coil:WaterHeating:AirToWaterHeatPump:Wrapped
     coil = apply_hpwh_dxcoil(runner, model, water_heating_system, hpxml_bldg.elevation, obj_name, airflow_rate, unit_multiplier)
@@ -219,7 +224,7 @@ module Waterheater
     fan.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeWaterHeater) # Used by reporting measure
 
     # WaterHeater:HeatPump:WrappedCondenser
-    hpwh = apply_hpwh_wrapped_condenser(model, obj_name, coil, tank, fan, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, control_setpoint_schedule, unit_multiplier)
+    hpwh = apply_hpwh_wrapped_condenser(model, obj_name, water_heating_system, coil, tank, fan, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, control_setpoint_schedule, unit_multiplier)
     hpwh.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by infiltration program
 
     # Get ducting info
@@ -905,6 +910,7 @@ module Waterheater
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
+  # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
   # @param coil [OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped] The HPWH DX coil
   # @param tank [OpenStudio::Model::WaterHeaterStratified] The HPWH storage tank
   # @param fan [OpenStudio::Model::FanSystemModel] The HPWH fan
@@ -916,10 +922,14 @@ module Waterheater
   # @param control_setpoint_schedule [OpenStudio::Model::ScheduleConstant or OpenStudio::Model::ScheduleRuleset] Setpoint temperature schedule (controlled)
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser] The HPWH object
-  def self.apply_hpwh_wrapped_condenser(model, obj_name, coil, tank, fan, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, control_setpoint_schedule, unit_multiplier)
+  def self.apply_hpwh_wrapped_condenser(model, obj_name, water_heating_system, coil, tank, fan, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, control_setpoint_schedule, unit_multiplier)
     hpwh = OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser.new(model, coil, tank, fan, control_setpoint_schedule, model.alwaysOnDiscreteSchedule)
     hpwh.setName("#{obj_name} hpwh")
-    hpwh.setDeadBandTemperatureDifference(3.89)
+    if water_heating_system.hpwh_voltage == HPXML::HPWHVoltage240
+      hpwh.setDeadBandTemperatureDifference(3.89)
+    else
+      hpwh.setDeadBandTemperatureDifference(5.0)
+    end
     hpwh.setCondenserBottomLocation((1.0 - (12 - 0.5) / 12.0) * tank.tankHeight.get) # in the 12th node of a 12-node tank (counting from top)
     hpwh.setCondenserTopLocation((1.0 - (6 - 0.5) / 12.0) * tank.tankHeight.get) # in the 6th node of a 12-node tank (counting from top)
     hpwh.setEvaporatorAirFlowRate(UnitConversions.convert(airflow_rate * unit_multiplier, 'ft^3/min', 'm^3/s'))
@@ -936,7 +946,11 @@ module Waterheater
     hpwh.setParasiticHeatRejectionLocation('Outdoors')
     hpwh.setTankElementControlLogic('MutuallyExclusive')
     hpwh.setControlSensor1HeightInStratifiedTank((1.0 - (3 - 0.5) / 12.0) * tank.tankHeight.get) # in the 3rd node of a 12-node tank (counting from top)
-    hpwh.setControlSensor1Weight(0.75)
+    if water_heating_system.hpwh_voltage == HPXML::HPWHVoltage240
+      hpwh.setControlSensor1Weight(0.75)
+    else
+      hpwh.setControlSensor1Weight(0.5)
+    end
     hpwh.setControlSensor2HeightInStratifiedTank((1.0 - (9 - 0.5) / 12.0) * tank.tankHeight.get) # in the 9th node of a 12-node tank (counting from top)
 
     return hpwh
@@ -954,17 +968,27 @@ module Waterheater
   # @return [OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped] The HPWH DX coil
   def self.apply_hpwh_dxcoil(runner, model, water_heating_system, elevation, obj_name, airflow_rate, unit_multiplier)
     # Curves
+    if water_heating_system.hpwh_voltage == HPXML::HPWHVoltage240
+      cap_coeff = [0.563, 0.0437, 0.000039, 0.0055, -0.000148, -0.000145]
+      cop_coeff = [1.1332, 0.063, -0.0000979, -0.00972, -0.0000214, -0.000686]
+    elsif water_heating_system.hpwh_voltage == HPXML::HPWHVoltage120Dedicated
+      cap_coeff = [0.636, 0.0227, 0.000406, -0.000437, 0.0, 0.0]
+      cop_coeff = [1.460454, 0.031379, 0.000439, -0.01806, 0.000138, -0.000626]
+    else # 120V shared
+      cap_coeff = [0.832591, 0.016347, 0.00055, 0.00208, -0.000088, -0.00007]
+      cop_coeff = [1.237784, 0.052924, 0.000027, -0.013587, 0.000045, -0.000609]
+    end
     hpwh_cap = Model.add_curve_biquadratic(
       model,
       name: 'HPWH-Cap-fT',
-      coeff: [0.563, 0.0437, 0.000039, 0.0055, -0.000148, -0.000145],
+      coeff: cap_coeff,
       min_x: 0, max_x: 100, min_y: 0, max_y: 100
     )
 
     hpwh_cop = Model.add_curve_biquadratic(
       model,
       name: 'HPWH-COP-fT',
-      coeff: [1.1332, 0.063, -0.0000979, -0.00972, -0.0000214, -0.000686],
+      coeff: cop_coeff,
       min_x: 0, max_x: 100, min_y: 0, max_y: 100
     )
 
@@ -1055,17 +1079,38 @@ module Waterheater
 
     e_cap = UnitConversions.convert(water_heating_system.backup_heating_capacity, 'Btu/hr', 'W') # W
     parasitics = 3.0 # W
-    # Based on Ecotope lab testing of AO Smith HPWHs (series HPTU), see 2015 report:
-    # https://neea.org/img/documents/hpwh-lab-report_ao-smith_hptu_12-09-2015.pdf.
-    # More recent products do not show much change to UA values, see 2021 report:
-    # https://neea.org/img/documents/Laboratory-Assessment-of-Rheem-Generation-5-Series-HPWH.pdf.
-    if water_heating_system.tank_volume <= 58.0
-      tank_ua = 3.6 # Btu/hr-F
-    elsif water_heating_system.tank_volume <= 73.0
-      tank_ua = 4.0 # Btu/hr-F
-    else
-      tank_ua = 4.7 # Btu/hr-F
+    if water_heating_system.hpwh_voltage == HPXML::HPWHVoltage240
+      # Based on Ecotope lab testing of AO Smith HPWHs (series HPTU), see 2015 report:
+      # https://neea.org/img/documents/hpwh-lab-report_ao-smith_hptu_12-09-2015.pdf.
+      # More recent products do not show much change to UA values, see 2021 report:
+      # https://neea.org/img/documents/Laboratory-Assessment-of-Rheem-Generation-5-Series-HPWH.pdf.
+      if water_heating_system.tank_volume <= 58.0
+        tank_ua = 3.6 # Btu/hr-F
+      elsif water_heating_system.tank_volume <= 73.0
+        tank_ua = 4.0 # Btu/hr-F
+      else
+        tank_ua = 4.7 # Btu/hr-F
+      end
+    elsif water_heating_system.hpwh_voltage == HPXML::HPWHVoltage120Dedicated
+      # Values from HPWHSim models for Rheem units
+      if water_heating_system.tank_volume <= 58.0
+        tank_ua = 3.2 # Btu/hr-F
+      elsif water_heating_system.tank_volume <= 73.0
+        tank_ua = 4.2 # Btu/hr-F
+      else
+        tank_ua = 4.7 # Btu/hr-F
+      end
+    else # 120V shared
+      # Values from HPWHSim models for Rheem units
+      if water_heating_system.tank_volume <= 58.0
+        tank_ua = 5.0 # Btu/hr-F
+      elsif water_heating_system.tank_volume <= 73.0
+        tank_ua = 5.6 # Btu/hr-F
+      else
+        tank_ua = 5.7 # Btu/hr-F
+      end
     end
+
     tank_ua = apply_tank_jacket(water_heating_system, tank_ua, side_a)
     tank_ua = apply_shared_adjustment(water_heating_system, tank_ua, nbeds) # shared losses
     tank_u = tank_ua / tank_a # Btu/hr-ft^2-F
@@ -1345,7 +1390,10 @@ module Waterheater
       )
 
       if not water_heating_system.hpwh_operating_mode.nil?
-        runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterHPWHOperatingMode].name}' schedule file and operating mode provided; the latter will be ignored.")
+        runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterHPWHOperatingMode].name}' schedule file and HPWH operating mode provided; the latter will be ignored.")
+      end
+      if water_heating_system.hpwh_voltage != HPXML::HPWHVoltage240
+        fail "'#{SchedulesFile::Columns[:WaterHeaterHPWHOperatingMode].name}' schedule file is not allowed for 120V HPWH systems."
       end
     end
 
@@ -1358,8 +1406,9 @@ module Waterheater
       name: "#{obj_name} Control"
     )
     hpwh_ctrl_program.addLine("Set #{hpwhschedoverride_actuator.name} = #{t_set_sensor.name}")
-    # If in HP only mode: still enable elements if ambient temperature is out of bounds, otherwise disable elements
     if water_heating_system.hpwh_operating_mode == HPXML::WaterHeaterHPWHOperatingModeHeatPumpOnly
+      # If in HP only mode: still enable elements if ambient temperature is out of bounds, otherwise disable elements
+      # Also operate elements the same way if 120V HPWH and backup elements are installed
       hpwh_ctrl_program.addLine("If (#{amb_temp_sensor.name}<#{min_temp_c}) || (#{amb_temp_sensor.name}>#{max_temp_c})")
       hpwh_ctrl_program.addLine("  Set #{leschedoverride_actuator.name} = #{t_set_sensor.name}")
       hpwh_ctrl_program.addLine("  Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name}")
