@@ -2404,6 +2404,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.water_heating_systems[0].usage_bin = nil
     elsif ['base-dhw-tank-heat-pump-120v.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].hpwh_voltage = HPXML::HPWHVoltage120
+    elsif ['base-dhw-tank-heat-pump-120v-backup-capacity.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].hpwh_voltage = HPXML::HPWHVoltage120
+      hpxml_bldg.water_heating_systems[0].backup_heating_capacity = 3071.0
     elsif ['base-dhw-tank-heat-pump-120v-dedicated-circuit.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].hpwh_voltage = HPXML::HPWHVoltage120Dedicated
     elsif ['base-dhw-setpoint-temperature-mixing-valve.xml'].include? hpxml_file

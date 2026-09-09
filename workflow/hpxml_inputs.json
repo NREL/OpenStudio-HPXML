@@ -977,6 +977,9 @@
   "sample_files/base-dhw-tank-heat-pump-120v.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml"
   },
+    "sample_files/base-dhw-tank-heat-pump-120v-backup-capacity.xml": {
+    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-outside.xml"
+  },
   "sample_files/base-dhw-tank-heat-pump-120v-dedicated-circuit.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml"
   },
