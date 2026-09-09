@@ -1246,9 +1246,9 @@ module Defaults
         roof.orientation = get_orientation_from_azimuth(roof.azimuth)
         roof.orientation_isdefaulted = true
       end
-      if roof.roof_type.nil?
-        roof.roof_type = HPXML::RoofTypeAsphaltShingles
-        roof.roof_type_isdefaulted = true
+      if roof.roof_material.nil?
+        roof.roof_material = HPXML::RoofMaterialAsphaltShingles
+        roof.roof_material_isdefaulted = true
       end
       if roof.emittance.nil?
         roof.emittance = 0.90
@@ -6347,7 +6347,7 @@ module Defaults
     map = Constructions.get_roof_color_and_solar_absorptance_map
     color_map = {}
     map.each do |key, value|
-      next unless key[1] == roof.roof_type
+      next unless key[1] == roof.roof_material
 
       color_map[key[0]] = value
     end
@@ -6361,7 +6361,7 @@ module Defaults
   # @return [Double] Roof solar absorptance (frac)
   def self.get_roof_solar_absorptance(roof)
     map = Constructions.get_roof_color_and_solar_absorptance_map
-    return map[[roof.roof_color, roof.roof_type]]
+    return map[[roof.roof_color, roof.roof_material]]
   end
 
   # Gets the default color for a wall.

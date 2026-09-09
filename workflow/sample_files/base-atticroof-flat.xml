@@ -99,7 +99,10 @@
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <Area>1350.0</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
+            <RoofMaterial>asphalt or fiberglass shingles</RoofMaterial>
             <RoofColor>light</RoofColor>
             <Pitch>0.0</Pitch>
             <Insulation>

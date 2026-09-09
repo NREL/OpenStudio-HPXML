@@ -18,9 +18,9 @@ module Constructions
     interior_film = Material.AirFilmIndoorRoof(UnitConversions.convert(surfaces[0].tilt, 'rad', 'deg'), hpxml_header.apply_ashrae140_assumptions)
     exterior_film = Material.AirFilmOutside(false, hpxml_header.apply_ashrae140_assumptions)
     if hpxml_header.apply_ashrae140_assumptions
-      mat_ext_finish = Material.RoofMaterialAndSheathing(roof.roof_type, 0.5) # Combined roof material + OSB sheathing
+      mat_ext_finish = Material.RoofMaterialAndSheathing(roof.roof_material, 0.5) # Combined roof material + OSB sheathing
     else
-      mat_ext_finish = Material.RoofMaterialAndSheathing(roof.roof_type) # Combined roof material + OSB sheathing
+      mat_ext_finish = Material.RoofMaterialAndSheathing(roof.roof_material) # Combined roof material + OSB sheathing
     end
     mat_int_finish = Material.InteriorFinishMaterial(roof.interior_finish_type, roof.interior_finish_thickness)
     if mat_int_finish.nil?
@@ -1965,10 +1965,10 @@ module Constructions
     map = {}
 
     # Asphalt/wood shingles
-    [HPXML::RoofTypeAsphaltShingles,
-     HPXML::RoofTypeWoodShingles,
-     HPXML::RoofTypeShingles,
-     HPXML::RoofTypeEPS].each do |roof_type|
+    [HPXML::RoofMaterialAsphaltShingles,
+     HPXML::RoofMaterialWoodShingles,
+     HPXML::RoofMaterialShingles,
+     HPXML::RoofMaterialEPS].each do |roof_type|
       map[[HPXML::ColorDark, roof_type]] = 0.92 # ASHRAE HOF
       map[[HPXML::ColorMediumDark, roof_type]] = 0.89 # Average of dark & medium
       map[[HPXML::ColorMedium, roof_type]] = 0.85 # ASHRAE HOF
@@ -1979,8 +1979,8 @@ module Constructions
     end
 
     # Concrete/clay tile
-    [HPXML::RoofTypeClayTile,
-     HPXML::RoofTypeConcrete].each do |roof_type|
+    [HPXML::RoofMaterialClayTile,
+     HPXML::RoofMaterialConcrete].each do |roof_type|
       map[[HPXML::ColorDark, roof_type]] = 0.85 # CRRC for black Tile products
       map[[HPXML::ColorMediumDark, roof_type]] = 0.80 # ASHRAE HOF dark & medium
       map[[HPXML::ColorMedium, roof_type]] = 0.75 # CRRC for Tile products, FSEC
@@ -1991,7 +1991,7 @@ module Constructions
     end
 
     # Metal roofing
-    [HPXML::RoofTypeMetal].each do |roof_type|
+    [HPXML::RoofMaterialMetal].each do |roof_type|
       map[[HPXML::ColorDark, roof_type]] = 0.90 # ASHRAE HOF
       map[[HPXML::ColorMediumDark, roof_type]] = 0.80 # Average above/below
       map[[HPXML::ColorMedium, roof_type]] = 0.70 # ASHRAE HOF
@@ -2002,7 +2002,7 @@ module Constructions
     end
 
     # Plastic/rubber
-    [HPXML::RoofTypePlasticRubber].each do |roof_type|
+    [HPXML::RoofMaterialPlasticRubber].each do |roof_type|
       map[[HPXML::ColorDark, roof_type]] = 0.90 # CRRC for black Single-Ply products
       map[[HPXML::ColorMediumDark, roof_type]] = 0.78 # Average of dark & medium
       map[[HPXML::ColorMedium, roof_type]] = 0.65 # Average of dark & light
@@ -2607,7 +2607,7 @@ module Constructions
     osb_thick_in = (is_ceiling ? 0.0 : 0.75)
 
     case floor_type
-    when HPXML::FloorTypeWoodFrame
+    when HPXML::FloorRoofTypeWoodFrame
       install_grade = 1
       constr_sets = [
         WoodStudConstructionSet.new(Material.Stud2x(6), 0.10, 50.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R50
@@ -2627,7 +2627,7 @@ module Constructions
                                      constr_set.osb_thick_in, constr_set.rigid_r, constr_int_finish_or_covering,
                                      has_radiant_barrier, interior_film, exterior_film, radiant_barrier_grade)
 
-    when HPXML::FloorTypeSteelFrame
+    when HPXML::FloorRoofTypeSteelFrame
       install_grade = 1
       corr_factor = 0.45
       osb_thick_in = (is_ceiling ? 0.0 : 0.75)
@@ -2648,7 +2648,7 @@ module Constructions
                                       constr_set.rigid_r, constr_int_finish_or_covering, has_radiant_barrier, interior_film,
                                       exterior_film, radiant_barrier_grade)
 
-    when HPXML::FloorTypeSIP
+    when HPXML::FloorRoofTypeSIP
       constr_sets = [
         SIPConstructionSet.new(16.0, 0.08, 0.0, 0.0, osb_thick_in, mat_int_finish_or_covering, nil), # 16" SIP core
         SIPConstructionSet.new(12.0, 0.08, 0.0, 0.0, osb_thick_in, mat_int_finish_or_covering, nil), # 12" SIP core
@@ -2662,7 +2662,7 @@ module Constructions
                               constr_set.osb_thick_in, constr_set.rigid_r, constr_set.mat_ext_finish,
                               has_radiant_barrier, interior_film, exterior_film, radiant_barrier_grade)
 
-    when HPXML::FloorTypeConcrete
+    when HPXML::FloorRoofTypeConcrete
       constr_sets = [
         GenericConstructionSet.new(20.0, osb_thick_in, mat_int_finish_or_covering, nil), # w/R-20 rigid
         GenericConstructionSet.new(10.0, osb_thick_in, mat_int_finish_or_covering, nil), # w/R-10 rigid
@@ -2719,7 +2719,7 @@ module Constructions
     elsif type == 'roof'
       apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
                              0, 1, 7.25, 0.07, 7.25, 0.0, 99,
-                             Material.RoofMaterialAndSheathing(HPXML::RoofTypeAsphaltShingles),
+                             Material.RoofMaterialAndSheathing(HPXML::RoofMaterialAsphaltShingles),
                              false, Material.AirFilmOutside,
                              Material.AirFilmIndoorRoof(UnitConversions.convert(surfaces[0].tilt, 'rad', 'deg')), nil)
     end

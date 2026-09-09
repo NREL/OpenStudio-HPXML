@@ -118,7 +118,10 @@
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <Area>1006.0</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
+            <RoofMaterial>asphalt or fiberglass shingles</RoofMaterial>
             <RoofColor>light</RoofColor>
             <Pitch>6.0</Pitch>
             <Insulation>
@@ -130,7 +133,10 @@
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <Area>504.0</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
+            <RoofMaterial>asphalt or fiberglass shingles</RoofMaterial>
             <RoofColor>light</RoofColor>
             <Pitch>6.0</Pitch>
             <Insulation>

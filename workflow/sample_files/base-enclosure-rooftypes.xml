@@ -84,9 +84,6 @@
             <AttachedToRoof idref='Roof2'/>
             <AttachedToRoof idref='Roof3'/>
             <AttachedToRoof idref='Roof4'/>
-            <AttachedToRoof idref='Roof5'/>
-            <AttachedToRoof idref='Roof6'/>
-            <AttachedToRoof idref='Roof7'/>
             <AttachedToWall idref='Wall2'/>
             <AttachedToFloor idref='Floor1'/>
           </Attic>
@@ -108,120 +105,53 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>215.6142857142857</Area>
-            <RoofType>slate or tile shingles</RoofType>
-            <RoofColor>light</RoofColor>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
+            <Area>377.3</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Roof1Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>26.1</AssemblyEffectiveRValue>
             </Insulation>
           </Roof>
           <Roof>
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>215.6142857142857</Area>
-            <RoofType>metal surfacing</RoofType>
-            <RoofColor>reflective</RoofColor>
-            <InteriorFinish>
-              <Type>plaster</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
+            <Area>377.3</Area>
+            <RoofType>
+              <StructuralInsulatedPanel/>
+            </RoofType>
             <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Roof2Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>16.1</AssemblyEffectiveRValue>
             </Insulation>
           </Roof>
           <Roof>
             <SystemIdentifier id='Roof3'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>215.6142857142857</Area>
-            <RoofType>wood shingles or shakes</RoofType>
-            <RoofColor>dark</RoofColor>
-            <InteriorFinish>
-              <Type>wood</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
+            <Area>377.3</Area>
+            <RoofType>
+              <SolidConcrete/>
+            </RoofType>
             <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Roof3Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>3.2</AssemblyEffectiveRValue>
             </Insulation>
           </Roof>
           <Roof>
             <SystemIdentifier id='Roof4'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>215.6142857142857</Area>
-            <RoofType>shingles</RoofType>
-            <RoofColor>medium dark</RoofColor>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
+            <Area>377.3</Area>
+            <RoofType>
+              <SteelFrame/>
+            </RoofType>
             <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Roof4Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='Roof5'/>
-            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>215.6142857142857</Area>
-            <RoofType>plastic/rubber/synthetic sheeting</RoofType>
-            <RoofColor>medium light</RoofColor>
-            <InteriorFinish>
-              <Type>plaster</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
-            <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='Roof5Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='Roof6'/>
-            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>215.6142857142857</Area>
-            <RoofType>expanded polystyrene sheathing</RoofType>
-            <RoofColor>medium</RoofColor>
-            <InteriorFinish>
-              <Type>wood</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
-            <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='Roof6Insulation'/>
-              <AssemblyEffectiveRValue>7.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='Roof7'/>
-            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>215.6142857142857</Area>
-            <RoofType>concrete</RoofType>
-            <RoofColor>white</RoofColor>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-              <Thickness>0.5</Thickness>
-            </InteriorFinish>
-            <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='Roof7Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>8.1</AssemblyEffectiveRValue>
             </Insulation>
           </Roof>
         </Roofs>

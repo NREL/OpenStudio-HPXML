@@ -1179,6 +1179,9 @@
     "parent_hpxml": "sample_files/base.xml",
     "enclosure_overhangs": "Detailed Example: 1.5ft, Back/Left/Right Windows, 2ft Offset, 4ft Window Height"
   },
+  "sample_files/base-enclosure-roofmaterials.xml": {
+    "parent_hpxml": "sample_files/base.xml"
+  },
   "sample_files/base-enclosure-rooftypes.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
