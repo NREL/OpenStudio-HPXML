@@ -3305,13 +3305,13 @@ module Defaults
         water_heating_system.temperature_isdefaulted = true
       end
 
-      if not water_heating_system.temperature.nil?
-        min_setpoint = water_heating_system.temperature
-        max_setpoint = water_heating_system.temperature
-      elsif schedules_file_includes_water_heater_setpoint_temp
+      if schedules_file_includes_water_heater_setpoint_temp
         sf = schedules_file.schedules[SchedulesFile::Columns[:WaterHeaterSetpoint].name]
         min_setpoint = sf.min
         max_setpoint = sf.max
+      elsif not water_heating_system.temperature.nil?
+        min_setpoint = water_heating_system.temperature
+        max_setpoint = water_heating_system.temperature
       end
 
       if water_heating_system.performance_adjustment.nil?
@@ -3434,15 +3434,14 @@ module Defaults
         water_heating_system.mixing_valve_setpoint_isdefaulted = true
       end
 
+      # Additional error-checking that cannot be performed in schematron.
       if schedules_file_includes_water_heater_setpoint_temp
-        # Detailed schedule file error-checking that cannot be performed in the schematron.
-        # This matches schematron logic for simple (constant) water heater setpoints.
         if min_setpoint < 105
           runner.registerError("Expected minimum value for detailed water heater setpoint schedule (#{min_setpoint} deg-F) to be greater than or equal to 105 deg-F.")
         end
-        if water_heating_system.has_mixing_valve && water_heating_system.mixing_valve_setpoint > min_setpoint
-          runner.registerError("Expected MixingValveSetpoint (#{water_heating_system.mixing_valve_setpoint} deg-F) to be less than or equal to minimum value for detailed water heater setpoint schedule (#{min_setpoint} deg-F).")
-        end
+      end
+      if water_heating_system.has_mixing_valve && water_heating_system.mixing_valve_setpoint > min_setpoint
+        runner.registerError("Expected MixingValveSetpoint (#{water_heating_system.mixing_valve_setpoint} deg-F) to be less than or equal to minimum value for detailed water heater setpoint schedule (#{min_setpoint} deg-F).")
       end
 
       next unless water_heating_system.location.nil?

@@ -2148,14 +2148,14 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[WaterHeatingSystemType=HPWHon240v]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="heat pump water heater" and h:HPWHVoltage="240V"]'>
+    <sch:title>[WaterHeatingSystemType=240vHPWH]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="heat pump water heater" and (h:HPWHVoltage="240V" or not(h:HPWHVoltage))]'>
       <sch:assert role='ERROR' test='h:HPWHOperatingMode[text()="hybrid/auto" or text()="heat pump only"] or not(h:HPWHOperatingMode)'>Expected HPWHOperatingMode to be 'hybrid/auto' or 'heat pump only'</sch:assert>
     </sch:rule>
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[WaterHeatingSystemType=HPWHon120vDedicatedCircuit]</sch:title>
+    <sch:title>[WaterHeatingSystemType=120vHPWHonDedicatedCircuit]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="heat pump water heater" and h:HPWHVoltage="120V dedicated circuit"]'>
       <sch:assert role='ERROR' test='h:HPWHOperatingMode[text()="heat pump only"] or not(h:HPWHOperatingMode)'>Expected HPWHOperatingMode to be 'heat pump only'</sch:assert>
       <!-- Warnings -->
@@ -2164,7 +2164,7 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[WaterHeatingSystemType=HPWHon120vSharedCircuit]</sch:title>
+    <sch:title>[WaterHeatingSystemType=120vHPWHonSharedCircuit]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="heat pump water heater" and (h:HPWHVoltage="120V shared circuit" or h:HPWHVoltage="120V")]'>
       <sch:assert role='ERROR' test='h:HPWHOperatingMode[text()="heat pump only"] or not(h:HPWHOperatingMode)'>Expected HPWHOperatingMode to be 'heat pump only'</sch:assert>
       <!-- Warnings -->
