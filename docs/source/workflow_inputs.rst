@@ -722,7 +722,7 @@ The column names available in the schedule CSV files are:
   ``cooling_setpoint``              F        Thermostat cooling setpoint schedule.                                                          No
   ``hvac_maximum_power_ratio``      frac     Variable speed system maximum power ratio schedule. [#]_                                       No
   ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                                No
-  ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.               No
+  ``water_heater_operating_mode``   0/1      240V heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.          No
   ``battery``                       -1 to 1  Battery availability schedule. Positive for charging, negative for discharging.                No
   ``electric_vehicle``              -1 to 1  Electric vehicle schedule. Positive for charging, negative for discharging. [#]_               Yes
   ================================  =======  =============================================================================================  ===============================
@@ -4212,7 +4212,7 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
 Heat Pump
 ~~~~~~~~~
 
-Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
+Each heat pump water heater (HPWH) is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
   ===================================================  ================  =============  ==============================  ========  ==============  =============================================
   Element                                              Type              Units          Constraints                     Required  Default         Notes
@@ -4227,7 +4227,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``HeatingCapacity``                                  double            Btu/hr         > 0                             No        See [#]_        Heating input capacity
   ``BackupHeatingCapacity``                            double            Btu/hr         >= 0                            No        See [#]_        Heating capacity of the electric resistance backup
   ``UniformEnergyFactor`` or ``EnergyFactor``          double            frac           >= 1.45, <= 5                   Yes                       EnergyGuide label rated efficiency
-  ``HPWHOperatingMode``                                string                           See [#]_                        No        hybrid/auto     HPWH operating mode [#]_
+  ``HPWHOperatingMode``                                string                           See [#]_                        No        See [#]_        HPWH operating mode [#]_
   ``HPWHVoltage``                                      string                           See [#]_                        No        240V            HPWH voltage
   ``HPWHDucting/ExhaustAirTermination``                string                           See [#]_                        No        <none>          The location where HPWH exhaust air is ducted to
   ``UsageBin`` or ``FirstHourRating``                  string or double  str or gal/hr  See [#]_ or > 0                 No        See [#]_        EnergyGuide label usage bin/first hour rating
@@ -4260,8 +4260,12 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] If HeatingCapacity not provided, defaults to 1706 Btu/hr (0.5 kW) for 240V HPWHs and 1443 Btu/hr (0.423 kW) for 120V HPWHs.
   .. [#] If BackupHeatingCapacity not provided, defaults to 15355 Btu/hr (4.5 kW) for 240V HPWHs and 0 (no backup elements) for 120V HPWHs.
-  .. [#] HPWHOperatingMode choices are "hybrid/auto" or "heat pump only".
-  .. [#] The heat pump water heater operating mode can alternatively be defined using :ref:`schedules_detailed`.
+  .. [#] HPWHOperatingMode choices are "hybrid/auto" or "heat pump only"; "hybrid/auto" is not allowed for 120V HPWHs.
+  .. [#] If HPWHOperatingMode not provided, defaults to "hybrid/auto" for 240V HPWHs, otherwise "heat pump only".
+  .. [#] When "hybrid/auto" is used, the HPWH will prioritize using the heat pump and will resort to electric resistance backup if heat pump capacity is not sufficient to meet demand.
+         When "heat pump only", the HPWH will not run the electric resistance to meet demand.
+         In both cases, electric resistance may also operate if the ambient temperature is outside the minimum/maximum compressor operating temperatures.
+         Note that the operating mode for 240V systems can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] HPWHVoltage choices are "240V", "120V", "120V dedicated circuit", or "120V shared circuit".
   .. [#] OpenStudio-HPXML currently only supports ExhaustAirTermination="outside" for heat pump water heaters located in conditioned space.
          Any other combination of ExhaustAirTermination value and water heater location will be ignored w/ a warning.

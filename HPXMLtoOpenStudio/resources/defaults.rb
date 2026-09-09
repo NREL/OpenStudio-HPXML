@@ -3401,7 +3401,11 @@ module Defaults
 
         schedules_file_includes_water_heater_operating_mode = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:WaterHeaterHPWHOperatingMode].name))
         if water_heating_system.hpwh_operating_mode.nil? && !schedules_file_includes_water_heater_operating_mode
-          water_heating_system.hpwh_operating_mode = HPXML::WaterHeaterHPWHOperatingModeHybridAuto
+          if water_heating_system.hpwh_voltage == HPXML::HPWHVoltage240
+            water_heating_system.hpwh_operating_mode = HPXML::WaterHeaterHPWHOperatingModeHybridAuto
+          else
+            water_heating_system.hpwh_operating_mode = HPXML::WaterHeaterHPWHOperatingModeHeatPumpOnly
+          end
           water_heating_system.hpwh_operating_mode_isdefaulted = true
         end
 

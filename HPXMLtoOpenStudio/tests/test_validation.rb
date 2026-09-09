@@ -75,6 +75,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'dehumidifier-fraction-served' => ['Expected sum(FractionDehumidificationLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
                             'dhw-frac-load-served' => ['Expected sum(FractionDHWLoadServed) to be 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
                             'dhw-hpwh-voltage' => ["Expected HPWHVoltage to be '240V' or '120V' or '120V dedicated circuit' or '120V shared circuit'"],
+                            'dhw-hpwh-operating-mode-120v' => ["Expected HPWHOperatingMode to be 'heat pump only'"],
                             'dhw-invalid-ef-tank' => ['Expected EnergyFactor to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"], id: "WaterHeatingSystem1"]'],
                             'dhw-invalid-uef-tank-heat-pump' => ['Expected UniformEnergyFactor to be greater than or equal to 1.45 [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="heat pump water heater"], id: "WaterHeatingSystem1"]'],
                             'dhw-mixing-valve-consistency' => ['Expected no MixingValveSetpoint when HasMixingValve=false'],
@@ -329,6 +330,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'dhw-hpwh-voltage'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml')
         hpxml_bldg.water_heating_systems[0].hpwh_voltage = 'other'
+      when 'dhw-hpwh-operating-mode-120v'
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-120v.xml')
+        hpxml_bldg.water_heating_systems[0].hpwh_operating_mode = HPXML::WaterHeaterHPWHOperatingModeHybridAuto
       when 'dhw-invalid-ef-tank'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-gas-ef.xml')
         hpxml_bldg.water_heating_systems[0].energy_factor = 1.0
@@ -1407,6 +1411,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'schedule-detailed-bad-values-non-numeric' => ["Schedule value must be numeric for column 'lighting_interior'."],
                             'schedule-detailed-bad-values-mode-negative' => ["Schedule value for column 'water_heater_operating_mode' must be either 0 or 1."],
                             'schedule-detailed-duplicate-columns' => ["Schedule column name 'occupants' is duplicated."],
+                            'schedule-detailed-operating-mode-and-120v' => ["'water_heater_operating_mode' schedule file is not allowed for 120V HPWH systems."],
                             'schedule-detailed-wrong-filename' => ["Schedules file path 'invalid-wrong-filename.csv' does not exist."],
                             'schedule-detailed-wrong-rows' => ["Schedule has invalid number of rows (8759) for column 'occupants'. Must be one of: 8760, 17520, 26280, 35040, 43800, 52560, 87600, 105120, 131400, 175200, 262800, 525600."],
                             'skylight-not-connected-to-cond-space' => ["Skylight 'Skylight1' not connected to conditioned space; if it's a skylight with a shaft, use AttachedToFloor to connect it to conditioned space."],
@@ -1862,6 +1867,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.header.schedules_filepaths = []
         hpxml_bldg.header.schedules_filepaths << @tmp_csv_path
         hpxml_bldg.header.schedules_filepaths << @tmp_csv_path
+      when 'schedule-detailed-operating-mode-and-120v'
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-120v.xml')
+        hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/water-heater-operating-modes.csv')
       when 'schedule-detailed-wrong-filename'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.header.schedules_filepaths << 'invalid-wrong-filename.csv'
@@ -2149,7 +2157,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'schedule-file-and-setpoints' => ["Both 'heating_setpoint' schedule file and heating setpoint temperature provided; the latter will be ignored.",
                                                                 "Both 'cooling_setpoint' schedule file and cooling setpoint temperature provided; the latter will be ignored.",
                                                                 "Both 'water_heater_setpoint' schedule file and setpoint temperature provided; the latter will be ignored."],
-                              'schedule-file-and-operating-mode' => ["Both 'water_heater_operating_mode' schedule file and operating mode provided; the latter will be ignored."],
+                              'schedule-file-and-operating-mode' => ["Both 'water_heater_operating_mode' schedule file and HPWH operating mode provided; the latter will be ignored."],
                               'schedule-file-max-power-ratio-with-single-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
                               'schedule-file-max-power-ratio-with-two-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
                               'schedule-file-max-power-ratio-with-separate-backup-system' => ['Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.'],

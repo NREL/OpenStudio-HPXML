@@ -2139,7 +2139,6 @@
       <!-- Note: We need to allow modeling HPWHs w/ EF/UEF around 1.5 for ENERGY STAR and DOE Efficient New Home ERI targets -->
       <sch:assert role='ERROR' test='number(h:UniformEnergyFactor) &gt;= 1.45 or not(h:UniformEnergyFactor)'>Expected UniformEnergyFactor to be greater than or equal to 1.45</sch:assert>
       <sch:assert role='ERROR' test='number(h:EnergyFactor) &gt;= 1.45 or not(h:EnergyFactor)'>Expected EnergyFactor to be greater than or equal to 1.45</sch:assert>
-      <sch:assert role='ERROR' test='h:HPWHOperatingMode[text()="hybrid/auto" or text()="heat pump only"] or not(h:HPWHOperatingMode)'>Expected HPWHOperatingMode to be 'hybrid/auto' or 'heat pump only'</sch:assert>
       <sch:assert role='ERROR' test='h:HPWHVoltage[text()="240V" or text()="120V" or text()="120V dedicated circuit" or text()="120V shared circuit"] or not(h:HPWHVoltage)'>Expected HPWHVoltage to be '240V' or '120V' or '120V dedicated circuit' or '120V shared circuit'</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HPWHInConfinedSpaceWithoutMitigation) &lt;= 1'>Expected at most one extension/HPWHInConfinedSpaceWithoutMitigation</sch:assert>
       <sch:assert role='ERROR' test='h:extension/h:HPWHInConfinedSpaceWithoutMitigation[text()="true" or text()="false"] or not(h:extension/h:HPWHInConfinedSpaceWithoutMitigation)'>Expected extension/HPWHInConfinedSpaceWithoutMitigation to be 'true' or 'false'</sch:assert>
@@ -2149,8 +2148,16 @@
   </sch:pattern>
 
   <sch:pattern>
+    <sch:title>[WaterHeatingSystemType=HPWHon240v]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="heat pump water heater" and h:HPWHVoltage="240V"]'>
+      <sch:assert role='ERROR' test='h:HPWHOperatingMode[text()="hybrid/auto" or text()="heat pump only"] or not(h:HPWHOperatingMode)'>Expected HPWHOperatingMode to be 'hybrid/auto' or 'heat pump only'</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
     <sch:title>[WaterHeatingSystemType=HPWHon120vDedicatedCircuit]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="heat pump water heater" and h:HPWHVoltage="120V dedicated circuit"]'>
+      <sch:assert role='ERROR' test='h:HPWHOperatingMode[text()="heat pump only"] or not(h:HPWHOperatingMode)'>Expected HPWHOperatingMode to be 'heat pump only'</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:BackupHeatingCapacity) &gt; 6824'>BackupHeatingCapacity should typically be less than or equal to 6824 Btu/hr for an HPWH on a 120V dedicated circuit.</sch:report>
     </sch:rule>
@@ -2159,6 +2166,7 @@
   <sch:pattern>
     <sch:title>[WaterHeatingSystemType=HPWHon120vSharedCircuit]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="heat pump water heater" and (h:HPWHVoltage="120V shared circuit" or h:HPWHVoltage="120V")]'>
+      <sch:assert role='ERROR' test='h:HPWHOperatingMode[text()="heat pump only"] or not(h:HPWHOperatingMode)'>Expected HPWHOperatingMode to be 'heat pump only'</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:BackupHeatingCapacity) &gt; 3412'>BackupHeatingCapacity should typically be less than or equal to 3412 Btu/hr for an HPWH on a 120V shared circuit.</sch:report>
     </sch:rule>

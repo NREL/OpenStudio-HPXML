@@ -1390,7 +1390,10 @@ module Waterheater
       )
 
       if not water_heating_system.hpwh_operating_mode.nil?
-        runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterHPWHOperatingMode].name}' schedule file and operating mode provided; the latter will be ignored.")
+        runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterHPWHOperatingMode].name}' schedule file and HPWH operating mode provided; the latter will be ignored.")
+      end
+      if water_heating_system.hpwh_voltage != HPXML::HPWHVoltage240
+        fail "'#{SchedulesFile::Columns[:WaterHeaterHPWHOperatingMode].name}' schedule file is not allowed for 120V HPWH systems."
       end
     end
 
@@ -1403,9 +1406,9 @@ module Waterheater
       name: "#{obj_name} Control"
     )
     hpwh_ctrl_program.addLine("Set #{hpwhschedoverride_actuator.name} = #{t_set_sensor.name}")
-    # If in HP only mode: still enable elements if ambient temperature is out of bounds, otherwise disable elements
-    # Also operate elements the same way if 120V HPWH and backup elements are installed
-    if water_heating_system.hpwh_operating_mode == HPXML::WaterHeaterHPWHOperatingModeHeatPumpOnly or (water_heating_system.backup_heating_capacity > 0.0 and water_heating_system.hpwh_voltage != HPXML::HPWHVoltage240)
+    if water_heating_system.hpwh_operating_mode == HPXML::WaterHeaterHPWHOperatingModeHeatPumpOnly
+      # If in HP only mode: still enable elements if ambient temperature is out of bounds, otherwise disable elements
+      # Also operate elements the same way if 120V HPWH and backup elements are installed
       hpwh_ctrl_program.addLine("If (#{amb_temp_sensor.name}<#{min_temp_c}) || (#{amb_temp_sensor.name}>#{max_temp_c})")
       hpwh_ctrl_program.addLine("  Set #{leschedoverride_actuator.name} = #{t_set_sensor.name}")
       hpwh_ctrl_program.addLine("  Set #{ueschedoverride_actuator.name} = #{t_set_sensor.name}")
