@@ -2216,6 +2216,14 @@ module Airflow
     )
     infil_flow.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeInfiltration)
 
+    # Warmup workaround, see https://github.com/NatLabRockies/EnergyPlus/pull/11409
+    ['Qducts', 'Qexhaust', 'Qsupply'].each do |var|
+      Model.add_ems_global_var(
+        model,
+        var_name: var
+      )
+    end
+
     # Average in-unit CFMs (include recirculation from in unit CFMs for shared systems)
     sup_cfm_tot = vent_fans[:mech_supply].map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
     exh_cfm_tot = vent_fans[:mech_exhaust].map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)

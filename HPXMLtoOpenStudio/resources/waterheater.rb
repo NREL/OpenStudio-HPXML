@@ -829,8 +829,8 @@ module Waterheater
     storage_tank.setHeaterThermalEfficiency(1)
     storage_tank.ambientTemperatureSchedule.get.remove
     apply_ambient_temperature(loc_space, loc_schedule, storage_tank)
-    storage_tank.setSkinLossFractiontoZone(1.0 / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
-    storage_tank.setOffCycleFlueLossFractiontoZone(1.0 / unit_multiplier)
+    storage_tank.setSkinLossFractiontoZone(1.0)
+    storage_tank.setOffCycleFlueLossFractiontoZone(1.0)
     storage_tank.setUseSideEffectiveness(1)
     storage_tank.setUseSideInletHeight(0)
     storage_tank.setSourceSideOutletHeight(0)
@@ -1107,8 +1107,8 @@ module Waterheater
     tank.setSourceSideFlowControlMode('')
     tank.setSourceSideInletHeight(0)
     tank.setSourceSideOutletHeight(0)
-    tank.setSkinLossFractiontoZone(1.0 / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
-    tank.setOffCycleFlueLossFractiontoZone(1.0 / unit_multiplier)
+    tank.setSkinLossFractiontoZone(1.0)
+    tank.setOffCycleFlueLossFractiontoZone(1.0)
     apply_stratified_tank_losses(tank, tank_u, unit_multiplier)
     tank.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
 
@@ -1950,8 +1950,8 @@ module Waterheater
       water_heater.setSourceSideFlowControlMode('')
       water_heater.setSourceSideInletHeight((1.0 - (1 - 0.5) / 15) * h_tank) # in the 1st node of a 15-node tank (counting from top)
       water_heater.setSourceSideOutletHeight((1.0 - (15 - 0.5) / 15) * h_tank) # in the 15th node of a 15-node tank (counting from top)
-      water_heater.setSkinLossFractiontoZone(1.0 / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
-      water_heater.setOffCycleFlueLossFractiontoZone(1.0 / unit_multiplier)
+      water_heater.setSkinLossFractiontoZone(1.0)
+      water_heater.setOffCycleFlueLossFractiontoZone(1.0)
       apply_stratified_tank_losses(water_heater, tank_u, unit_multiplier)
     else
       water_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
@@ -1988,8 +1988,8 @@ module Waterheater
           skinlossfrac = 0.96 # Condensing
         end
       end
-      water_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
-      water_heater.setOnCycleLossFractiontoThermalZone(1.0 / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
+      water_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac)
+      water_heater.setOnCycleLossFractiontoThermalZone(1.0)
 
       water_heater.setOnCycleLossCoefficienttoAmbientTemperature(UnitConversions.convert(tank_ua, 'Btu/(hr*F)', 'W/K'))
       water_heater.setOffCycleLossCoefficienttoAmbientTemperature(UnitConversions.convert(tank_ua, 'Btu/(hr*F)', 'W/K'))

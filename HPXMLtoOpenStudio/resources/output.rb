@@ -782,6 +782,8 @@ module Outputs
         end
       end
 
+      unit_multiplier = hpxml_bldg.building_construction.number_of_units
+
       # EMS program: Internal Gains, Lighting, Infiltration, Natural Ventilation, Mechanical Ventilation, Ducts
       { 'intgains' => intgains_sensors,
         'lighting' => lightings_sensors,
@@ -812,7 +814,7 @@ module Outputs
       end
       intgains_dhw_sensors.each do |sensor, vals|
         off_loss, on_loss, rtf_sensor = vals
-        program.addLine("Set hr_intgains = hr_intgains + #{sensor.name} * (#{off_loss}*(1-#{rtf_sensor.name}) + #{on_loss}*#{rtf_sensor.name})") # Water heater tank losses to zone
+        program.addLine("Set hr_intgains = hr_intgains + (#{sensor.name} * (#{off_loss}*(1-#{rtf_sensor.name}) + #{on_loss}*#{rtf_sensor.name})) / #{unit_multiplier}") # Water heater tank losses to zone
       end
       if (not ducts_mix_loss_sensor.nil?) && (not ducts_mix_gain_sensor.nil?)
         program.addLine("Set hr_ducts = hr_ducts + (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
@@ -870,7 +872,6 @@ module Outputs
       program.addLine('  EndIf')
       program.addLine('EndIf')
 
-      unit_multiplier = hpxml_bldg.building_construction.number_of_units
       [:htg, :clg].each do |mode|
         if mode == :htg
           sign = ''
