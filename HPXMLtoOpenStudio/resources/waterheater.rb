@@ -1092,7 +1092,7 @@ module Waterheater
     tank.setEndUseSubcategory('Domestic Hot Water')
     tank.setTankVolume(UnitConversions.convert(v_actual, 'gal', 'm^3'))
     tank.setTankHeight(h_tank)
-    tank.setMaximumTemperatureLimit(90)
+    tank.setMaximumTemperatureLimit(99)
     tank.setHeaterPriorityControl('MasterSlave')
     tank.heater1SetpointTemperatureSchedule.remove
     tank.setHeater1SetpointTemperatureSchedule(hpwh_top_element_sp)
@@ -1950,7 +1950,7 @@ module Waterheater
       water_heater.setEndUseSubcategory('Domestic Hot Water')
       water_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
       water_heater.setTankHeight(h_tank)
-      water_heater.setMaximumTemperatureLimit(90)
+      water_heater.setMaximumTemperatureLimit(99)
       water_heater.setHeaterPriorityControl('MasterSlave')
       water_heater.setHeater1Capacity(UnitConversions.convert(cap, 'Btu/hr', 'W'))
       water_heater.setHeater1Height((1.0 - (4 - 0.5) / 15) * h_tank) # in the 4th node of a 15-node tank (counting from top); height of upper element based on TRNSYS assumptions for an ERWH
