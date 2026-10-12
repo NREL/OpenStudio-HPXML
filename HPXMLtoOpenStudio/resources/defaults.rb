@@ -76,7 +76,7 @@ module Defaults
     apply_infiltration(hpxml_bldg, unit_num)
     apply_hvac_location(hpxml_bldg)
     apply_ventilation_fans(hpxml_bldg, weather, eri_version)
-    apply_water_heaters(hpxml_bldg, eri_version, schedules_file)
+    apply_water_heaters(runner, hpxml_bldg, eri_version, schedules_file)
     apply_flue_or_chimney(hpxml_bldg)
     apply_hot_water_distribution(hpxml_bldg, schedules_file)
     apply_water_fixtures(hpxml_bldg, schedules_file)
@@ -3319,11 +3319,12 @@ module Defaults
 
   # Assigns default values for omitted optional inputs in the HPXML::WaterHeatingSystem objects
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_water_heaters(hpxml_bldg, eri_version, schedules_file)
+  def self.apply_water_heaters(runner, hpxml_bldg, eri_version, schedules_file)
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     nbaths = hpxml_bldg.building_construction.number_of_bathrooms
     n_occ = hpxml_bldg.building_occupancy.number_of_residents
@@ -3338,6 +3339,15 @@ module Defaults
       if water_heating_system.temperature.nil? && !schedules_file_includes_water_heater_setpoint_temp
         water_heating_system.temperature = get_water_heater_temperature(eri_version)
         water_heating_system.temperature_isdefaulted = true
+      end
+
+      if schedules_file_includes_water_heater_setpoint_temp
+        sf = schedules_file.schedules[SchedulesFile::Columns[:WaterHeaterSetpoint].name]
+        min_setpoint = sf.min
+        max_setpoint = sf.max
+      elsif not water_heating_system.temperature.nil?
+        min_setpoint = water_heating_system.temperature
+        max_setpoint = water_heating_system.temperature
       end
 
       if water_heating_system.performance_adjustment.nil?
@@ -3394,15 +3404,29 @@ module Defaults
         end
 
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
+
+        if water_heating_system.hpwh_voltage.nil?
+          water_heating_system.hpwh_voltage = HPXML::HPWHVoltage240
+          water_heating_system.hpwh_voltage_isdefaulted = true
+        end
+
         water_heating_system.additional_properties.cop = get_water_heater_heat_pump_cop(water_heating_system)
 
         if water_heating_system.heating_capacity.nil?
-          water_heating_system.heating_capacity = UnitConversions.convert(0.5, 'kW', 'Btu/hr').round
+          if water_heating_system.hpwh_voltage == HPXML::HPWHVoltage240
+            water_heating_system.heating_capacity = UnitConversions.convert(0.5, 'kW', 'Btu/hr').round
+          else
+            water_heating_system.heating_capacity = UnitConversions.convert(0.423, 'kW', 'Btu/hr').round
+          end
           water_heating_system.heating_capacity_isdefaulted = true
         end
 
         if water_heating_system.backup_heating_capacity.nil?
-          water_heating_system.backup_heating_capacity = UnitConversions.convert(4.5, 'kW', 'Btu/hr').round
+          if water_heating_system.hpwh_voltage == HPXML::HPWHVoltage240
+            water_heating_system.backup_heating_capacity = UnitConversions.convert(4.5, 'kW', 'Btu/hr').round
+          else
+            water_heating_system.backup_heating_capacity = 0.0 # No backup elements
+          end
           water_heating_system.backup_heating_capacity_isdefaulted = true
         end
 
@@ -3413,7 +3437,11 @@ module Defaults
 
         schedules_file_includes_water_heater_operating_mode = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:WaterHeaterHPWHOperatingMode].name))
         if water_heating_system.hpwh_operating_mode.nil? && !schedules_file_includes_water_heater_operating_mode
-          water_heating_system.hpwh_operating_mode = HPXML::WaterHeaterHPWHOperatingModeHybridAuto
+          if water_heating_system.hpwh_voltage == HPXML::HPWHVoltage240
+            water_heating_system.hpwh_operating_mode = HPXML::WaterHeaterHPWHOperatingModeHybridAuto
+          else
+            water_heating_system.hpwh_operating_mode = HPXML::WaterHeaterHPWHOperatingModeHeatPumpOnly
+          end
           water_heating_system.hpwh_operating_mode_isdefaulted = true
         end
 
@@ -3423,6 +3451,35 @@ module Defaults
         end
 
       end
+
+      if water_heating_system.has_mixing_valve.nil?
+        if not water_heating_system.mixing_valve_setpoint.nil?
+          water_heating_system.has_mixing_valve = true
+        elsif max_setpoint > 140
+          # Assuming 140F because most water heaters have that as the maximum setpoint, so anything above that
+          # would be a special case where the scalding risk goes up dramatically.
+          water_heating_system.has_mixing_valve = true
+        else
+          water_heating_system.has_mixing_valve = false
+        end
+        water_heating_system.has_mixing_valve_isdefaulted = true
+      end
+
+      if water_heating_system.has_mixing_valve && water_heating_system.mixing_valve_setpoint.nil?
+        water_heating_system.mixing_valve_setpoint = [125.0, min_setpoint].min
+        water_heating_system.mixing_valve_setpoint_isdefaulted = true
+      end
+
+      # Additional error-checking that cannot be performed in schematron.
+      if schedules_file_includes_water_heater_setpoint_temp
+        if min_setpoint < 105
+          runner.registerError("Expected minimum value for detailed water heater setpoint schedule (#{min_setpoint} deg-F) to be greater than or equal to 105 deg-F.")
+        end
+      end
+      if water_heating_system.has_mixing_valve && water_heating_system.mixing_valve_setpoint > min_setpoint
+        runner.registerError("Expected MixingValveSetpoint (#{water_heating_system.mixing_valve_setpoint} deg-F) to be less than or equal to minimum value for detailed water heater setpoint schedule (#{min_setpoint} deg-F).")
+      end
+
       next unless water_heating_system.location.nil?
 
       iecc_zone = hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty? ? nil : hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone
@@ -6304,23 +6361,55 @@ module Defaults
   # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
   # @return [Double] COP of the heat pump (W/W)
   def self.get_water_heater_heat_pump_cop(water_heating_system)
-    # Based on simulations of the UEF test procedure at varying COPs
     if not water_heating_system.energy_factor.nil?
-      uef = (0.60522 + water_heating_system.energy_factor) / 1.2101
-      cop = 1.174536058 * uef
-    elsif not water_heating_system.uniform_energy_factor.nil?
+      # Based on RESNET-EF-Calculator-2017.xlsx
+      uef = (0.6052 + water_heating_system.energy_factor) / 1.2101
+      usage_bin = HPXML::WaterHeaterUsageBinMedium
+    else
       uef = water_heating_system.uniform_energy_factor
-      case water_heating_system.usage_bin
-      when HPXML::WaterHeaterUsageBinVerySmall
-        fail 'It is unlikely that a heat pump water heater falls into the very small bin of the First Hour Rating (FHR) test. Double check input.'
+      usage_bin = water_heating_system.usage_bin
+    end
+
+    if usage_bin == HPXML::WaterHeaterUsageBinVerySmall
+      fail 'It is unlikely that a heat pump water heater falls into the very small bin of the First Hour Rating (FHR) test. Double check input.'
+    end
+
+    # Based on simulations of the UEF test procedure at varying COPs.
+    # Simulations can be downloaded from:
+    # - https://github.com/user-attachments/files/31976520/main.zip
+    # - https://github.com/user-attachments/files/31976523/240v.zip
+    # - https://github.com/user-attachments/files/31976537/120v_dedicated.zip
+    # - https://github.com/user-attachments/files/31976539/120v_shared.zip
+    # Unzip everything into the same top directory.
+    if water_heating_system.hpwh_voltage == HPXML::HPWHVoltage240
+      case usage_bin
       when HPXML::WaterHeaterUsageBinLow
-        cop = 1.0005 * uef - 0.0789
+        cop = 0.9995 * uef + 0.0789
       when HPXML::WaterHeaterUsageBinMedium
-        cop = 1.0909 * uef - 0.0868
+        cop = 0.9166 * uef + 0.0796
       when HPXML::WaterHeaterUsageBinHigh
-        cop = 1.1022 * uef - 0.0877
+        cop = 0.9073 * uef + 0.0796
+      end
+    elsif water_heating_system.hpwh_voltage == HPXML::HPWHVoltage120Dedicated
+      case usage_bin
+      when HPXML::WaterHeaterUsageBinLow
+        cop = 1.0003 * uef + 0.1102
+      when HPXML::WaterHeaterUsageBinMedium
+        cop = 0.9217 * uef + 0.1121
+      when HPXML::WaterHeaterUsageBinHigh
+        cop = 0.8764 * uef + 0.1151
+      end
+    else # 120V shared
+      case usage_bin
+      when HPXML::WaterHeaterUsageBinLow
+        cop = 1.0938 * uef + 0.08349
+      when HPXML::WaterHeaterUsageBinMedium
+        cop = 0.9950 * uef + 0.0841
+      when HPXML::WaterHeaterUsageBinHigh
+        cop = 0.9489 * uef + 0.0846
       end
     end
+
     return cop
   end
 
@@ -6848,8 +6937,17 @@ module Defaults
         end
       elsif component.is_a?(HPXML::PVSystem)
         voltages << HPXML::ElectricPanelVoltage240
-      elsif component.is_a?(HPXML::WaterHeatingSystem) ||
-            component.is_a?(HPXML::ClothesDryer) ||
+      elsif component.is_a?(HPXML::WaterHeatingSystem)
+        if component.fuel_type == HPXML::FuelTypeElectricity
+          if component.hpwh_voltage.nil? # Not HPWH
+            voltages << HPXML::ElectricPanelVoltage240
+          elsif component.hpwh_voltage == HPXML::HPWHVoltage240
+            voltages << HPXML::ElectricPanelVoltage240
+          else # 120V HPWH
+            voltages << HPXML::ElectricPanelVoltage120
+          end
+        end
+      elsif component.is_a?(HPXML::ClothesDryer) ||
             component.is_a?(HPXML::CookingRange)
         if component.fuel_type == HPXML::FuelTypeElectricity
           voltages << HPXML::ElectricPanelVoltage240
