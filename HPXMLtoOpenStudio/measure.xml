@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxml_to_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c951c292-3e62-4b28-8770-5f0881b20efa</version_id>
-  <version_modified>2026-10-05T19:28:52Z</version_modified>
+  <version_id>65ec6768-f270-48f5-ab29-fd0995ea8e5d</version_id>
+  <version_modified>2026-10-12T18:28:38Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLToOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -715,7 +715,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B5EE0F55</checksum>
+      <checksum>FD8F02AD</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
