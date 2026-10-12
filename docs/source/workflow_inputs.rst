@@ -3672,16 +3672,20 @@ Hydronic Distribution
 
 Each hydronic distribution system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
 
-  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
-  Element                                                                                     Type     Units    Constraints  Required  Default    Notes
-  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
-  ``SystemIdentifier``                                                                        id                             Yes                  Unique identifier
-  ``DistributionSystemType/HydronicDistribution``                                             element                        Yes                  Type of distribution system
-  ``DistributionSystemType/HydronicDistribution/HydronicDistributionType``                    string            See [#]_     Yes                  Type of hydronic distribution system
-  ``DistributionSystemType/HydronicDistribution/extension/ManualJInputs/HotWaterPipingBtuh``  double   Btu/hr   >= 0         No        0          Piping load for ACCA Manual J design loads [#]_
-  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
+  ==========================================================================================  =======  =======  ==========================  ========  =========  ====================================
+  Element                                                                                     Type     Units    Constraints                 Required  Default    Notes
+  ==========================================================================================  =======  =======  ==========================  ========  =========  ====================================
+  ``SystemIdentifier``                                                                        id                                            Yes                  Unique identifier
+  ``DistributionSystemType/HydronicDistribution``                                             element                                       Yes                  Type of distribution system
+  ``DistributionSystemType/HydronicDistribution/HydronicDistributionType``                    string            See [#]_                    Yes                  Type of hydronic distribution system
+  ``DistributionSystemType/HydronicDistribution/SupplyTemperature``                           double   F        >= 90, <= 200               No        See [#]_   Supply water temperature
+  ``DistributionSystemType/HydronicDistribution/ReturnTemperature``                           double   F        >= 40, < SupplyTemperature  No        See [#]_   Return water temperature
+  ``DistributionSystemType/HydronicDistribution/extension/ManualJInputs/HotWaterPipingBtuh``  double   Btu/hr   >= 0                        No        0          Piping load for ACCA Manual J design loads [#]_
+  ==========================================================================================  =======  =======  ==========================  ========  =========  ====================================
 
   .. [#] HydronicDistributionType choices are "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop".
+  .. [#] If SupplyTemperature not provided, defaults to 180F if ReturnTemperature not provided, otherwise ReturnTemperature + 20F.
+  .. [#] If ReturnTemperature not provided, defaults to SupplyTemperature - 20F.
   .. [#] HotWaterPipingBtuh should only be provided when hydronic distribution pipes run through unconditioned spaces.
          When provided, it can be calculated according to Manual J Section 26.
 

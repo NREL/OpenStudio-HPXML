@@ -1714,9 +1714,11 @@ module Outputs
           return { [FT::Elec, EUT::HotWater] => ['Fan Electricity Energy'] }
         end
 
-      elsif object.to_PumpConstantSpeed.is_initialized
+      elsif object.to_PumpConstantSpeed.is_initialized || object.to_PumpVariableSpeed.is_initialized
         if object_type == Constants::ObjectTypeSolarHotWater
           return { [FT::Elec, EUT::HotWaterSolarThermalPump] => ['Pump Electricity Energy'] }
+        elsif object_type == Constants::ObjectTypeFanPumpDisaggregatePrimaryHeat
+          return { [FT::Elec, EUT::HeatingFanPump] => ['Pump Electricity Energy'] }
         end
 
       elsif object.to_WaterHeaterMixed.is_initialized

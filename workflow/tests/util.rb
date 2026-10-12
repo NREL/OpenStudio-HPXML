@@ -15,6 +15,7 @@ def run_simulation_tests(xmls)
 
     next unless xml.include?('sample_files') || xml.include?('real_homes') # Exclude e.g. ASHRAE 140 files
     next if xml.include? 'base-bldgtype-mf-whole-building' # Already has multiple dwelling units
+    next if xml.include? 'base-bldgtype-mf-unit-shared' # FUTURE: Allow someday, but need to use @sameas attribute and size the shared HVAC equipment
     next if xml.include? 'base-misc-multiple-buildings.xml' # Already has multiple building elements
 
     # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x

@@ -477,21 +477,32 @@ module Model
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param name [String] Name for the OpenStudio object
   # @param rated_power [Double] Design power consumption (W)
+  # @param rated_flow_rate [Double] Design flow rate (m^3/s)
+  # @param rated_pump_head [Double] Design pump head (Pa)
+  # @param motor_efficiency [Double] Motor efficiency (frac)
   # @param control_type [String] Pump control type (EPlus::PumpControlTypeXXX)
   # @return [OpenStudio::Model::PumpVariableSpeed] The model object
-  def self.add_pump_variable_speed(model, name:, rated_power:, control_type: EPlus::PumpControlTypeIntermittent)
+  def self.add_pump_variable_speed(model, name:, rated_power:, rated_flow_rate: nil, rated_pump_head: 20000, motor_efficiency: 0.85, control_type: EPlus::PumpControlTypeIntermittent)
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(name)
-    pump.setMotorEfficiency(0.85)
-    pump.setRatedPowerConsumption(rated_power)
-    pump_eff = 0.75 # Overall efficiency of the pump
-    if rated_power > 0
-      pump.setRatedPumpHead(20000)
-      flow_rate = pump_eff * rated_power / pump.ratedPumpHead
-      pump.setRatedFlowRate([flow_rate, 0.00001].max)
-    else
-      pump.setRatedPumpHead(1)
-      pump.setRatedFlowRate(0.01)
+    pump.setMotorEfficiency(motor_efficiency)
+    if not rated_power.nil?
+      pump.setRatedPowerConsumption(rated_power)
+      if rated_power > 0
+        if not rated_pump_head.nil?
+          pump.setRatedPumpHead(20000)
+          if not rated_flow_rate.nil?
+            pump.setRatedFlowRate(rated_flow_rate)
+          else
+            pump_eff = 0.75 # Overall efficiency of the pump
+            rated_flow_rate = pump_eff * rated_power / pump.ratedPumpHead
+            pump.setRatedFlowRate([rated_flow_rate, 0.00001].max)
+          end
+        end
+      else
+        pump.setRatedPumpHead(1)
+        pump.setRatedFlowRate(0.01)
+      end
     end
     pump.setFractionofMotorInefficienciestoFluidStream(0)
     pump.setCoefficient1ofthePartLoadPerformanceCurve(0)

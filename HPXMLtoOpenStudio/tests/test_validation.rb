@@ -171,6 +171,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-sizing-humidity-setpoint' => ['Expected ManualJInputs/HumiditySetpoint to be less than 1'],
                             'hvac-sizing-daily-temp-range' => ["Expected ManualJInputs/DailyTemperatureRange to be 'low' or 'medium' or 'high'"],
                             'hvac-negative-crankcase-heater-watts' => ['Expected extension/CrankcaseHeaterPowerWatts to be greater than or equal to 0.'],
+                            'hydronic-supply-temp-low' => ['Expected SupplyTemperature to be greater than or equal to 90'],
+                            'hydronic-supply-temp-high' => ['Expected SupplyTemperature to be less than or equal to 200'],
+                            'hydronic-return-temp-low' => ['Expected ReturnTemperature to be greater than or equal to 40'],
+                            'hydronic-return-temp-high' => ['Expected ReturnTemperature to be less than SupplyTemperature'],
                             'incomplete-integrated-heating' => ['Expected IntegratedHeatingSystemFractionHeatLoadServed'],
                             'invalid-airflow-defect-ratio' => ['Expected extension/AirflowDefectRatio to be 0'],
                             'invalid-airflow-rates' => ['Expected extension/HeatingDesignAirflowCFM to be greater than or equal to 0',
@@ -673,6 +677,19 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'hvac-negative-crankcase-heater-watts'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.cooling_systems[0].crankcase_heater_watts = -10
+      when 'hydronic-supply-temp-low'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-only.xml')
+        hpxml_bldg.hvac_distributions[0].hydronic_supply_temp = 80
+      when 'hydronic-supply-temp-high'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-only.xml')
+        hpxml_bldg.hvac_distributions[0].hydronic_supply_temp = 205
+      when 'hydronic-return-temp-low'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-only.xml')
+        hpxml_bldg.hvac_distributions[0].hydronic_return_temp = 35
+      when 'hydronic-return-temp-high'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-only.xml')
+        hpxml_bldg.hvac_distributions[0].hydronic_supply_temp = 140
+        hpxml_bldg.hvac_distributions[0].hydronic_return_temp = 141
       when 'incomplete-integrated-heating'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ptac-with-heating-electricity.xml')
         hpxml_bldg.cooling_systems[0].integrated_heating_system_fraction_heat_load_served = nil

@@ -3361,6 +3361,43 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         plug_load.kwh_per_year = 0.0
       end
     end
+  elsif ['base-bldgtype-mf-whole-building-shared-boilers-sequenced.xml',
+         'base-bldgtype-mf-whole-building-shared-boilers-simultaneous.xml'].include? hpxml_file
+    if hpxml_file.include? 'sequenced'
+      hpxml.header.shared_boiler_operation = HPXML::SharedBoilerOperationSequenced
+    elsif hpxml_file.include? 'simultaneous'
+      hpxml.header.shared_boiler_operation = HPXML::SharedBoilerOperationSimultaneous
+    end
+    # Add two shared boilers to building1
+    hpxml.buildings[0].heating_systems.clear
+    for j in 1..2
+      hpxml.buildings[0].heating_systems.add(id: "HeatingSystem#{j}",
+                                             is_shared_system: true,
+                                             distribution_system_idref: 'HVACDistribution1',
+                                             heating_system_type: HPXML::HVACTypeBoiler,
+                                             heating_system_fuel: HPXML::FuelTypeNaturalGas,
+                                             heating_capacity: 30000,
+                                             heating_efficiency_afue: 0.8)
+    end
+    hpxml.buildings[0].hvac_distributions.clear
+    hpxml.buildings[0].hvac_distributions.add(id: 'HVACDistribution1',
+                                              distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                              hydronic_type: HPXML::HydronicTypeBaseboard,
+                                              hydronic_supply_temp: 160,
+                                              hydronic_return_temp: 120,
+                                              hydronic_variable_speed_pump: true)
+    # Reference the shared boilers from all other buildings
+    for i in 1..hpxml.buildings.size - 1
+      hpxml.buildings[i].heating_systems.clear
+      for j in 1..2
+        hpxml.buildings[i].heating_systems.add(id: "HeatingSystem#{j}_#{i}",
+                                               distribution_system_idref: "HVACDistribution1_#{i}",
+                                               sameas_id: "HeatingSystem#{j}")
+      end
+      hpxml.buildings[i].hvac_distributions.clear
+      hpxml.buildings[i].hvac_distributions.add(id: "HVACDistribution1_#{i}",
+                                                sameas_id: 'HVACDistribution1')
+    end
   end
 
   # Logic to apply at whole building level, need to be outside hpxml_bldg loop

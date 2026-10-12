@@ -250,6 +250,13 @@ module Defaults
       hpxml_header.latent_degradation_model_blower_off_delay = 45.0
       hpxml_header.latent_degradation_model_blower_off_delay_isdefaulted = true
     end
+
+    if hpxml_header.shared_boiler_operation.nil?
+      if hpxml_bldg.heating_systems.select { |htg| htg.heating_system_type == HPXML::HVACTypeBoiler && htg.is_shared_system_serving_multiple_dwelling_units }.size > 0
+        hpxml_header.shared_boiler_operation = HPXML::SharedBoilerOperationSequenced
+        hpxml_header.shared_boiler_operation_isdefaulted = true
+      end
+    end
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::BuildingHeader object
@@ -1912,7 +1919,7 @@ module Defaults
   # @return [nil]
   def self.apply_hvac(runner, hpxml_header, hpxml_bldg, weather, convert_shared_systems, unit_num)
     if convert_shared_systems
-      convert_shared_systems_to_in_unit_systems(hpxml_bldg)
+      convert_shared_systems_to_in_unit_systems(hpxml_bldg, hpxml_header)
     end
 
     # Convert negative values (e.g., -1) to nil as appropriate
@@ -2441,13 +2448,16 @@ module Defaults
     end
   end
 
-  # Converts shared systems to equivalent in-unit systems per ANSI/RESNET/ICC 301.
+  # Converts shared systems to equivalent in-unit systems when modeling individual dwelling units (or,
+  # when modeling a whole SFA/MF building, if OS-HPXML does not yet support explicitly modeling the
+  # shared system we fall back to these conversions).
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
-  def self.convert_shared_systems_to_in_unit_systems(hpxml_bldg)
+  def self.convert_shared_systems_to_in_unit_systems(hpxml_bldg, hpxml_header)
     converted_clg = convert_shared_cooling_systems_to_in_unit_systems(hpxml_bldg)
-    converted_htg = convert_shared_heating_systems_to_in_unit_systems(hpxml_bldg)
+    converted_htg = convert_shared_heating_systems_to_in_unit_systems(hpxml_bldg, hpxml_header)
     return unless (converted_clg || converted_htg)
 
     # Remove WLHP if not serving heating nor cooling
@@ -2603,10 +2613,12 @@ module Defaults
   # Converts shared heating systems to equivalent in-unit systems per ANSI/RESNET/ICC 301.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [Boolean] Whether a shared heating system was converted to an in-unit system
-  def self.convert_shared_heating_systems_to_in_unit_systems(hpxml_bldg)
+  def self.convert_shared_heating_systems_to_in_unit_systems(hpxml_bldg, hpxml_header)
     applied = false
     hpxml_bldg.heating_systems.each do |heating_system|
+      next if hpxml_header.whole_sfa_or_mf_building_sim # Central boilers are explicitly modeled for whole SFA/MF buildings
       next unless heating_system.is_shared_system
 
       applied = true
@@ -2876,6 +2888,30 @@ module Defaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_hvac_distribution(hpxml_bldg)
+    # Hydronic distribution
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.hvac_systems.any? { |h| h.is_a?(HPXML::HeatingSystem) && h.heating_system_type == HPXML::HVACTypeBoiler }
+
+      # Supply/return loop temperatures
+      default_delta_t = 20.0 # deg-F
+      if hvac_distribution.hydronic_supply_temp.nil?
+        if not hvac_distribution.hydronic_return_temp.nil?
+          hvac_distribution.hydronic_supply_temp = hvac_distribution.hydronic_return_temp + default_delta_t # deg-F
+        else
+          hvac_distribution.hydronic_supply_temp = 180.0 # deg-F
+        end
+        hvac_distribution.hydronic_supply_temp_isdefaulted = true
+      end
+      if hvac_distribution.hydronic_return_temp.nil?
+        hvac_distribution.hydronic_return_temp = hvac_distribution.hydronic_supply_temp - default_delta_t # deg-F
+        hvac_distribution.hydronic_return_temp_isdefaulted = true
+      end
+      if hvac_distribution.hydronic_variable_speed_pump.nil?
+        hvac_distribution.hydronic_variable_speed_pump = false
+        hvac_distribution.hydronic_variable_speed_pump_isdefaulted = true
+      end
+    end
+
     # Air distribution
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
     ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
