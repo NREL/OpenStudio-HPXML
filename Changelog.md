@@ -17,6 +17,7 @@ __Features__
 - Updates garage ventilation rate to be SLA=1/150 (same as a vented crawlspace).
 - Reverts E+ radiant exchange algorithm from CarrollMRT to ScriptF.
 - Adds min/max value warnings for clothes washer and dishwasher label inputs (e.g., `LabelElectricRate` and `LabelGasRate`).
+- HPXMLtoOpenStudio measure: Allow output files to be individually skipped from being written.
 
 __Bugfixes__
 - **Breaking change**: Prevent possible error if heat pump water heater in confined space with very small containment volume; minimum allowed volume now 32 ft3.

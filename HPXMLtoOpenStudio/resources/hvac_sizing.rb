@@ -5624,6 +5624,8 @@ module HVACSizing
   # @param output_file_path [String] Detailed output file path
   # @return [nil]
   def self.write_detailed_output(results_out, output_format, output_file_path)
+    return if output_file_path.nil?
+
     line_break = nil
     if ['csv'].include? output_format
       CSV.open(output_file_path, 'a') { |csv| results_out.to_a.each { |elem| csv << elem } }

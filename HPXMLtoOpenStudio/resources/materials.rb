@@ -115,13 +115,13 @@ class Material
   # @return [Material] The material object
   def self.AirFilmOutside(no_wind_exposure = false, apply_ashrae140_assumptions = false)
     if no_wind_exposure
-      rvalue = 0.455 # hr-ft-F/Btu
+      rvalue = 0.455 # hr-ft2-F/Btu
     else
       if apply_ashrae140_assumptions
-        rvalue = 0.174 # hr-ft-F/Btu
+        rvalue = 0.174 # hr-ft2-F/Btu
       else
-        rvalue_winter = 0.17 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
-        rvalue_summer = 0.25 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
+        rvalue_winter = 0.17 # hr-ft2-F/Btu (ASHRAE 2005, F25.2, Table 1)
+        rvalue_summer = 0.25 # hr-ft2-F/Btu (ASHRAE 2005, F25.2, Table 1)
         rvalue = (rvalue_winter + rvalue_summer) / 2.0
       end
     end
@@ -132,7 +132,7 @@ class Material
   #
   # @return [Material] The material object
   def self.AirFilmIndoorWall
-    rvalue = 0.68 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
+    rvalue = 0.68 # hr-ft2-F/Btu (ASHRAE 2005, F25.2, Table 1)
     return self.AirFilm(rvalue)
   end
 
@@ -144,7 +144,7 @@ class Material
   # @return [Material] The material object
   def self.AirFilmIndoorFloorAverage
     rvalue_down = self.AirFilmIndoorFloorDown.rvalue
-    rvalue_up = 0.61 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
+    rvalue_up = 0.61 # hr-ft2-F/Btu (ASHRAE 2005, F25.2, Table 1)
     rvalue = (rvalue_down + rvalue_up) / 2.0
     return self.AirFilm(rvalue)
   end
@@ -155,7 +155,7 @@ class Material
   #
   # @return [Material] The material object
   def self.AirFilmIndoorFloorDown
-    rvalue = 0.92 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
+    rvalue = 0.92 # hr-ft2-F/Btu (ASHRAE 2005, F25.2, Table 1)
     return self.AirFilm(rvalue)
   end
 
@@ -166,16 +166,16 @@ class Material
   # @return [Material] The material object
   def self.AirFilmIndoorRoof(surface_angle, apply_ashrae140_assumptions = false)
     if apply_ashrae140_assumptions
-      rvalue = 0.752 # hr-ft-F/Btu
+      rvalue = 0.752 # hr-ft2-F/Btu
     else
       # Correlation functions used to interpolate between values provided
       # in ASHRAE 2005, F25.2, Table 1 - which only provides values for
       # 0, 45, and 90 degrees.
       # Uses the average of upward/downward heat flow values with the assumption
       # that the temperature above the roof can be either hotter or colder.
-      rvalue_up = 0.002 * Math::exp(0.0398 * surface_angle) + 0.608 # hr-ft-F/Btu (evaluates to 0.62 at 45 degrees, when direction of heat flow is upward)
-      rvalue_down = 0.32 * Math::exp(-0.0154 * surface_angle) + 0.6 # hr-ft-F/Btu (evaluates to 0.76 at 45 degrees, when direction of heat flow is downward)
-      rvalue = (rvalue_up + rvalue_down) / 2.0 # hr-ft-F/Btu
+      rvalue_up = 0.002 * Math::exp(0.0398 * surface_angle) + 0.608 # hr-ft2-F/Btu (evaluates to 0.62 at 45 degrees, when direction of heat flow is upward)
+      rvalue_down = 0.32 * Math::exp(-0.0154 * surface_angle) + 0.6 # hr-ft2-F/Btu (evaluates to 0.76 at 45 degrees, when direction of heat flow is downward)
+      rvalue = (rvalue_up + rvalue_down) / 2.0 # hr-ft2-F/Btu
     end
     return self.AirFilm(rvalue)
   end

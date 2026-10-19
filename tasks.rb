@@ -3799,6 +3799,7 @@ if [:unit_tests, :workflow_tests1, :workflow_tests2].include? ARGV[0].to_sym
     failed_tests.each do |failed_test|
       puts "- #{failed_test}"
     end
+    $stdout.flush
     exit! 1
   end
 

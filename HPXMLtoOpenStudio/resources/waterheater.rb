@@ -322,24 +322,8 @@ module Waterheater
                                       unavailable_periods: unavailable_periods,
                                       unit_multiplier: unit_multiplier)
     water_heater.setSourceSideDesignFlowRate(100 * unit_multiplier) # set one large number, override by EMS
+    water_heater.setSourceSideFlowControlMode('StorageTank')
 
-    # Create alternate setpoint schedule for source side flow request
-    alternate_stp_sch = water_heater.setpointTemperatureSchedule.get.clone(model).to_Schedule.get
-    alternate_stp_sch.setName("#{obj_name_combi} Alt Spt")
-    water_heater.setIndirectAlternateSetpointTemperatureSchedule(alternate_stp_sch)
-
-    # Create setpoint schedule to specify source side temperature
-    # tank source side inlet temperature, degree C
-    boiler_spt_mngr = model.getSetpointManagerScheduleds.find { |spt_mngr| spt_mngr.setpointNode.get == boiler_plant_loop.loopTemperatureSetpointNode }
-    boiler_heating_spt = boiler_spt_mngr.to_SetpointManagerScheduled.get.schedule.to_ScheduleConstant.get.value
-    source_stp_sch = Model.add_schedule_constant(
-      model,
-      name: "#{obj_name_combi} Source Spt",
-      value: boiler_heating_spt,
-      limits: EPlus::ScheduleTypeLimitsTemperature
-    )
-    # reset dhw boiler setpoint
-    boiler_spt_mngr.to_SetpointManagerScheduled.get.setSchedule(source_stp_sch)
     boiler_plant_loop.autosizeMaximumLoopFlowRate()
 
     # change loop equipment operation scheme to heating load
@@ -465,9 +449,8 @@ module Waterheater
       equipment_sch_sensors = {}
       equipment_target_temp_sensors = {}
       tank_volume, deadband, tank_source_temp = 0.0, 0.0, 0.0
-      alt_spt_sch = nil
       tank_temp_sensor, tank_spt_sensor, tank_loss_energy_sensor = nil, nil, nil
-      altsch_actuator, pump_actuator = nil, nil
+      pump_actuator = nil
       water_heater = nil
 
       # Create sensors and actuators
@@ -499,20 +482,6 @@ module Waterheater
           name: "#{combi_sys_id} Setpoint Temperature",
           output_var_or_meter_name: 'Schedule Value',
           key_name: water_heater.setpointTemperatureSchedule.get.name
-        )
-
-        alt_spt_sch = water_heater.indirectAlternateSetpointTemperatureSchedule.get
-        if alt_spt_sch.to_ScheduleConstant.is_initialized
-          comp_type_and_control = EPlus::EMSActuatorScheduleConstantValue
-        elsif alt_spt_sch.to_ScheduleRuleset.is_initialized
-          comp_type_and_control = EPlus::EMSActuatorScheduleYearValue
-        else
-          comp_type_and_control = EPlus::EMSActuatorScheduleFileValue
-        end
-        altsch_actuator = Model.add_ems_actuator(
-          name: "#{combi_sys_id} AltSchedOverride",
-          model_object: alt_spt_sch,
-          comp_type_and_control: comp_type_and_control
         )
       end
       plant_loop.components.each do |c|
@@ -597,10 +566,8 @@ module Waterheater
       combi_ctrl_program.addLine('Set WH_Energy_Heat = WH_Use + WH_Loss - WH_HeatToHighSetpoint')
       combi_ctrl_program.addLine('If WH_Energy_Demand > 0')
       combi_ctrl_program.addLine("Set #{pump_actuator.name} = WH_Energy_Heat / (Cp * DeltaT * 3600 * ZoneTimeStep)")
-      combi_ctrl_program.addLine("Set #{altsch_actuator.name} = 100") # Set the alternate setpoint temperature to highest level to ensure maximum source side flow rate
       combi_ctrl_program.addLine('Else')
       combi_ctrl_program.addLine("Set #{pump_actuator.name} = 0")
-      combi_ctrl_program.addLine("Set #{altsch_actuator.name} = NULL")
       combi_ctrl_program.addLine('EndIf')
 
       # ProgramCallingManagers
@@ -1125,7 +1092,7 @@ module Waterheater
     tank.setEndUseSubcategory('Domestic Hot Water')
     tank.setTankVolume(UnitConversions.convert(v_actual, 'gal', 'm^3'))
     tank.setTankHeight(h_tank)
-    tank.setMaximumTemperatureLimit(90)
+    tank.setMaximumTemperatureLimit(99)
     tank.setHeaterPriorityControl('MasterSlave')
     tank.heater1SetpointTemperatureSchedule.remove
     tank.setHeater1SetpointTemperatureSchedule(hpwh_top_element_sp)
@@ -1983,7 +1950,7 @@ module Waterheater
       water_heater.setEndUseSubcategory('Domestic Hot Water')
       water_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
       water_heater.setTankHeight(h_tank)
-      water_heater.setMaximumTemperatureLimit(90)
+      water_heater.setMaximumTemperatureLimit(99)
       water_heater.setHeaterPriorityControl('MasterSlave')
       water_heater.setHeater1Capacity(UnitConversions.convert(cap, 'Btu/hr', 'W'))
       water_heater.setHeater1Height((1.0 - (4 - 0.5) / 15) * h_tank) # in the 4th node of a 15-node tank (counting from top); height of upper element based on TRNSYS assumptions for an ERWH
