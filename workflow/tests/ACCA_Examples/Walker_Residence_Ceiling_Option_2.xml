@@ -171,7 +171,10 @@
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>2015.0</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
+            <RoofMaterial>asphalt or fiberglass shingles</RoofMaterial>
             <RoofColor>light</RoofColor>
             <Pitch>7.0</Pitch>
             <RadiantBarrier>true</RadiantBarrier>

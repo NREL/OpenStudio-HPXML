@@ -1983,7 +1983,10 @@
             <SystemIdentifier id='Roof1_7'/>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <Area>1341.6</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
+            <RoofMaterial>asphalt or fiberglass shingles</RoofMaterial>
             <RoofColor>light</RoofColor>
             <Pitch>6.0</Pitch>
             <Insulation>
@@ -2185,7 +2188,10 @@
             <SystemIdentifier id='Roof1_8'/>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <Area>1341.6</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
+            <RoofMaterial>asphalt or fiberglass shingles</RoofMaterial>
             <RoofColor>light</RoofColor>
             <Pitch>6.0</Pitch>
             <Insulation>

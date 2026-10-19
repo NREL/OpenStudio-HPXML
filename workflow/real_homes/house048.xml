@@ -77,6 +77,9 @@
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>1789.6</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <SolarAbsorptance>0.8</SolarAbsorptance>
             <Emittance>0.75</Emittance>
             <Pitch>2.0</Pitch>
@@ -91,6 +94,9 @@
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <Area>392.0</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <SolarAbsorptance>0.8</SolarAbsorptance>
             <Emittance>0.75</Emittance>
             <Pitch>2.0</Pitch>
@@ -105,6 +111,9 @@
             <SystemIdentifier id='Roof3'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>162.0</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <SolarAbsorptance>0.8</SolarAbsorptance>
             <Emittance>0.75</Emittance>
             <Pitch>2.0</Pitch>
@@ -119,6 +128,9 @@
             <SystemIdentifier id='Roof4'/>
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
             <Area>452.0</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <SolarAbsorptance>0.8</SolarAbsorptance>
             <Emittance>0.75</Emittance>
             <Pitch>2.0</Pitch>

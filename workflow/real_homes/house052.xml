@@ -67,6 +67,9 @@
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <Area>11705.0</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <SolarAbsorptance>0.92</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Pitch>2.0</Pitch>

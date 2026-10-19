@@ -97,6 +97,9 @@
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <Area>863.23</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <RoofColor>dark</RoofColor>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
@@ -109,6 +112,9 @@
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <Area>502.0</Area>
+            <RoofType>
+              <WoodFrame/>
+            </RoofType>
             <RoofColor>dark</RoofColor>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
