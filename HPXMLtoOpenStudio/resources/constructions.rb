@@ -49,14 +49,15 @@ module Constructions
           match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, wood_frame_constr_sets, interior_film, exterior_film)
           framing_factor = constr_set.framing_factor
         else
+          corr_factor = 0.82
           steel_frame_constr_sets = [
-            SteelStudConstructionSet.new(Material.Stud2x(8), 0.69, 50.0, 0.0, mat_int_finish, mat_ext_finish), # 2x8 + R50
-            SteelStudConstructionSet.new(Material.Stud2x(8), 0.73, 40.0, 0.0, mat_int_finish, mat_ext_finish), # 2x8 + R40
-            SteelStudConstructionSet.new(Material.Stud2x(8), 0.79, 30.0, 0.0, mat_int_finish, mat_ext_finish), # 2x8 + R30
-            SteelStudConstructionSet.new(Material.Stud2x(8), 0.85, 20.0, 0.0, mat_int_finish, mat_ext_finish), # 2x8 + R20
-            SteelStudConstructionSet.new(Material.Stud2x(8), 0.92, 10.0, 0.0, mat_int_finish, mat_ext_finish), # 2x8 + R10
-            SteelStudConstructionSet.new(Material.Stud2x(6), 1.0, 0.0, 0.0, mat_int_finish, mat_ext_finish), # 2x6
-            SteelStudConstructionSet.new(Material.Stud2x(4), 1.0, 0.0, 0.0, fallback_mat_int_finish, mat_ext_finish), # Fallback
+            SteelStudConstructionSet.new(5.5, corr_factor, 50.0, 0.0, mat_int_finish, mat_ext_finish), # 2x8 + R50
+            SteelStudConstructionSet.new(5.5, corr_factor, 40.0, 0.0, mat_int_finish, mat_ext_finish), # 2x8 + R40
+            SteelStudConstructionSet.new(5.5, corr_factor, 30.0, 0.0, mat_int_finish, mat_ext_finish), # 2x8 + R30
+            SteelStudConstructionSet.new(5.5, corr_factor, 20.0, 0.0, mat_int_finish, mat_ext_finish), # 2x8 + R20
+            SteelStudConstructionSet.new(5.5, corr_factor, 10.0, 0.0, mat_int_finish, mat_ext_finish), # 2x8 + R10
+            SteelStudConstructionSet.new(3.5, corr_factor, 0.0, 0.0, mat_int_finish, mat_ext_finish), # 2x6
+            SteelStudConstructionSet.new(3.5, 1.0, 0.0, 0.0, fallback_mat_int_finish, mat_ext_finish), # Fallback
           ]
           match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, steel_frame_constr_sets, interior_film, exterior_film)
           corr_factor = constr_set.corr_factor
@@ -98,10 +99,11 @@ module Constructions
       end
     when HPXML::FloorRoofTypeSIP
       osb_thick_in = 0.5
+      sheath_thick_in = 0.44
       constr_sets = [
-        SIPConstructionSet.new(16.0, 0.08, 0.0, 0.0, osb_thick_in, mat_int_finish, mat_ext_finish), # 16" SIP core
-        SIPConstructionSet.new(12.0, 0.08, 0.0, 0.0, osb_thick_in, mat_int_finish, mat_ext_finish), # 12" SIP core
-        SIPConstructionSet.new(8.0, 0.08, 0.0, 0.0, osb_thick_in, mat_int_finish, mat_ext_finish),  # 8" SIP core
+        SIPConstructionSet.new(16.0, 0.08, 0.0, sheath_thick_in, osb_thick_in, mat_int_finish, mat_ext_finish), # 16" SIP core
+        SIPConstructionSet.new(12.0, 0.08, 0.0, sheath_thick_in, osb_thick_in, mat_int_finish, mat_ext_finish), # 12" SIP core
+        SIPConstructionSet.new(8.0, 0.08, 0.0, sheath_thick_in, osb_thick_in, mat_int_finish, mat_ext_finish),  # 8" SIP core
         SIPConstructionSet.new(1.1, 0.01, 0.0, 0.0, 0.0, fallback_mat_int_finish, mat_ext_finish), # Fallback
       ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, interior_film, exterior_film)
@@ -2891,7 +2893,7 @@ module Constructions
 
     when HPXML::FloorRoofTypeSteelFrame
       install_grade = 1
-      corr_factor = 0.45
+      corr_factor = 0.82
       osb_thick_in = (is_ceiling ? 0.0 : 0.75)
       constr_sets = [
         SteelStudConstructionSet.new(5.5, corr_factor, 50.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6 + R50
@@ -2911,10 +2913,12 @@ module Constructions
                                       exterior_film, radiant_barrier_grade)
 
     when HPXML::FloorRoofTypeSIP
+      sheath_thick_in = 0.44
+      osb_thick_in = 0.5
       constr_sets = [
-        SIPConstructionSet.new(16.0, 0.08, 0.0, 0.0, osb_thick_in, mat_int_finish_or_covering, nil), # 16" SIP core
-        SIPConstructionSet.new(12.0, 0.08, 0.0, 0.0, osb_thick_in, mat_int_finish_or_covering, nil), # 12" SIP core
-        SIPConstructionSet.new(8.0, 0.08, 0.0, 0.0, osb_thick_in, mat_int_finish_or_covering, nil),  # 8" SIP core
+        SIPConstructionSet.new(16.0, 0.08, 0.0, sheath_thick_in, osb_thick_in, mat_int_finish_or_covering, nil), # 16" SIP core
+        SIPConstructionSet.new(12.0, 0.08, 0.0, sheath_thick_in, osb_thick_in, mat_int_finish_or_covering, nil), # 12" SIP core
+        SIPConstructionSet.new(8.0, 0.08, 0.0, sheath_thick_in, osb_thick_in, mat_int_finish_or_covering, nil),  # 8" SIP core
         SIPConstructionSet.new(1.1, 0.01, 0.0, 0.0, 0.0, fallback_mat_int_finish_or_covering, nil), # Fallback
       ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, interior_film, exterior_film)

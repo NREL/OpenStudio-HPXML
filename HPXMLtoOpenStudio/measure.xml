@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxml_to_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f4627b75-4d30-4362-8018-807183bf3312</version_id>
-  <version_modified>2026-09-29T19:07:10Z</version_modified>
+  <version_id>deaff3fc-ab27-4673-aa5a-24c7f2022275</version_id>
+  <version_modified>2026-10-19T23:51:28Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLToOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -241,7 +241,7 @@
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>10DBE2FD</checksum>
+      <checksum>A1844228</checksum>
     </file>
     <file>
       <filename>data/Xing_okstate_0664D_13659_Table_A-3.csv</filename>
