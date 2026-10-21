@@ -72,19 +72,19 @@ def create_hpxmls
     model = OpenStudio::Model::Model.new
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
-    num_apply_measures = 1
-    if hpxml_path.include?('whole-building-common-spaces')
-      num_apply_measures = 8
-    elsif hpxml_path.include?('whole-building')
-      num_apply_measures = 6
-    elsif hpxml_path.include?('multiple-buildings')
-      num_apply_measures = 2
+    num_dwelling_units = 1
+    if hpxml_path.include? 'mf-whole-building-common-spaces'
+      num_dwelling_units = 8
+    elsif hpxml_path.include? 'mf-whole-building'
+      num_dwelling_units = 6
+    elsif hpxml_path.include? 'multiple-buildings'
+      num_dwelling_units = 2
     end
 
-    for i in 1..num_apply_measures
+    for i in 1..num_dwelling_units
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
-      if hpxml_path.include?('whole-building-common-spaces')
-        suffix = "_#{i}" if i > 1
+      suffix = "_#{i}" if i > 1
+      if hpxml_path.include? 'mf-whole-building-common-spaces'
         build_residential_hpxml['schedules_paths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv")
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'Basement, Unconditioned' : 'Above Apartment')
         build_residential_hpxml['geometry_attic_type'] = (i >= 7 ? 'Attic, Vented, Gable' : 'Below Apartment')
@@ -93,8 +93,7 @@ def create_hpxmls
         # Partially conditioned basement + one unconditioned hallway each floor + unconditioned attic
         build_residential_hpxml['hvac_heating_system'] = ([1, 4, 6].include?(i) ? 'Electric Resistance' : 'None')
         build_residential_hpxml['hvac_cooling_system'] = ([1, 4, 6].include?(i) ? 'Room AC, CEER 8.4' : 'None')
-      elsif hpxml_path.include?('whole-building')
-        suffix = "_#{i}" if i > 1
+      elsif hpxml_path.include? 'mf-whole-building'
         build_residential_hpxml['schedules_paths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'Basement, Unconditioned' : 'Above Apartment')
         build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'Attic, Vented, Gable' : 'Below Apartment')
@@ -103,8 +102,7 @@ def create_hpxmls
           build_residential_hpxml['hvac_heating_system'] = ([1, 3, 5].include?(i) ? 'Electric Resistance' : 'None')
           build_residential_hpxml['hvac_cooling_system'] = ([1, 3, 5].include?(i) ? 'Room AC, CEER 8.4' : 'None')
         end
-      elsif hpxml_path.include?('multiple-buildings')
-        suffix = "_#{i}" if i > 1
+      elsif hpxml_path.include? 'multiple-buildings'
         if i > 1
           build_residential_hpxml['enclosure_window'] = 'Triple, Low-E, Insulated, Gas, High Gain'
         end
@@ -248,6 +246,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     hpxml_bldg.doors << hpxml_bldg.doors[0].dup
     hpxml_bldg.doors[1].azimuth = 0
     hpxml_bldg.doors[1].id = 'Door2'
+    hpxml_bldg.doors[0].attached_to_wall_idref = hpxml_bldg.walls[0].id
   end
   hpxml_bldg.windows.each do |window|
     next if window.overhangs_depth.nil?
@@ -1530,7 +1529,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorReflective],
                       [HPXML::SidingTypeAsbestos, HPXML::ColorLight],
                       [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
-                      [HPXML::SidingTypeCompositeShingle, HPXML::ColorReflective],
+                      [HPXML::SidingTypeCompositeShingle, HPXML::ColorWhite],
                       [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
                       [HPXML::SidingTypeMasonite, HPXML::ColorDark],
                       [HPXML::SidingTypeStucco, HPXML::ColorLight],
@@ -1616,8 +1615,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                     [HPXML::RoofTypeShingles, HPXML::ColorMediumDark],
                     [HPXML::RoofTypePlasticRubber, HPXML::ColorMediumLight],
                     [HPXML::RoofTypeEPS, HPXML::ColorMedium],
-                    [HPXML::RoofTypeConcrete, HPXML::ColorLight],
-                    [HPXML::RoofTypeCool, HPXML::ColorReflective]]
+                    [HPXML::RoofTypeConcrete, HPXML::ColorWhite]]
       int_finish_types = [[HPXML::InteriorFinishGypsumBoard, 0.5],
                           [HPXML::InteriorFinishPlaster, 0.5],
                           [HPXML::InteriorFinishWood, 0.5]]
@@ -1799,7 +1797,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.heat_pumps[0].number_of_units_served = 6
       hpxml_bldg.heat_pumps[0].pump_watts_per_ton = 0.0
     end
-    if !hpxml_file.include? 'eae'
+    if !hpxml_file.include?('eae') && !hpxml_file.include?('mf-whole-building')
       if hpxml_file.include? 'shared-boiler'
         hpxml_bldg.heating_systems[0].shared_loop_watts = 600
       end
@@ -2404,6 +2402,16 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     elsif ['base-dhw-tank-gas-fhr.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].first_hour_rating = 56.0
       hpxml_bldg.water_heating_systems[0].usage_bin = nil
+    elsif ['base-dhw-tank-heat-pump-120v.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].hpwh_voltage = HPXML::HPWHVoltage120
+    elsif ['base-dhw-tank-heat-pump-120v-backup-capacity.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].hpwh_voltage = HPXML::HPWHVoltage120
+      hpxml_bldg.water_heating_systems[0].backup_heating_capacity = 3071.0
+    elsif ['base-dhw-tank-heat-pump-120v-dedicated-circuit.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].hpwh_voltage = HPXML::HPWHVoltage120Dedicated
+    elsif ['base-dhw-setpoint-temperature-mixing-valve.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].has_mixing_valve = true
+      hpxml_bldg.water_heating_systems[0].mixing_valve_setpoint = 120
     elsif ['base-dhw-tank-heat-pump-confined-space.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].hpwh_confined_space_without_mitigation = true
       hpxml_bldg.water_heating_systems[0].hpwh_containment_volume = 453
@@ -2783,6 +2791,20 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     if ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.pv_systems[0].year_modules_manufactured = 2015
       hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2700.0
+    elsif ['base-pv-collector-area.xml'].include? hpxml_file
+      hpxml_bldg.pv_systems[0].max_power_output = nil
+      hpxml_bldg.pv_systems[0].collector_area = 200
+      hpxml_bldg.pv_systems[0].year_installed = 2026
+      hpxml_bldg.pv_systems[0].system_losses_fraction = 0.15
+      hpxml_bldg.pv_systems[1].max_power_output = nil
+      hpxml_bldg.pv_systems[1].collector_area = 80
+      hpxml_bldg.pv_systems[1].year_installed = 2026
+      hpxml_bldg.pv_systems[1].system_losses_fraction = 0.17
+    elsif ['base-pv-number-of-panels.xml'].include? hpxml_file
+      hpxml_bldg.pv_systems[0].max_power_output = nil
+      hpxml_bldg.pv_systems[0].number_of_panels = 10
+      hpxml_bldg.pv_systems[1].max_power_output = nil
+      hpxml_bldg.pv_systems[1].number_of_panels = 4
     elsif ['base-pv-inverters.xml'].include? hpxml_file
       hpxml_bldg.inverters.add(id: "Inverter#{hpxml_bldg.inverters.size + 1}",
                                inverter_efficiency: 0.96)
@@ -3758,6 +3780,7 @@ if [:unit_tests, :workflow_tests1, :workflow_tests2].include? ARGV[0].to_sym
     failed_tests.each do |failed_test|
       puts "- #{failed_test}"
     end
+    $stdout.flush
     exit! 1
   end
 

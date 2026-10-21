@@ -409,9 +409,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next unless hpxml_bldgs_size > 1
 
       for unit_num in 0..(hpxml_bldgs_size - 1)
-        Model.add_output_meter(model, meter_name: Model.make_unit_meter_name(fuel.meter, unit_num, hpxml_bldgs_size), reporting_frequency: 'runperiod')
+        meter_name = Model.make_unit_meter_name(fuel.meter, unit_num, hpxml_bldgs_size)
+
+        # Check if unit has this fuel type
+        meter = (model.getMeterCustoms + model.getMeterCustomDecrements).find { |m| m.name.to_s.upcase == meter_name.upcase }
+        next if meter.nil?
+
+        Model.add_output_meter(model, meter_name: meter_name, reporting_frequency: 'runperiod')
         if args[:include_timeseries_fuel_consumptions] && args[:include_timeseries_dwelling_unit_outputs]
-          Model.add_output_meter(model, meter_name: Model.make_unit_meter_name(fuel.meter, unit_num, hpxml_bldgs_size), reporting_frequency: args[:timeseries_frequency])
+          Model.add_output_meter(model, meter_name: meter_name, reporting_frequency: args[:timeseries_frequency])
         end
       end
     end

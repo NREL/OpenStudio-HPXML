@@ -439,7 +439,8 @@ class WorkflowOtherTest < Minitest::Test
      'template-build-hpxml.osw'].each do |osw_name|
       osw_path = File.join(File.dirname(__FILE__), '..', osw_name)
 
-      skip_simulation = (osw_name == 'template-build-hpxml.osw')
+      skip_simulation = (osw_name == 'template-build-hpxml.osw' || osw_name == 'template-run-hpxml.osw')
+      skip_hpxml_to_os_outputs = (osw_name == 'template-run-hpxml.osw')
 
       # Create derivative OSW for testing
       osw_path_test = osw_path.gsub('.osw', '_test.osw')
@@ -448,13 +449,21 @@ class WorkflowOtherTest < Minitest::Test
       # Turn on debug mode
       json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
       if not skip_simulation
-        measure_index = json[:steps].find_index { |m| m[:measure_dir_name] == 'HPXMLtoOpenStudio' }
-        json[:steps][measure_index][:arguments][:debug] = true
+        hpxml_to_os_measure_index = json[:steps].find_index { |m| m[:measure_dir_name] == 'HPXMLtoOpenStudio' }
+        hpxml_to_os_measure = json[:steps][hpxml_to_os_measure_index]
+        hpxml_to_os_measure[:arguments][:debug] = true
+      end
+      if skip_hpxml_to_os_outputs
+        hpxml_to_os_measure_index = json[:steps].find_index { |m| m[:measure_dir_name] == 'HPXMLtoOpenStudio' }
+        hpxml_to_os_measure = json[:steps][hpxml_to_os_measure_index]
+        hpxml_to_os_measure[:arguments][:annual_output_file_name] = 'null'
+        hpxml_to_os_measure[:arguments][:electric_panel_output_file_name] = 'null'
+        hpxml_to_os_measure[:arguments][:design_load_details_output_file_name] = 'null'
       end
 
       if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
         # CI checks out the repo as "project", so update dir name
-        json[:steps][measure_index][:measure_dir_name] = 'project'
+        hpxml_to_os_measure[:measure_dir_name] = 'project'
       end
 
       File.open(osw_path_test, 'w') do |f|
@@ -474,6 +483,7 @@ class WorkflowOtherTest < Minitest::Test
       # Check for output files
       assert(File.exist? File.join(run_dir, 'eplusout.msgpack')) unless skip_simulation
       assert(File.exist? File.join(run_dir, 'results_annual.csv')) unless skip_simulation
+      assert(File.exist?(File.join(run_dir, 'results_design_load_details.csv'))) unless skip_hpxml_to_os_outputs || osw_name == 'template-build-hpxml.osw'
 
       # Check for debug files
       assert(File.exist? File.join(run_dir, 'in.osm')) unless skip_simulation
