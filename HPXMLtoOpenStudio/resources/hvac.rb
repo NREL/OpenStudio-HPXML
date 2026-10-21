@@ -621,14 +621,23 @@ module HVAC
         name: "#{obj_name} clg power curve",
         coeff: hp_ap.cool_power_curve_spec[0]
       )
+      # Fixme: Should we only apply to single-speed systems since we don't really model more than one speed?
+      plf_fplr_curve = Model.add_curve_quadratic(
+        model,
+        name: 'Cool-PLF-fPLR',
+        coeff: hp_ap.plf_fplr_spec,
+        min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+      )
       clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model, clg_total_cap_curve, clg_sens_cap_curve, clg_power_curve)
       clg_coil.setName(obj_name + ' clg coil')
+      clg_coil.setPartLoadFractionCorrelationCurve(plf_fplr_curve)
       clg_coil.setRatedCoolingCoefficientofPerformance(hp_ap.cool_rated_cops[0])
       clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
       clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
       clg_coil.setRatedAirFlowRate(clg_air_flow_rated)
       clg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
-      clg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(80, 'F', 'C'))
+      # RatedEnteringWaterTemperature is not impacting results, only used in E+ sizing
+      # clg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(77, 'F', 'C'))
       clg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(80, 'F', 'C'))
       clg_coil.setRatedEnteringAirWetBulbTemperature(UnitConversions.convert(67, 'F', 'C'))
       # TODO: Add net to gross conversion after RESNET PR: https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1879
@@ -645,12 +654,21 @@ module HVAC
         name: "#{obj_name} htg power curve",
         coeff: hp_ap.heat_power_curve_spec[0]
       )
+      # Fixme: Should we only apply to single-speed systems since we don't really model more than one speed?
+      plf_fplr_curve = Model.add_curve_quadratic(
+        model,
+        name: 'Heat-PLF-fPLR',
+        coeff: hp_ap.plf_fplr_spec,
+        min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+      )
       htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit.new(model, htg_cap_curve, htg_power_curve)
       htg_coil.setName(obj_name + ' htg coil')
+      htg_coil.setPartLoadFractionCorrelationCurve(plf_fplr_curve)
       htg_coil.setRatedHeatingCoefficientofPerformance(hp_ap.heat_rated_cops[0])
       htg_coil.setRatedAirFlowRate(htg_air_flow_rated)
       htg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
-      htg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(60, 'F', 'C'))
+      # RatedEnteringWaterTemperature is not impacting results, only used in E+ sizing
+      # htg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(32, 'F', 'C'))
       htg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(70, 'F', 'C'))
       # TODO: Add net to gross conversion after RESNET PR: https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1879
       htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
