@@ -7923,8 +7923,9 @@ module Defaults
   # Sets the degradation coefficient and Part Load Factor (PLF) curve for the HVAC system.
   #
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
+  # @param single_speed_coil [Boolean] If it's a simplified model where the first speed is not explicitly modeled
   # @return [nil]
-  def self.set_hvac_degradation_coefficient(hvac_system)
+  def self.set_hvac_degradation_coefficient(hvac_system, single_speed_coil = false)
     hvac_ap = hvac_system.additional_properties
 
     # Degradation coefficient
@@ -7935,13 +7936,17 @@ module Defaults
       case hvac_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
         hvac_ap.c_d = 0.08
+        # reaching first speed at 50%
+        adj_factor_single_speed_coil = single_speed_coil ? 0.5 : 1.0
       when HPXML::HVACCompressorTypeVariableSpeed
         hvac_ap.c_d = 0.40
+        # reaching first speed at 30%
+        adj_factor_single_speed_coil = single_speed_coil ? 0.3 : 1.0
       end
     end
 
     # PLF curve (linear part load model)
-    hvac_ap.plf_fplr_spec = [(1.0 - hvac_ap.c_d), hvac_ap.c_d, 0.0]
+    hvac_ap.plf_fplr_spec = [(1.0 - hvac_ap.c_d), hvac_ap.c_d / adj_factor_single_speed_coil, 0.0]
   end
 
   # Sets the ground-to-air heat pump gross rated heating/cooling cops based on COP ratios from spec sheets.
@@ -8039,6 +8044,7 @@ module Defaults
         clg_ap.cool_sh_curve_spec = [[0.552252763485081, 18.4018840120962, -18.8349860928753, -0.135894420725405, 0.474444411548241, -0.00161950659658672]]
 
         cool_cop_ratios = [1.0]
+        set_hvac_degradation_coefficient(cooling_system, true)
 
       when HPXML::GroundToAirHeatPumpModelTypeExperimental
         case cooling_system.compressor_type
@@ -8104,10 +8110,10 @@ module Defaults
           # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
           cool_cop_ratios = [1.059467645, 1.0]
         end
+        set_hvac_degradation_coefficient(cooling_system)
       end
 
       set_ground_to_air_heat_pump_cops(cooling_system, cool_cop_ratios, :clg)
-      set_hvac_degradation_coefficient(cooling_system)
       return
     end
 
@@ -8251,6 +8257,7 @@ module Defaults
         htg_ap.heat_cap_curve_spec = [[-4.15575838697543, -2.41636319256641, 7.57540001609313, 0.208741878970691, 0.19265009478362]]
         htg_ap.heat_power_curve_spec = [[-10.1331922905183, 9.69567277321437, 1.65913848367526, -0.403708340999133, 0.0533437030572159]]
         heat_cop_ratios = [1.0]
+        set_hvac_degradation_coefficient(heating_system, true)
       when HPXML::GroundToAirHeatPumpModelTypeExperimental
         case heating_system.compressor_type
         when HPXML::HVACCompressorTypeSingleStage
@@ -8313,10 +8320,10 @@ module Defaults
           # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
           heat_cop_ratios = [1.15012987, 1.0]
         end
+        set_hvac_degradation_coefficient(heating_system)
       end
 
       set_ground_to_air_heat_pump_cops(heating_system, heat_cop_ratios, :htg)
-      set_hvac_degradation_coefficient(heating_system)
       return
     end
 
