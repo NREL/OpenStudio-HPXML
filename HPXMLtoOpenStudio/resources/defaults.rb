@@ -7923,7 +7923,7 @@ module Defaults
   # Sets the degradation coefficient and Part Load Factor (PLF) curve for the HVAC system.
   #
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
-  # @param single_speed_coil [Boolean] If it's a simplified model where the first speed is not explicitly modeled
+  # @param single_speed_coil [Boolean] Whether it's a simplified model where the first speed is not explicitly modeled
   # @return [nil]
   def self.set_hvac_degradation_coefficient(hvac_system, single_speed_coil = false)
     hvac_ap = hvac_system.additional_properties
@@ -7931,6 +7931,7 @@ module Defaults
     # Degradation coefficient
     if HVAC.is_room_dx_hvac_system(hvac_system)
       hvac_ap.c_d = 0.22
+      adj_factor_single_speed_coil = 1.0
     else
       # Per RESNET HERS Addendum 82
       case hvac_system.compressor_type
