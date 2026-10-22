@@ -2,6 +2,7 @@
 
 # Collection of constants.
 module Constants
+  ApplianceEventDurationMax = 480 # minutes
   BathToShowerRatio = 0.078843
   BathDurationMean = 5.65
   BathDurationStd = 2.09

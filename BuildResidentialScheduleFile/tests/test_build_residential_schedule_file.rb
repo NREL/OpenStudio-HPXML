@@ -303,6 +303,49 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?("GeometryNumOccupants=#{Float(Integer(num_occupants))}") })
   end
 
+  def test_cooking_event_duration
+    # Regression test for implausibly long cooking events at different schedule timesteps.
+    # Event durations are sampled in 15-minute units, then aggregated to the schedule timestep.
+    # Use equivalent full-load minutes because partial timestep values can extend elapsed time
+    # beyond the nominal event duration without increasing the total event energy.
+    # Master seed 111745 selects a long sample that should be capped to roughly 8 hours.
+    # Master seed 1 represents an ordinary event that should remain below the cap.
+    expected_event_metrics = {
+      'base-simcontrol-timestep-10-mins.xml' => { 111745 => [490, 480.0], 1 => [330, 316.0] },
+      'base-simcontrol-timestep-30-mins.xml' => { 111745 => [510, 480.009], 1 => [360, 315.99] },
+      'base.xml' => { 111745 => [660, 494.982], 1 => [360, 316.02] },
+    }
+    [['base-simcontrol-timestep-10-mins.xml', 10], ['base-simcontrol-timestep-30-mins.xml', 30], ['base.xml', 60]].each do |hpxml_name, minutes_per_step|
+      [111745, 1].each do |random_seed|
+        @args_hash['hpxml_path'] = File.join(@sample_files_path, hpxml_name)
+        @args_hash['schedules_random_seed'] = random_seed
+        @args_hash['schedules_column_names'] = SchedulesFile::Columns[:CookingRange].name
+        @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+        hpxml, _result = _test_measure()
+
+        sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
+                               year: @year,
+                               output_path: @tmp_schedule_file_path)
+        cooking_schedule = sf.tmp_schedules[SchedulesFile::Columns[:CookingRange].name]
+        event_blocks = cooking_schedule.chunk { |value| value > 0 }
+        event_elapsed_minutes = event_blocks.filter_map { |on, values| values.size * minutes_per_step if on }
+        event_full_load_minutes = event_blocks.filter_map { |on, values| values.sum * minutes_per_step if on }
+        expected_elapsed_minutes, expected_full_load_minutes = expected_event_metrics[hpxml_name][random_seed]
+        assert_equal(expected_elapsed_minutes, event_elapsed_minutes.max)
+        assert_in_delta(expected_full_load_minutes, event_full_load_minutes.max, 0.01)
+
+        # The cap applies to the raw event before it is converted to fixed-size output timesteps.
+        # If the event straddles a timestep boundary, aggregation can include a partial event
+        # in one additional timestep, so allow one minutes_per_step beyond the nominal cap.
+        if random_seed == 111745
+          assert_operator(event_full_load_minutes.max, :<=, Constants::ApplianceEventDurationMax + minutes_per_step)
+        else
+          assert_operator(event_full_load_minutes.max, :<, Constants::ApplianceEventDurationMax + minutes_per_step)
+        end
+      end
+    end
+  end
+
   def test_zero_occupants
     num_occupants = 0.0
 

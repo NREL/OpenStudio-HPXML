@@ -64,6 +64,10 @@ These files contain the samples of runtime duration of different end uses, in 15
 So, a value of 3 means 45 minutes.
 Each row is for one household, and each column is the duration of one instance of the appliance running.
 
+Sampled appliance events are limited by `Constants::ApplianceEventDurationMax`, which is specified in minutes and defaults to 480 minutes (8 hours).
+The limit is applied to the raw sampled duration and again after applying the end use's monthly duration multiplier, so no generated appliance event exceeds 8 hours.
+This protects against implausibly long outliers in the empirical distributions while retaining the source samples in the resource files.
+
 Again, `<enduse>` may be:
 * `clothes_dryer`
 * `clothes_washer`

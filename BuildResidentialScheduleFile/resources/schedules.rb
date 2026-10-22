@@ -406,7 +406,16 @@ class ScheduleGenerator
     power = consumption_vals[@consumption_row[appliance_name]]
     sample = prng.rand(0..(duration_vals[@duration_row[appliance_name]].length - 1))
     duration = duration_vals[@duration_row[appliance_name]][sample]
+    duration = apply_appliance_duration_limit(duration * 15) / 15
     return [duration, power]
+  end
+
+  # Limit appliance event durations to avoid implausible outliers in the empirical distributions.
+  #
+  # @param duration [Integer] Event duration in minutes
+  # @return [Integer] Event duration in minutes, limited to the maximum allowed duration
+  def apply_appliance_duration_limit(duration)
+    return [duration, Constants::ApplianceEventDurationMax].min
   end
 
   # Read activity cluster size probability distributions from CSV files.
@@ -1393,7 +1402,7 @@ class ScheduleGenerator
         duration_15min, avg_power = sample_appliance_duration_power(@prngs[:dishwasher], @appliance_power_dist_map, 'dishwasher')
 
         month = (start_time + step * 15 * 60).month
-        duration_min = (duration_15min * 15 * hot_water_dishwasher_monthly_multiplier[month - 1]).to_i
+        duration_min = apply_appliance_duration_limit((duration_15min * 15 * hot_water_dishwasher_monthly_multiplier[month - 1]).to_i)
 
         duration = [duration_min, @mins_in_year - step * 15].min
         dw_power_sch.fill(avg_power, step * 15, duration)
@@ -1429,8 +1438,8 @@ class ScheduleGenerator
         cd_duration_15min, cd_avg_power = sample_appliance_duration_power(@prngs[:clothes_dryer], @appliance_power_dist_map, 'clothes_dryer')
 
         month = (start_time + step * 15 * 60).month
-        cd_duration_min = (cd_duration_15min * 15 * clothes_dryer_monthly_multiplier[month - 1]).to_i
-        cw_duration_min = (cw_duration_15min * 15 * hot_water_clothes_washer_monthly_multiplier[month - 1]).to_i
+        cd_duration_min = apply_appliance_duration_limit((cd_duration_15min * 15 * clothes_dryer_monthly_multiplier[month - 1]).to_i)
+        cw_duration_min = apply_appliance_duration_limit((cw_duration_15min * 15 * hot_water_clothes_washer_monthly_multiplier[month - 1]).to_i)
 
         cw_duration = [cw_duration_min, @mins_in_year - step * 15].min
         cw_power_sch.fill(cw_avg_power, step * 15, cw_duration)
@@ -1465,7 +1474,7 @@ class ScheduleGenerator
       if (cooking_state > 0) && (last_state == 0) # last_state == 0 prevents consecutive cooking power without gap
         duration_15min, avg_power = sample_appliance_duration_power(@prngs[:cooking], @appliance_power_dist_map, 'cooking')
         month = (start_time + step * 15 * 60).month
-        duration_min = (duration_15min * 15 * cooking_monthly_multiplier[month - 1]).to_i
+        duration_min = apply_appliance_duration_limit((duration_15min * 15 * cooking_monthly_multiplier[month - 1]).to_i)
         duration = [duration_min, @mins_in_year - step * 15].min
         cooking_power_sch.fill(avg_power, step * 15, duration)
         step_jump = duration_15min
