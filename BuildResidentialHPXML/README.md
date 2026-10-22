@@ -1370,7 +1370,7 @@ The size and type of battery storage.
 
 - **Required:** ``false``
 
-- **Choices:** <br/>  - `None`<br/>  - `5.0 kWh`<br/>  - `7.5 kWh`<br/>  - `10.0 kWh`<br/>  - `12.5 kWh`<br/>  - `15.0 kWh`<br/>  - `17.5 kWh`<br/>  - `20.0 kWh`<br/>  - `Detailed Example: 20.0 kWh, 6 kW, Garage`<br/>  - `Detailed Example: 20.0 kWh, 6 kW, Outside`<br/>  - `Detailed Example: 20.0 kWh, 6 kW, Outside, 80% Efficiency`
+- **Choices:** <br/>  - `None`<br/>  - `5.0 kWh`<br/>  - `7.5 kWh`<br/>  - `10.0 kWh`<br/>  - `12.5 kWh`<br/>  - `15.0 kWh`<br/>  - `17.5 kWh`<br/>  - `20.0 kWh`<br/>  - `Detailed Example: 20.0 kWh, 6 kW, Garage`<br/>  - `Detailed Example: 20.0 kWh, 6 kW, Outside`<br/>  - `Detailed Example: 20.0 kWh, 6 kW, Outside, 80% Efficiency`<br/>  - `Detailed Example: 20.0 kWh, 6 kW, Other Heated Space`<br/>  - `Detailed Example: 20.0 kWh, 6 kW, Other Multifamily Buffer Space`<br/>  - `Detailed Example: 20.0 kWh, 6 kW, Other Non-Freezing Space`
 
 
 - **Default:** `None`

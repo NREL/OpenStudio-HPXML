@@ -282,6 +282,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                         'Expected only SystemIdentifier to be specified when sameas attribute used'],
                             'multifamily-common-space-whole-sfa-or-mf-building-sim-false' => ['Expected ExteriorAdjacentTo'],
                             'multifamily-reference-appliance' => ['There are references to "other housing unit" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
+                            'multifamily-reference-battery' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-duct' => ['There are references to "other multifamily buffer space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-surface' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-water-heater' => ['There are references to "other non-freezing space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
@@ -921,6 +922,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'multifamily-reference-appliance'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
+      when 'multifamily-reference-battery'
+        hpxml, hpxml_bldg = _create_hpxml('base-pv-battery.xml')
+        hpxml_bldg.batteries[0].location = HPXML::LocationOtherHeatedSpace
       when 'multifamily-reference-duct'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherMultifamilyBufferSpace

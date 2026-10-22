@@ -12,6 +12,7 @@ __Features__
 - PV systems:
   - Allows `CollectorArea` or `NumberOfPanels` instead of `MaxPowerOutput`.
   - Allows `YearInstalled` instead of `YearModulesManufactured` for age-based degradation.
+- Allows batteries to be located in multifamily spaces; these locations are modeled as outside, so battery heat gains are not assigned to the dwelling unit.
 - To accommodate electric furnaces/boilers, allows heating efficiency with units of "Percent" as an alternative to "AFUE"; the two units are modeled identically.
 - Updates to some roof/wall solar absorptance defaults.
 - Updates garage ventilation rate to be SLA=1/150 (same as a vented crawlspace).
@@ -34,6 +35,7 @@ __Bugfixes__
 - Fixes specific heat for drywall (0.2 -> 0.26 Btu/lb-F).
 - Fixes order-dependent effective below-grade depth when collapsing similar foundation walls.
 - Fixes default water heater location hierarchy for locations where the IECC climate zone cannot be determined.
+- Fixes missing timeseries temperature outputs for manufactured home belly and wing foundation type.
 
 ## OpenStudio-HPXML v1.12.0
 
