@@ -795,7 +795,7 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-pv-battery.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-pv.xml",
-    "battery": "20.0 kWh"
+    "battery": "Detailed Example: 20.0 kWh, 6 kW, Other Heated Space"
   },
   "sample_files/base-bldgtype-mf-unit-shared-water-heater.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",

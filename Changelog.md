@@ -12,6 +12,7 @@ __Features__
 - PV systems:
   - Allows `CollectorArea` or `NumberOfPanels` instead of `MaxPowerOutput`.
   - Allows `YearInstalled` instead of `YearModulesManufactured` for age-based degradation.
+- Allows batteries to be located in multifamily spaces; these locations are modeled as outside, so battery heat gains are not assigned to the dwelling unit.
 - To accommodate electric furnaces/boilers, allows heating efficiency with units of "Percent" as an alternative to "AFUE"; the two units are modeled identically.
 - Updates to some roof/wall solar absorptance defaults.
 - Updates garage ventilation rate to be SLA=1/150 (same as a vented crawlspace).
