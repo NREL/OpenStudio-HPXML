@@ -35,6 +35,7 @@ __Bugfixes__
 - Fixes specific heat for drywall (0.2 -> 0.26 Btu/lb-F).
 - Fixes order-dependent effective below-grade depth when collapsing similar foundation walls.
 - Fixes default water heater location hierarchy for locations where the IECC climate zone cannot be determined.
+- Fixes missing timeseries temperature outputs for manufactured home belly and wing foundation type.
 
 ## OpenStudio-HPXML v1.12.0
 

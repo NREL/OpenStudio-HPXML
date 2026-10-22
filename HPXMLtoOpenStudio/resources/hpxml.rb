@@ -12332,6 +12332,20 @@ class HPXML < Object
             HPXML::LocationOtherHousingUnit]
   end
 
+  # Returns the set of all location types that have scheduled temperatures (i.e., not
+  # modeled as thermal zones).
+  #
+  # @return [Array<String>] List of conditioned locations (HPXML::LocationXXX)
+  def self.scheduled_locations
+    return [HPXML::LocationOtherHousingUnit,
+            HPXML::LocationOtherHeatedSpace,
+            HPXML::LocationOtherMultifamilyBufferSpace,
+            HPXML::LocationOtherNonFreezingSpace,
+            HPXML::LocationExteriorWall,
+            HPXML::LocationUnderSlab,
+            HPXML::LocationManufacturedHomeBelly]
+  end
+
   # Returns the set of all location types that are multifamily common spaces.
   #
   # @return [Array<String>] List of multifamily common space locations (HPXML::LocationXXX)

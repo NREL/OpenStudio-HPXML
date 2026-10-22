@@ -375,10 +375,7 @@ module HVACSizing
       # Includes below-grade garage
       heat_temp = calculate_space_design_temp(mj, location, weather, hpxml_bldg, mj.heat_setpoint, outdoor_design_temp, ground_temp, false)
 
-    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace,
-           HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace,
-           HPXML::LocationExteriorWall, HPXML::LocationUnderSlab,
-           HPXML::LocationManufacturedHomeBelly].include? location
+    elsif HPXML::scheduled_locations.include? location
       heat_temp = calculate_scheduled_space_design_temps(location, mj.heat_setpoint, outdoor_design_temp, ground_temp)
 
     end
@@ -537,10 +534,7 @@ module HVACSizing
       # Includes below-grade garage
       cool_temp = calculate_space_design_temp(mj, location, weather, hpxml_bldg, mj.cool_setpoint, outdoor_design_temp, ground_temp, false)
 
-    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace,
-           HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace,
-           HPXML::LocationExteriorWall, HPXML::LocationUnderSlab,
-           HPXML::LocationManufacturedHomeBelly].include? location
+    elsif HPXML::scheduled_locations.include? location
       cool_temp = calculate_scheduled_space_design_temps(location, mj.cool_setpoint, outdoor_design_temp, ground_temp)
 
     end
@@ -1769,8 +1763,7 @@ module HVACSizing
     when HPXML::LocationOutside, HPXML::LocationRoofDeck
       f_regain = 0.0
 
-    when HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
-         HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab, HPXML::LocationManufacturedHomeBelly
+    when *HPXML::scheduled_locations
       space_values = Geometry.get_temperature_scheduled_space_values(duct.duct_location)
       f_regain = space_values[:f_regain]
 
