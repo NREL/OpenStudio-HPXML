@@ -4175,7 +4175,6 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
   ``SystemIdentifier``                         id                                                     Yes                     Unique identifier
   ``FuelType``                                 string                 See [#]_                        Yes                     Fuel type
   ``WaterHeaterType``                          string                 instantaneous water heater      Yes                     Type of water heater
-  ``Location``                                 string                 See [#]_                        No            See [#]_  Water heater location
   ``IsSharedSystem``                           boolean                                                No            false     Whether it serves multiple dwelling units or shared laundry room
   ``PerformanceAdjustment``                    double   frac          >= 0, <= 1                      No            See [#]_  Multiplier on efficiency, typically to account for cycling
   ``FractionDHWLoadServed``                    double   frac          >= 0, <= 1 [#]_                 Yes                     Fraction of hot water load served [#]_
@@ -4188,14 +4187,6 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
   ===========================================  =======  ============  ==============================  ============  ========  ==========================================================
 
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
-  .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
-         See :ref:`hpxml_locations` for descriptions.
-  .. [#] If Location not provided, defaults to the first present space type:
-
-         \- **IECC zones 1-3**: "garage", "conditioned space"
-
-         \- **IECC zones 4-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
-
   .. [#] If PerformanceAdjustment not provided, defaults to 0.94 (UEF) or 0.92 (EF) based on `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
@@ -4346,7 +4337,6 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
   ====================================  =======  =====  =======================================  ============  ========  ==================================================
   ``SystemIdentifier``                  id                                                       Yes                     Unique identifier
   ``WaterHeaterType``                   string          space-heating boiler with tankless coil  Yes                     Type of water heater
-  ``Location``                          string          See [#]_                                 No            See [#]_  Water heater location
   ``IsSharedSystem``                    boolean                                                  No            false     Whether it serves multiple dwelling units or shared laundry room
   ``FractionDHWLoadServed``             double   frac   >= 0, <= 1 [#]_                          Yes                     Fraction of hot water load served [#]_
   ``HotWaterTemperature``               double   F      >= 105                                   No            125       Water heater setpoint [#]_
@@ -4355,14 +4345,6 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
   ``RelatedHVACSystem``                 idref           See [#]_                                 Yes                     ID of boiler
   ``extension/NumberofBedroomsServed``  integer         > NumberofBedrooms                       See [#]_                Number of bedrooms served directly or indirectly
   ====================================  =======  =====  =======================================  ============  ========  ==================================================
-
-  .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
-         See :ref:`hpxml_locations` for descriptions.
-  .. [#] If Location not provided, defaults to the first present space type:
-
-         \- **IECC zones 1-3**: "garage", "conditioned space"
-
-         \- **IECC zones 4-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
 
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.

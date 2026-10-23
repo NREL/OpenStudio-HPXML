@@ -251,13 +251,11 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     ua = 0.0
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 0.9212
-    loc = water_heating_system.location
 
     # Check water heater
     assert_equal(1, model.getWaterHeaterMixeds.size)
     wh = model.getWaterHeaterMixeds[0]
     assert_equal(fuel, wh.heaterFuelType)
-    assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.01)
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.01)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.01)
@@ -282,13 +280,11 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     ua = 0.0
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 0.8832
-    loc = water_heating_system.location
 
     # Check water heater
     assert_equal(1, model.getWaterHeaterMixeds.size)
     wh = model.getWaterHeaterMixeds[0]
     assert_equal(fuel, wh.heaterFuelType)
-    assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.01)
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.01)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.01)
@@ -313,13 +309,11 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     ua = 0.0
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
     ther_eff = 0.8742
-    loc = water_heating_system.location
 
     # Check water heater
     assert_equal(1, model.getWaterHeaterMixeds.size)
     wh = model.getWaterHeaterMixeds[0]
     assert_equal(fuel, wh.heaterFuelType)
-    assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.01)
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.01)
     assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.01)
@@ -919,12 +913,10 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     cap = 0.0
     ua = 0.0
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
-    loc = water_heating_system.location
 
     # Check water heater
     assert_equal(1, model.getWaterHeaterMixeds.size)
     wh = model.getWaterHeaterMixeds[0]
-    assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_equal('Modulate', wh.heaterControlType)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.01)
     assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.01)

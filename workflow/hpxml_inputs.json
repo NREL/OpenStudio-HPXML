@@ -721,7 +721,8 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard-combi-tankless.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml",
-    "dhw_water_heater": "Space-Heating Boiler w/ Tankless Coil"
+    "dhw_water_heater": "Space-Heating Boiler w/ Tankless Coil",
+    "dhw_water_heater_location": null
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml",
@@ -818,11 +819,8 @@
   },
   "sample_files/base-dhw-combi-tankless.xml": {
     "parent_hpxml": "sample_files/base-dhw-indirect.xml",
-    "dhw_water_heater": "Space-Heating Boiler w/ Tankless Coil"
-  },
-  "sample_files/base-dhw-combi-tankless-outside.xml": {
-    "parent_hpxml": "sample_files/base-dhw-combi-tankless.xml",
-    "dhw_water_heater_location": "Outside"
+    "dhw_water_heater": "Space-Heating Boiler w/ Tankless Coil",
+    "dhw_water_heater_location": null
   },
   "sample_files/base-dhw-desuperheater.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml"
@@ -841,7 +839,8 @@
   },
   "sample_files/base-dhw-desuperheater-tankless.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
-    "dhw_water_heater": "Electricity, Tankless, UEF 0.98"
+    "dhw_water_heater": "Electricity, Tankless, UEF 0.98",
+    "dhw_water_heater_location": null
   },
   "sample_files/base-dhw-desuperheater-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-var-speed.xml"
@@ -1033,11 +1032,8 @@
   },
   "sample_files/base-dhw-tankless-electric.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "dhw_water_heater": "Electricity, Tankless, UEF 0.98"
-  },
-  "sample_files/base-dhw-tankless-electric-outside.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tankless-electric.xml",
-    "dhw_water_heater_location": "Outside"
+    "dhw_water_heater": "Electricity, Tankless, UEF 0.98",
+    "dhw_water_heater_location": null
   },
   "sample_files/base-dhw-tankless-electric-ef.xml": {
     "parent_hpxml": "sample_files/base-dhw-tankless-electric.xml",
@@ -1045,7 +1041,8 @@
   },
   "sample_files/base-dhw-tankless-gas.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "dhw_water_heater": "Natural Gas, Tankless, UEF 0.82"
+    "dhw_water_heater": "Natural Gas, Tankless, UEF 0.82",
+    "dhw_water_heater_location": null
   },
   "sample_files/base-dhw-tankless-gas-ef.xml": {
     "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
@@ -2504,6 +2501,7 @@
     "hvac_ducts_supply_location": "Conditioned Space",
     "hvac_ducts_return_location": "Conditioned Space",
     "dhw_water_heater": "Propane, Tankless, UEF 0.82",
+    "dhw_water_heater_location": null,
     "misc_fireplace": "Detailed Example: Wood, 55 therm/yr"
   },
   "sample_files/base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml": {
