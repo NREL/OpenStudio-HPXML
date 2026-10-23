@@ -979,7 +979,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
 
     # Location
     hpxml_value = appliance.location
-    if hpxml_value.nil? || HPXML::conditioned_locations.include?(hpxml_value) || [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
+    if hpxml_value.nil? || HPXML::conditioned_locations.include?(hpxml_value) || HPXML::multifamily_common_space_locations.include?(hpxml_value)
       hpxml_value = HPXML::LocationConditionedSpace
     end
     tabular_value = tabular_map[appliance.class]

@@ -1667,13 +1667,7 @@ module Geometry
 
     sch = nil
     space = nil
-    if [HPXML::LocationOtherHeatedSpace,
-        HPXML::LocationOtherHousingUnit,
-        HPXML::LocationOtherMultifamilyBufferSpace,
-        HPXML::LocationOtherNonFreezingSpace,
-        HPXML::LocationExteriorWall,
-        HPXML::LocationUnderSlab,
-        HPXML::LocationManufacturedHomeBelly].include? location
+    if HPXML::scheduled_locations.include? location
       # if located in spaces where we don't model a thermal zone, create and return temperature schedule
       sch = get_space_temperature_schedule(model, location, spaces)
     else
@@ -1683,7 +1677,7 @@ module Geometry
     return space, sch
   end
 
-  # Returns an OS:Space, or nil if a MF space or outside
+  # Returns an OS:Space, or nil if outside or a location with a scheduled temperature.
   # Should be called when the object's energy use is NOT sensitive to ambient temperature
   # (e.g., appliances).
   #
@@ -1691,11 +1685,8 @@ module Geometry
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [OpenStudio::Model::Space] OpenStudio Space object
   def self.get_space_from_location(location, spaces)
-    return if [HPXML::LocationOutside,
-               HPXML::LocationOtherHeatedSpace,
-               HPXML::LocationOtherHousingUnit,
-               HPXML::LocationOtherMultifamilyBufferSpace,
-               HPXML::LocationOtherNonFreezingSpace].include? location
+    return if location == HPXML::LocationOutside
+    return if HPXML::scheduled_locations.include? location
 
     if HPXML::conditioned_locations.include? location
       location = HPXML::LocationConditionedSpace
