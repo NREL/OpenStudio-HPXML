@@ -1383,6 +1383,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         'System Node Relative Humidity' => ['Supply Air Relative Humidity', nil, 1.0, 0.0],
         'System Node Humidity Ratio' => ['Supply Air Humidity Ratio', 'fraction', 1.0, 0.0]
       }.each do |output_variable_name, output_spec|
+        next if @model.getAirLoopHVACs.empty?
+
         output_name, output_units, unit_conv, unit_adder = output_spec
         key_values, units = get_output_variable_key_values_and_units(output_variable_name)
         if units.nil?
@@ -1429,12 +1431,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
 
       # DHW outputs
+      water_heaters = @model.getWaterHeaterMixeds + @model.getWaterHeaterStratifieds
       output_variable_name = 'Water Heater Use Side Outlet Temperature'
       key_values, units = get_output_variable_key_values_and_units(output_variable_name)
-      if units.nil?
+      if units.nil? && !water_heaters.empty?
         runner.registerWarning("Request for output variable '#{output_variable_name}' returned no results.")
       else
-        water_heaters = @model.getWaterHeaterMixeds + @model.getWaterHeaterStratifieds
         water_heaters.each do |water_heater|
           requested_key_value = water_heater.name.to_s
           key_value = key_values.find { |key| key.casecmp?(requested_key_value) }
