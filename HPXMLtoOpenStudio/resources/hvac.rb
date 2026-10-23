@@ -2787,7 +2787,7 @@ module HVAC
       end
 
       # Add new datapoint at min/max ODB temperatures
-      n_tries = 1000
+      n_tries = 5000 # Prevent iteration code from getting caught in an endless loop
       outdoor_dry_bulbs.each do |target_type, target_odb, min_power_constraint|
         if mode == :clg
           new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
@@ -2819,7 +2819,7 @@ module HVAC
           end
 
           if i == n_tries
-            fail 'Unexpected error.'
+            fail 'Reached maximum number of tries.'
           end
         end
 
