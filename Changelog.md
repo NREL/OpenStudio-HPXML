@@ -37,6 +37,7 @@ __Bugfixes__
 - Fixes order-dependent effective below-grade depth when collapsing similar foundation walls.
 - Fixes default water heater location hierarchy for locations where the IECC climate zone cannot be determined.
 - Fixes missing timeseries temperature outputs for manufactured home belly and wing foundation type.
+- Fixes possibility of iteration limit error when providing detailed HVAC performance data.
 
 ## OpenStudio-HPXML v1.12.0
 
