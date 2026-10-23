@@ -1147,6 +1147,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
   ['System Use:',
    'Temperature:',
    'Humidity Ratio:', 'Relative Humidity:', 'Dewpoint Temperature:', 'Radiant Temperature:', 'Operative Temperature:',
+   'Supply Air Temperature:', 'Supply Air Relative Humidity:', 'Supply Air Humidity Ratio:', 'Supply Water Temperature:',
    'Utility Bills:',
    'HVAC Zone Design Load:',
    'HVAC Space Design Load:',
