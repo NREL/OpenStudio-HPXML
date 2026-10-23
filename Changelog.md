@@ -37,6 +37,7 @@ __Bugfixes__
 - Fixes default water heater location hierarchy for locations where the IECC climate zone cannot be determined.
 - Fixes missing timeseries temperature outputs for manufactured home belly and wing foundation type.
 - Removes `Location` input for "instantaneous water heater" and "space-heating boiler with tankless coil" water heater types; it does not affect the model.
+- Fixes possibility of iteration limit error when providing detailed HVAC performance data.
 
 ## OpenStudio-HPXML v1.12.0
 
