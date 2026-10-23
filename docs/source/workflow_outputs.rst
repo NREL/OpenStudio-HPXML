@@ -667,6 +667,7 @@ Depending on the outputs requested, the file may include:
   Unmet Hours                         ``unmethours``       Heating, cooling, and EV driving unmet hours.
   Zone Temperatures                   ``temperatures``     Zone temperatures for each space (e.g., conditioned space [#]_, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints [#]_ (in deg-F).
   Zone Conditions                     ``conditions``       Zone conditions (humidity ratio and relative humidity and dewpoint, radiant, and operative temperatures).
+  Supply Conditions                   ``supply``           HVAC supply air temperature (deg-F), relative humidity (%), and humidity ratio (fraction); HVAC hydronic supply temperature (deg-F); domestic hot water temperature (deg-F) leaving each water heater's use side.
   Airflows                            ``airflows``         Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
   Weather                             ``weather``          Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.
   Resilience                          ``resilience``       Resilience outputs (currently only average resilience hours for battery storage).

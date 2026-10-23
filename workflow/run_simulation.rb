@@ -13,7 +13,7 @@ basedir = File.expand_path(File.dirname(__FILE__))
 
 $timeseries_types = ['ALL', 'total', 'fuels', 'enduses', 'systemuses', 'emissions', 'emissionfuels',
                      'emissionenduses', 'hotwater', 'loads', 'componentloads',
-                     'unmethours', 'temperatures', 'conditions', 'airflows', 'weather', 'resilience',
+                     'unmethours', 'temperatures', 'conditions', 'supply', 'airflows', 'weather', 'resilience',
                      'dwellingunits']
 
 def run_workflow(basedir, rundir, hpxml, debug, skip_validation, add_comp_loads,
@@ -96,6 +96,7 @@ def run_workflow(basedir, rundir, hpxml, debug, skip_validation, add_comp_loads,
       args['include_timeseries_unmet_hours'] = timeseries_outputs.include? 'unmethours'
       args['include_timeseries_zone_temperatures'] = timeseries_outputs.include? 'temperatures'
       args['include_timeseries_zone_conditions'] = timeseries_outputs.include? 'conditions'
+      args['include_timeseries_supply_conditions'] = timeseries_outputs.include? 'supply'
       args['include_timeseries_airflows'] = timeseries_outputs.include? 'airflows'
       args['include_timeseries_weather'] = timeseries_outputs.include? 'weather'
       args['include_timeseries_resilience'] = timeseries_outputs.include? 'resilience'
