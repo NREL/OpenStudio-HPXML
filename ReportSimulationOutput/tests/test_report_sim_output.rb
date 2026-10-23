@@ -357,6 +357,13 @@ class ReportSimulationOutputTest < Minitest::Test
     'Operative Temperature: Conditioned Space',
   ]
 
+  BaseHPXMLTimeseriesColsSupplyConds = [
+    'Supply Air Humidity Ratio: HVACDistribution1',
+    'Supply Air Relative Humidity: HVACDistribution1',
+    'Supply Air Temperature: HVACDistribution1',
+    'Supply Water Temperature: WaterHeatingSystem1',
+  ]
+
   BaseHPXMLTimeseriesColsAirflows = [
     "Airflow: #{AFT::Infiltration}",
     "Airflow: #{AFT::MechanicalVentilation}",
@@ -431,6 +438,7 @@ class ReportSimulationOutputTest < Minitest::Test
             BaseHPXMLTimeseriesColsUnmetHours +
             BaseHPXMLTimeseriesColsZoneTemps +
             BaseHPXMLTimeseriesColsZoneConds +
+            BaseHPXMLTimeseriesColsSupplyConds +
             BaseHPXMLTimeseriesColsAirflows +
             BaseHPXMLTimeseriesColsWeather)
   end
@@ -650,6 +658,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_component_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_zone_conditions' => false,
+                  'include_timeseries_supply_conditions' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false,
                   'include_timeseries_resilience' => false,
@@ -692,6 +701,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_component_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_zone_conditions' => true,
+                  'include_timeseries_supply_conditions' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true,
                   'include_timeseries_resilience' => true,
@@ -1180,6 +1190,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_component_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_zone_conditions' => true,
+                  'include_timeseries_supply_conditions' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true,
                   'include_timeseries_resilience' => true }
@@ -1224,6 +1235,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_component_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_zone_conditions' => true,
+                  'include_timeseries_supply_conditions' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true,
                   'include_timeseries_resilience' => true }
@@ -1264,6 +1276,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_component_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_zone_conditions' => true,
+                  'include_timeseries_supply_conditions' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true,
                   'include_timeseries_resilience' => true }
@@ -1488,6 +1501,61 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsEnergyPlusOutputVariables)
     assert(File.readlines(run_log).any? { |line| line.include?("Request for output variable 'Foo'") })
+  end
+
+  def test_timeseries_supply_outputs
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-hvac-boiler-gas-central-ac-1-speed.xml'),
+                  'skip_validation' => true,
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_supply_conditions' => true }
+    _annual_csv, timeseries_csv = _test_measure(args_hash)
+    timeseries_rows = CSV.read(timeseries_csv)
+    timeseries_cols = timeseries_rows[0]
+    supply_columns = timeseries_cols.select { |col| col.start_with?('Supply ') }
+    assert_equal(supply_columns.sort, supply_columns)
+    temperature_col = timeseries_cols.find_index { |col| col == 'Supply Air Temperature: HVACDistribution2' }
+    relative_humidity_col = timeseries_cols.find_index { |col| col == 'Supply Air Relative Humidity: HVACDistribution2' }
+    humidity_ratio_col = timeseries_cols.find_index { |col| col == 'Supply Air Humidity Ratio: HVACDistribution2' }
+    water_temperature_col = timeseries_cols.find_index { |col| col == 'Supply Water Temperature: HVACDistribution1' }
+    dhw_temperature_col = timeseries_cols.find_index { |col| col == 'Supply Water Temperature: WaterHeatingSystem1' }
+    refute_nil(temperature_col)
+    refute_nil(relative_humidity_col)
+    refute_nil(humidity_ratio_col)
+    refute_nil(water_temperature_col)
+    refute_nil(dhw_temperature_col)
+    assert_equal('F', timeseries_rows[1][temperature_col])
+    assert_equal('%', timeseries_rows[1][relative_humidity_col])
+    assert_equal('fraction', timeseries_rows[1][humidity_ratio_col])
+    assert_equal('F', timeseries_rows[1][water_temperature_col])
+    assert_equal('F', timeseries_rows[1][dhw_temperature_col])
+  end
+
+  def test_timeseries_supply_outputs_multifamily
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-bldgtype-mf-whole-building.xml'),
+                  'skip_validation' => true,
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_supply_conditions' => true }
+    _annual_csv, timeseries_csv = _test_measure(args_hash)
+    timeseries_rows = CSV.read(timeseries_csv)
+    timeseries_cols = timeseries_rows[0]
+
+    building_suffixes = ['', '_2', '_3', '_4', '_5', '_6']
+    expected_supply_columns = building_suffixes.flat_map do |building_suffix|
+      # The room ACs in this fixture have no distribution reference, so their system IDs are used as fallbacks.
+      system_id = "CoolingSystem1#{building_suffix}"
+      water_heating_system_id = "WaterHeatingSystem1#{building_suffix}"
+      ["Supply Air Temperature: #{system_id}",
+       "Supply Air Relative Humidity: #{system_id}",
+       "Supply Air Humidity Ratio: #{system_id}",
+       "Supply Water Temperature: #{water_heating_system_id}"]
+    end.sort
+    actual_supply_columns = timeseries_cols.select { |col| col.start_with?('Supply ') }
+    assert_equal(expected_supply_columns, actual_supply_columns)
+
+    assert_equal('F', timeseries_rows[1][timeseries_cols.find_index('Supply Air Temperature: CoolingSystem1_2')])
+    assert_equal('%', timeseries_rows[1][timeseries_cols.find_index('Supply Air Relative Humidity: CoolingSystem1_2')])
+    assert_equal('fraction', timeseries_rows[1][timeseries_cols.find_index('Supply Air Humidity Ratio: CoolingSystem1_2')])
+    assert_equal('F', timeseries_rows[1][timeseries_cols.find_index('Supply Water Temperature: WaterHeatingSystem1_2')])
   end
 
   def test_timeseries_energyplus_output_variables_freq_none

@@ -418,6 +418,19 @@ Generates timeseries temperatures and humidities for each thermal zone.
 - **Default:** `false`
 
 
+**Generate Timeseries Output: Supply Conditions**
+
+Generates timeseries supply air conditions, HVAC plant loop temperatures, and domestic hot water temperatures.
+
+- **Name:** ``include_timeseries_supply_conditions``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+
+- **Default:** `false`
+
+
 **Generate Timeseries Output: Airflows**
 
 Generates timeseries airflows.

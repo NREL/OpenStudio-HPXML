@@ -234,6 +234,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('include_timeseries_supply_conditions', false)
+    arg.setDisplayName('Generate Timeseries Output: Supply Conditions')
+    arg.setDescription('Generates timeseries supply air conditions, HVAC plant loop temperatures, and domestic hot water temperatures.')
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('include_timeseries_airflows', false)
     arg.setDisplayName('Generate Timeseries Output: Airflows')
     arg.setDescription('Generates timeseries airflows.')
@@ -355,6 +361,76 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       args[:user_output_meters] = nil
     end
     return args
+  end
+
+  # Returns whether the plant loop contains a domestic water heater.
+  #
+  # @param plant_loop [OpenStudio::Model::PlantLoop] Plant loop to inspect
+  # @return [Boolean] Whether the loop contains a water heater
+  def water_heating_plant_loop?(plant_loop)
+    components = plant_loop.supplyComponents + plant_loop.demandComponents
+    contains_water_heater = false
+    components.each do |component|
+      if component.to_WaterHeaterMixed.is_initialized || component.to_WaterHeaterStratified.is_initialized
+        contains_water_heater = true
+        break
+      end
+    end
+    return contains_water_heater
+  end
+
+  # Returns the unique HPXML system IDs attached to model objects.
+  #
+  # @param objects [Array<OpenStudio::Model::ModelObject>] Model objects to inspect
+  # @return [Array<String>] Unique HPXML system IDs
+  def hpxml_system_ids(objects)
+    system_ids = []
+    objects.each do |object|
+      system_id = object.additionalProperties.getFeatureAsString('HPXML_ID')
+      if system_id.is_initialized
+        system_ids << system_id.get
+      end
+    end
+    return system_ids.uniq
+  end
+
+  # Returns HPXML system IDs on an air loop and its unitary coils.
+  #
+  # @param air_loop [OpenStudio::Model::AirLoopHVAC] Air loop to inspect
+  # @return [Array<String>] Unique HPXML system IDs
+  def air_loop_hpxml_system_ids(air_loop)
+    system_ids = hpxml_system_ids(air_loop.supplyComponents)
+    air_loop.supplyComponents.each do |component|
+      unitary_system = component.to_AirLoopHVACUnitarySystem
+      next unless unitary_system.is_initialized
+
+      unitary_system = unitary_system.get
+      [unitary_system.heatingCoil, unitary_system.coolingCoil, unitary_system.supplementalHeatingCoil].each do |coil|
+        next unless coil.is_initialized
+
+        system_ids.concat(hpxml_system_ids([coil.get]))
+      end
+    end
+
+    return system_ids.uniq
+  end
+
+  # Maps HVAC system IDs to distribution IDs, falling back when no distribution is referenced.
+  #
+  # @param system_ids [Array<String>] HPXML HVAC system IDs
+  # @return [Array<String>] Unique HVAC distribution IDs or fallback system IDs
+  def hvac_distribution_ids(system_ids)
+    hvac_systems = @hpxml_bldgs.flat_map(&:hvac_systems)
+    distribution_ids = []
+    system_ids.each do |system_id|
+      hvac_system = hvac_systems.find { |system| system.id == system_id }
+      if hvac_system.nil? || hvac_system.distribution_system_idref.nil?
+        distribution_ids << system_id
+      else
+        distribution_ids << hvac_system.distribution_system_idref
+      end
+    end
+    return distribution_ids.uniq
   end
 
   # Adds OpenStudio model objects to requests desired outputs.
@@ -570,6 +646,28 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       Model.add_output_variable(model, key_value: '*', variable_name: 'Zone Mean Air Dewpoint Temperature', reporting_frequency: args[:timeseries_frequency])
       Model.add_output_variable(model, key_value: '*', variable_name: 'Zone Mean Radiant Temperature', reporting_frequency: args[:timeseries_frequency])
       Model.add_output_variable(model, key_value: '*', variable_name: 'Zone Operative Temperature', reporting_frequency: args[:timeseries_frequency])
+    end
+
+    # Detailed supply condition outputs (timeseries only)
+    if args[:include_timeseries_supply_conditions]
+      # HVAC outputs
+      model.getAirLoopHVACs.each do |air_loop|
+        key_value = air_loop.demandInletNode.name.to_s.upcase
+        ['System Node Temperature', 'System Node Relative Humidity', 'System Node Humidity Ratio'].each do |output_variable_name|
+          Model.add_output_variable(model, key_value: key_value, variable_name: output_variable_name, reporting_frequency: args[:timeseries_frequency])
+        end
+      end
+      model.getPlantLoops.each do |plant_loop|
+        next if water_heating_plant_loop?(plant_loop)
+        next unless plant_loop.fluidType == EPlus::FluidWater
+
+        Model.add_output_variable(model, key_value: plant_loop.name.to_s.upcase, variable_name: 'Plant Supply Side Outlet Temperature', reporting_frequency: args[:timeseries_frequency])
+      end
+
+      # DHW outputs
+      (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).each do |water_heater|
+        Model.add_output_variable(model, key_value: water_heater.name.to_s.upcase, variable_name: 'Water Heater Use Side Outlet Temperature', reporting_frequency: args[:timeseries_frequency])
+      end
     end
 
     # Airflow outputs (timeseries only)
@@ -1158,7 +1256,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # @return [String] Output name
     def sanitize_name(bldg_id, object_name)
       sstrs = object_name.gsub('_', ' ').split
-      sstrs.delete(sstrs[0]) if sstrs[0].include?('UNIT')
+      sstrs.delete(sstrs[0]) if sstrs[0].match?(/\AUNIT\d+\z/i)
       return "#{bldg_id} #{sstrs.map(&:capitalize).join(' ')}".strip
     end
 
@@ -1272,6 +1370,84 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           @zone_conds["#{zone_name} Operative Temperature"].name = "Operative Temperature: #{sanitize_name(bldg_id, zone_name)}"
           @zone_conds["#{zone_name} Operative Temperature"].timeseries_units = 'F'
           @zone_conds["#{zone_name} Operative Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Operative Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+        end
+      end
+    end
+
+    # Supply detailed conditions
+    @supply_conds = {}
+    if args[:include_timeseries_supply_conditions]
+      # HVAC outputs
+      {
+        'System Node Temperature' => ['Supply Air Temperature', 'F', 9.0 / 5.0, 32.0],
+        'System Node Relative Humidity' => ['Supply Air Relative Humidity', nil, 1.0, 0.0],
+        'System Node Humidity Ratio' => ['Supply Air Humidity Ratio', 'fraction', 1.0, 0.0]
+      }.each do |output_variable_name, output_spec|
+        output_name, output_units, unit_conv, unit_adder = output_spec
+        key_values, units = get_output_variable_key_values_and_units(output_variable_name)
+        if units.nil?
+          runner.registerWarning("Request for output variable '#{output_variable_name}' returned no results.")
+          next
+        end
+
+        @model.getAirLoopHVACs.each do |air_loop|
+          requested_key_value = air_loop.demandInletNode.name.to_s
+          key_value = key_values.find { |key| key.casecmp?(requested_key_value) }
+          next if key_value.nil?
+
+          distribution_ids = hvac_distribution_ids(air_loop_hpxml_system_ids(air_loop))
+          distribution_ids = [air_loop.name.to_s] if distribution_ids.empty?
+          distribution_ids.each do |distribution_id|
+            @supply_conds[[output_variable_name, key_value, distribution_id]] = OutputVariableOrMeter.new
+            @supply_conds[[output_variable_name, key_value, distribution_id]].name = "#{output_name}: #{distribution_id}"
+            @supply_conds[[output_variable_name, key_value, distribution_id]].timeseries_units = output_units || units
+            @supply_conds[[output_variable_name, key_value, distribution_id]].timeseries_output = get_report_variable_data_timeseries([key_value], [output_variable_name], unit_conv, unit_adder, args[:timeseries_frequency])
+          end
+        end
+      end
+
+      output_variable_name = 'Plant Supply Side Outlet Temperature'
+      key_values, units = get_output_variable_key_values_and_units(output_variable_name)
+      unless units.nil?
+        @model.getPlantLoops.each do |plant_loop|
+          next if water_heating_plant_loop?(plant_loop)
+          next unless plant_loop.fluidType == EPlus::FluidWater
+
+          requested_key_value = plant_loop.name.to_s
+          key_value = key_values.find { |key| key.casecmp?(requested_key_value) }
+          next if key_value.nil?
+
+          distribution_ids = hvac_distribution_ids(hpxml_system_ids(plant_loop.supplyComponents + plant_loop.demandComponents))
+          distribution_ids = [requested_key_value] if distribution_ids.empty?
+          distribution_ids.each do |distribution_id|
+            @supply_conds[[output_variable_name, key_value, distribution_id]] = OutputVariableOrMeter.new
+            @supply_conds[[output_variable_name, key_value, distribution_id]].name = "Supply Water Temperature: #{distribution_id}"
+            @supply_conds[[output_variable_name, key_value, distribution_id]].timeseries_units = 'F'
+            @supply_conds[[output_variable_name, key_value, distribution_id]].timeseries_output = get_report_variable_data_timeseries([key_value], [output_variable_name], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+          end
+        end
+      end
+
+      # DHW outputs
+      output_variable_name = 'Water Heater Use Side Outlet Temperature'
+      key_values, units = get_output_variable_key_values_and_units(output_variable_name)
+      if units.nil?
+        runner.registerWarning("Request for output variable '#{output_variable_name}' returned no results.")
+      else
+        water_heaters = @model.getWaterHeaterMixeds + @model.getWaterHeaterStratifieds
+        water_heaters.each do |water_heater|
+          requested_key_value = water_heater.name.to_s
+          key_value = key_values.find { |key| key.casecmp?(requested_key_value) }
+          next if key_value.nil?
+
+          system_ids = hpxml_system_ids([water_heater])
+          system_ids = [requested_key_value] if system_ids.empty?
+          system_ids.each do |system_id|
+            @supply_conds[[output_variable_name, key_value, system_id]] = OutputVariableOrMeter.new
+            @supply_conds[[output_variable_name, key_value, system_id]].name = "Supply Water Temperature: #{system_id}"
+            @supply_conds[[output_variable_name, key_value, system_id]].timeseries_units = 'F'
+            @supply_conds[[output_variable_name, key_value, system_id]].timeseries_output = get_report_variable_data_timeseries([key_value], [output_variable_name], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+          end
         end
       end
     end
@@ -1837,6 +2013,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     emissions_data, emission_fuel_data, emission_end_use_data = [], [], []
     hot_water_use_data, total_loads_data, comp_loads_data, unmet_hours_data = [], [], [], []
     zone_temps_data, zone_conds_data, airflows_data, weather_data, resilience_data = [], [], [], [], []
+    supply_conds_data = []
     output_variables_data, output_meters_data = [], []
     unit_total_energy_data, unit_fuel_data = [], []
 
@@ -1929,6 +2106,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       zone_conds_data = @zone_conds.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(4) } }
     end
 
+    # Supply conditions
+    if args[:include_timeseries_supply_conditions]
+      supply_conds_data = @supply_conds.values.map { |x| [x.name, x.timeseries_units] + x.timeseries_output }.sort_by(&:first)
+    end
+
     # Airflows
     if args[:include_timeseries_airflows]
       airflows_data = @airflows.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(3) } }
@@ -1981,7 +2163,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     return if (total_energy_data.size + fuel_data.size + end_use_data.size + system_use_data.size + emissions_data.size + emission_fuel_data.size +
                emission_end_use_data.size + hot_water_use_data.size + total_loads_data.size + comp_loads_data.size + unmet_hours_data.size +
-               zone_temps_data.size + zone_conds_data.size + airflows_data.size + weather_data.size + resilience_data.size + output_variables_data.size + output_meters_data.size +
+               zone_temps_data.size + zone_conds_data.size + supply_conds_data.size + airflows_data.size + weather_data.size + resilience_data.size + output_variables_data.size + output_meters_data.size +
                unit_total_energy_data.size + unit_fuel_data.size) == 0
 
     fail 'Unable to obtain timestamps.' if @timestamps.empty?
@@ -1990,7 +2172,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Assemble data
       data = data.zip(*timestamps2, *timestamps3, *total_energy_data, *fuel_data, *end_use_data, *system_use_data, *emissions_data,
                       *emission_fuel_data, *emission_end_use_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *unmet_hours_data,
-                      *zone_temps_data, *zone_conds_data, *airflows_data, *weather_data, *resilience_data, *output_variables_data, *output_meters_data,
+                      *zone_temps_data, *zone_conds_data, *supply_conds_data, *airflows_data, *weather_data, *resilience_data, *output_variables_data, *output_meters_data,
                       *unit_total_energy_data, *unit_fuel_data)
 
       # Error-check
@@ -2062,7 +2244,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       [total_energy_data, fuel_data, end_use_data, system_use_data, emissions_data, emission_fuel_data,
        emission_end_use_data, hot_water_use_data, total_loads_data, comp_loads_data, unmet_hours_data,
-       zone_temps_data, zone_conds_data, airflows_data, weather_data, resilience_data, output_variables_data, output_meters_data,
+       zone_temps_data, zone_conds_data, supply_conds_data, airflows_data, weather_data, resilience_data, output_variables_data, output_meters_data,
        unit_total_energy_data, unit_fuel_data].each do |d|
         d.each do |o|
           grp, name = o[0].split(':', 2)
